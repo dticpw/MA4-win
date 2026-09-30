@@ -3,11 +3,29 @@
   "codex_bin": null,
   "quota_source": "/home/dticpw/PG_linux/MA3/.ma3/quota-source.json",
   "links": [
-    {"name": "muQ", "url": "https://muq.koa-ol.com"},
-    {"name": "个人主页", "url": "https://koa-ol.com"}
+    {
+      "name": "muQ",
+      "url": "https://muq.koa-ol.com"
+    },
+    {
+      "name": "个人主页",
+      "url": "https://koa-ol.com"
+    }
   ],
   "health": [
-    {"name": "muQ 首页", "url": "https://muq.koa-ol.com"},
-    {"name": "21点联机服务", "url": "https://koa-ol.com/ace21-api/health"}
+    {
+      "name": "muQ 首页",
+      "url": "https://muq.koa-ol.com"
+    },
+    {
+      "name": "21点联机服务",
+      "url": "https://koa-ol.com/ace21-api/health"
+    }
+  ],
+  "folds": [
+    {
+      "name": "MA3 执行任务",
+      "cwd_prefix": "/home/dticpw/PG_linux/MA3/runs/"
+    }
   ]
 }

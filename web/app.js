@@ -17,6 +17,7 @@ const state = {
   filter: null,      // "waiting" | "running" | "unread" from the top counters
   flash: new Set(),  // thread ids whose status just changed
   counts: {},
+  openFolds: new Set(), // fold groups the user expanded
 };
 
 // ---------- helpers ----------
@@ -124,35 +125,63 @@ function sortedThreads() {
 
 const GROUPS = ["等你处理", "运行中", "新回复", "置顶", "其他"];
 
+// Quiet threads whose cwd matches a configured prefix collapse into one row at the bottom.
+function foldOf(t) {
+  if (t.status === "approval" || t.status === "input" || t.status === "running" || t.unread || t.pinned) return null;
+  return (state.side.folds || []).find((f) => (t.cwd || "").startsWith(f.cwd_prefix)) || null;
+}
+
+function saveFolds() {
+  try { localStorage.setItem("ma4-open-folds", JSON.stringify([...state.openFolds])); } catch { /* not persisted */ }
+}
+
+function threadRow(t) {
+  const key = statusKey(t);
+  const label = key === "unread" ? "新回复" : STATUS[t.status]?.label || t.status;
+  // The list only names states worth acting on; idle / not loaded stay quiet.
+  const shown = ["running", "approval", "input", "unread", "error"].includes(key) ? label : "";
+  const since = t.run && t.run.startedAt ? ` data-since="${t.run.startedAt}"` : "";
+  const classes = ["thread", t.id === state.current ? "selected" : "", state.flash.has(t.id) ? "flash" : ""].join(" ");
+  return `<li class="${classes}" data-id="${t.id}" title="${label}">
+    ${avatar(t)}
+    <div class="thread-main">
+      <div class="thread-title">${t.pinned ? "★ " : ""}${escapeHtml(title(t))}</div>
+      <div class="thread-sub">${escapeHtml(shortPath(t.cwd))}</div>
+    </div>
+    <div class="thread-side">
+      <span class="thread-state ${key}"${since} data-label="${shown}">${shown}${since ? " " + elapsed(t.run) : ""}</span>
+      <span class="thread-time">${ago(t.updatedAt)}</span>
+    </div>
+  </li>`;
+}
+
 function renderThreads() {
   const list = $("thread-list");
-  const rows = sortedThreads();
+  const searching = Boolean($("search").value.trim());
+  const folded = new Map();
   let lastGroup = null;
   const html = [];
-  for (const t of rows) {
+  for (const t of sortedThreads()) {
+    const fold = searching ? null : foldOf(t);
+    if (fold) {
+      if (!folded.has(fold.name)) folded.set(fold.name, []);
+      folded.get(fold.name).push(t);
+      continue;
+    }
     const group = t.status === "approval" || t.status === "input" ? 0
       : t.status === "running" ? 1 : t.unread ? 2 : t.pinned ? 3 : 4;
     if (group !== lastGroup) {
       html.push(`<li class="group">${GROUPS[group]}</li>`);
       lastGroup = group;
     }
-    const key = statusKey(t);
-    const label = key === "unread" ? "新回复" : STATUS[t.status]?.label || t.status;
-    // The list only names states worth acting on; idle / not loaded stay quiet.
-    const shown = ["running", "approval", "input", "unread", "error"].includes(key) ? label : "";
-    const since = t.run && t.run.startedAt ? ` data-since="${t.run.startedAt}"` : "";
-    const classes = ["thread", t.id === state.current ? "selected" : "", state.flash.has(t.id) ? "flash" : ""].join(" ");
-    html.push(`<li class="${classes}" data-id="${t.id}" title="${label}">
-      ${avatar(t)}
-      <div class="thread-main">
-        <div class="thread-title">${t.pinned ? "★ " : ""}${escapeHtml(title(t))}</div>
-        <div class="thread-sub">${escapeHtml(shortPath(t.cwd))}</div>
-      </div>
-      <div class="thread-side">
-        <span class="thread-state ${key}"${since} data-label="${shown}">${shown}${since ? " " + elapsed(t.run) : ""}</span>
-        <span class="thread-time">${ago(t.updatedAt)}</span>
-      </div>
+    html.push(threadRow(t));
+  }
+  for (const [name, members] of folded) {
+    const open = state.openFolds.has(name);
+    html.push(`<li class="fold${open ? " open" : ""}" data-fold="${escapeHtml(name)}" title="${open ? "收起" : "展开"}">
+      <span class="fold-arrow">›</span><span class="fold-name">${escapeHtml(name)}</span><span class="fold-count">${members.length}</span>
     </li>`);
+    if (open) html.push(...members.map(threadRow));
   }
   list.innerHTML = html.join("") || `<li class="group">${state.filter ? "这一类现在没有会话" : "没有会话"}</li>`;
   state.flash.clear();
@@ -217,7 +246,7 @@ function renderWelcome() {
   $("welcome-attention").innerHTML = attention.length ? `<h4>需要留意</h4><div class="cards">${attention.map((t, i) =>
     miniCard(t, t.status === "running" ? `运行中 ${elapsed(t.run)}`.trim() : statusKey(t) === "unread" ? "新回复 · " + ago(t.updatedAt) : STATUS[t.status]?.label, i)).join("")}</div>` : "";
   const shown = new Set(attention.map((t) => t.id));
-  const recent = [...state.threads].filter((t) => !shown.has(t.id))
+  const recent = [...state.threads].filter((t) => !shown.has(t.id) && !foldOf(t))
     .sort((a, b) => (b.pinned - a.pinned) || b.updatedAt - a.updatedAt).slice(0, 6);
   $("welcome-recent").innerHTML = recent.length ? `<h4>最近</h4><div class="cards">${recent.map((t, i) =>
     miniCard(t, (t.pinned ? "★ " : "") + ago(t.updatedAt), i + attention.length)).join("")}</div>` : "";
@@ -822,7 +851,16 @@ function wire() {
   });
   $("welcome-new").addEventListener("click", () => $("new-thread").click());
   $("search").addEventListener("input", renderThreads);
+  try { state.openFolds = new Set(JSON.parse(localStorage.getItem("ma4-open-folds") || "[]")); } catch { /* default: all folded */ }
   $("thread-list").addEventListener("click", (e) => {
+    const fold = e.target.closest(".fold");
+    if (fold) {
+      const name = fold.dataset.fold;
+      if (!state.openFolds.delete(name)) state.openFolds.add(name);
+      saveFolds();
+      renderThreads();
+      return;
+    }
     const row = e.target.closest(".thread");
     if (row) openThread(row.dataset.id);
   });

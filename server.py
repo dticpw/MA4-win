@@ -39,9 +39,10 @@ def find_codex(configured):
 class Server(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, hub, quota, health, links):
+    def __init__(self, address, hub, quota, health, links, folds=()):
         super().__init__(address, Handler)
         self.hub, self.quota, self.health, self.links = hub, quota, health, links
+        self.folds = list(folds)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -92,7 +93,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def side(self):
         return {"quota": self.server.quota.snapshot(), "health": self.server.health.snapshot(),
-                "links": self.server.links}
+                "links": self.server.links, "folds": self.server.folds}
 
     def do_GET(self):
         try:
@@ -182,7 +183,7 @@ def main():
     quota = QuotaPoller(DATA, source_file=quota_source)
     health = HealthPoller(config.get("health", []))
     server = Server(("127.0.0.1", args.port or config.get("port", 8764)), hub, quota, health,
-                    config.get("links", []))
+                    config.get("links", []), config.get("folds", []))
     hub.start()
 
     def shutdown(signum, frame):
