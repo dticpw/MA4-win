@@ -14,6 +14,9 @@ const state = {
   seq: 0,
   skills: {},        // cwd -> skills
   override: null,    // {model, effort} chosen with /model for the selected thread
+  filter: null,      // "waiting" | "running" | "unread" from the top counters
+  flash: new Set(),  // thread ids whose status just changed
+  counts: {},
 };
 
 // ---------- helpers ----------
@@ -54,6 +57,29 @@ const STATUS = {
   offline: { label: "未载入", rank: 3 },
 };
 
+function initials(t) {
+  const name = title(t).trim();
+  const latin = name.match(/[A-Za-z0-9]+/g);
+  if (/^[A-Za-z0-9]/.test(name) && latin) return (latin.length > 1 ? latin[0][0] + latin[1][0] : latin[0].slice(0, 2));
+  return [...name][0] || "?";
+}
+
+function hue(id) {
+  let h = 0;
+  for (const c of id) h = (h * 31 + c.charCodeAt(0)) % 360;
+  return h;
+}
+
+function avatar(t, big = false) {
+  return `<div class="avatar${big ? " big" : ""}" style="--h:${hue(t.id)}">${escapeHtml(initials(t))}<span class="badge ${statusKey(t)}"></span></div>`;
+}
+
+const FILTERS = {
+  waiting: { label: "只看等你处理的", test: (t) => t.status === "approval" || t.status === "input" },
+  running: { label: "只看运行中的", test: (t) => t.status === "running" },
+  unread: { label: "只看有新回复的", test: (t) => t.unread },
+};
+
 function statusKey(t) {
   if (t.unread && (t.status === "idle" || t.status === "offline")) return "unread";
   return t.status;
@@ -83,8 +109,9 @@ async function api(path, body) {
 // ---------- session list ----------
 function sortedThreads() {
   const q = $("search").value.trim().toLowerCase();
-  const rows = state.threads.filter((t) => !q
-    || title(t).toLowerCase().includes(q) || (t.cwd || "").toLowerCase().includes(q));
+  const filter = FILTERS[state.filter];
+  const rows = state.threads.filter((t) => (!filter || filter.test(t)) && (!q
+    || title(t).toLowerCase().includes(q) || (t.cwd || "").toLowerCase().includes(q)));
   const rank = (t) => {
     if (t.status === "approval" || t.status === "input") return 0;
     if (t.status === "running") return 1;
@@ -111,22 +138,29 @@ function renderThreads() {
     }
     const key = statusKey(t);
     const label = key === "unread" ? "新回复" : STATUS[t.status]?.label || t.status;
+    // The list only names states worth acting on; idle / not loaded stay quiet.
+    const shown = ["running", "approval", "input", "unread", "error"].includes(key) ? label : "";
     const since = t.run && t.run.startedAt ? ` data-since="${t.run.startedAt}"` : "";
-    html.push(`<li class="thread ${t.id === state.current ? "selected" : ""}" data-id="${t.id}">
-      <span class="dot ${key}" title="${label}"></span>
+    const classes = ["thread", t.id === state.current ? "selected" : "", state.flash.has(t.id) ? "flash" : ""].join(" ");
+    html.push(`<li class="${classes}" data-id="${t.id}" title="${label}">
+      ${avatar(t)}
       <div class="thread-main">
         <div class="thread-title">${t.pinned ? "★ " : ""}${escapeHtml(title(t))}</div>
         <div class="thread-sub">${escapeHtml(shortPath(t.cwd))}</div>
       </div>
       <div class="thread-side">
-        <span class="thread-state ${key}"${since} data-label="${label}">${label}${since ? " " + elapsed(t.run) : ""}</span>
+        <span class="thread-state ${key}"${since} data-label="${shown}">${shown}${since ? " " + elapsed(t.run) : ""}</span>
         <span class="thread-time">${ago(t.updatedAt)}</span>
       </div>
     </li>`);
   }
-  list.innerHTML = html.join("") || `<li class="group">没有会话</li>`;
+  list.innerHTML = html.join("") || `<li class="group">${state.filter ? "这一类现在没有会话" : "没有会话"}</li>`;
+  state.flash.clear();
+  $("filter-bar").hidden = !state.filter;
+  $("filter-label").textContent = FILTERS[state.filter]?.label || "";
   renderCounters();
   renderHeader();
+  if (!state.current) renderWelcome();
 }
 
 function renderCounters() {
@@ -134,13 +168,68 @@ function renderCounters() {
     + state.approvals.filter((a) => !state.threads.some((t) => t.id === a.threadId && t.status === "approval")).length;
   const running = state.threads.filter((t) => t.status === "running").length;
   const unread = state.threads.filter((t) => t.unread).length;
-  $("count-waiting").textContent = waiting;
-  $("count-running").textContent = running;
-  $("count-unread").textContent = unread;
+  for (const [key, value] of Object.entries({ waiting, running, unread })) {
+    const button = document.querySelector(`.stat[data-filter="${key}"]`);
+    if (state.counts[key] !== undefined && value > state.counts[key]) {
+      button.classList.remove("bump");
+      void button.offsetWidth; // restart the animation
+      button.classList.add("bump");
+    }
+    state.counts[key] = value;
+    $(`count-${key}`).textContent = value;
+    button.classList.toggle("zero", value === 0);
+    button.setAttribute("aria-pressed", String(state.filter === key));
+  }
   const attention = waiting + unread;
   document.title = attention ? `(${attention}) MA4` : "MA4";
   const cwds = [...new Set(state.threads.map((t) => t.cwd).filter(Boolean))];
   $("cwd-options").innerHTML = cwds.map((c) => `<option value="${escapeHtml(c)}">`).join("");
+}
+
+// ---------- welcome overview ----------
+function greeting(hour) {
+  if (hour < 5) return "夜深了";
+  if (hour < 11) return "早上好";
+  if (hour < 13) return "中午好";
+  if (hour < 18) return "下午好";
+  return "晚上好";
+}
+
+function miniCard(t, sub, i) {
+  return `<button class="mini" type="button" data-open="${t.id}" style="animation-delay:${i * 40}ms">
+    ${avatar(t)}<div class="mini-text"><div class="mini-title">${escapeHtml(title(t))}</div><div class="mini-sub">${escapeHtml(sub)}</div></div>
+  </button>`;
+}
+
+function renderWelcome() {
+  const now = new Date();
+  $("welcome-date").textContent = now.toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "long" });
+  $("welcome-greeting").textContent = greeting(now.getHours());
+  const waiting = state.threads.filter((t) => t.status === "approval" || t.status === "input");
+  const running = state.threads.filter((t) => t.status === "running");
+  const unread = state.threads.filter((t) => t.unread);
+  const parts = [];
+  if (waiting.length) parts.push(`${waiting.length} 个会话在等你`);
+  if (running.length) parts.push(`${running.length} 个正在运行`);
+  if (unread.length) parts.push(`${unread.length} 个有新回复`);
+  $("welcome-summary").textContent = parts.length ? parts.join("，") + "。" : "一切安静，没有需要你处理的事。";
+  const attention = [...waiting, ...running, ...unread].slice(0, 9);
+  $("welcome-attention").innerHTML = attention.length ? `<h4>需要留意</h4><div class="cards">${attention.map((t, i) =>
+    miniCard(t, t.status === "running" ? `运行中 ${elapsed(t.run)}`.trim() : statusKey(t) === "unread" ? "新回复 · " + ago(t.updatedAt) : STATUS[t.status]?.label, i)).join("")}</div>` : "";
+  const shown = new Set(attention.map((t) => t.id));
+  const recent = [...state.threads].filter((t) => !shown.has(t.id))
+    .sort((a, b) => (b.pinned - a.pinned) || b.updatedAt - a.updatedAt).slice(0, 6);
+  $("welcome-recent").innerHTML = recent.length ? `<h4>最近</h4><div class="cards">${recent.map((t, i) =>
+    miniCard(t, (t.pinned ? "★ " : "") + ago(t.updatedAt), i + attention.length)).join("")}</div>` : "";
+}
+
+function goHome() {
+  if (state.current) state.drafts[state.current] = $("input").value;
+  state.current = null;
+  window.history.replaceState(null, "", location.pathname);
+  $("conversation").hidden = true;
+  $("empty").hidden = false;
+  renderThreads();
 }
 
 // ---------- conversation ----------
@@ -150,6 +239,7 @@ function renderHeader() {
   const t = currentThread();
   if (!t) return;
   $("rename").textContent = title(t);
+  $("chat-avatar").outerHTML = avatar(t, true).replace('class="avatar big"', 'id="chat-avatar" class="avatar big"');
   const chips = [];
   if (t.model) chips.push(`<span class="chip model">${escapeHtml(t.model)}</span>`);
   if (t.effort) chips.push(`<span class="chip">思考 ${escapeHtml(t.effort)}</span>`);
@@ -323,6 +413,7 @@ function upsertItem(turnId, item) {
     if (replaced && wasOpen) replaced.open = true;
   } else if (html) {
     turnElement(turnId).insertAdjacentHTML("beforeend", html);
+    turnElement(turnId).lastElementChild?.classList.add("fresh");
   }
   if (follow) scrollBottom();
 }
@@ -332,9 +423,10 @@ function appendDelta(itemId, delta) {
   let el = document.querySelector(`[data-item="${CSS.escape(itemId)}"]`);
   if (!el) {
     turnElement(state.turn || "live").insertAdjacentHTML("beforeend",
-      `<div class="msg agent" data-item="${escapeHtml(itemId)}"><div class="md"></div></div>`);
+      `<div class="msg agent fresh" data-item="${escapeHtml(itemId)}"><div class="md"></div></div>`);
     el = document.querySelector(`[data-item="${CSS.escape(itemId)}"]`);
   }
+  el.classList.add("streaming");
   el.dataset.raw = (el.dataset.raw || "") + delta;
   el.querySelector(".md").innerHTML = renderMarkdown(el.dataset.raw);
   if (follow) scrollBottom();
@@ -355,7 +447,7 @@ async function send(event) {
   const requestId = crypto.randomUUID();
   $("send").disabled = true;
   $("turns").insertAdjacentHTML("beforeend",
-    `<div class="msg user pending"><div class="bubble">${escapeHtml(text).replace(/\n/g, "<br>")}</div></div>`);
+    `<div class="msg user pending fresh"><div class="bubble">${escapeHtml(text).replace(/\n/g, "<br>")}</div></div>`);
   scrollBottom();
   try {
     const result = await api("/api/send", { id, text, request_id: requestId });
@@ -540,11 +632,25 @@ function renderSide() {
     const left = q.reset_at ? Math.max(0, q.reset_at - Date.now() / 1000) : null;
     const reset = left === null ? "重置时间未知"
       : `${Math.floor(left / 86400)} 天 ${Math.floor((left % 86400) / 3600)} 小时后重置`;
-    quota = `<div class="bar"><span style="width:${q.used}%"></span></div>
-      <div class="quota-text">7 日已用 <b>${q.used}%</b> · ${reset}</div>`;
+    const r = 30, circumference = 2 * Math.PI * r;
+    const color = q.used >= 85 ? "var(--bad)" : q.used >= 60 ? "var(--wait)" : "var(--accent)";
+    quota = `<div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 72 72"><circle class="track" cx="36" cy="36" r="${r}"/>
+          <circle class="value" cx="36" cy="36" r="${r}" stroke="${color}" stroke-dasharray="${circumference}"
+            stroke-dashoffset="${circumference}" data-target="${circumference * (1 - q.used / 100)}"/></svg>
+        <div class="ring-label">${q.used}%</div>
+      </div>
+      <div class="quota-text">7 日已用 <b>${q.used}%</b><small>${reset}</small></div>`;
   }
   if (q.error || q.stale) quota += `<div class="hint">${escapeHtml(q.error || "数据可能过期")}</div>`;
   $("quota").innerHTML = quota;
+  // Animate the ring from empty on first paint, then from its last value.
+  const ring = $("quota").querySelector(".ring .value");
+  if (ring) {
+    if (state.ringOffset !== undefined) ring.style.strokeDashoffset = state.ringOffset;
+    requestAnimationFrame(() => requestAnimationFrame(() => { ring.style.strokeDashoffset = ring.dataset.target; }));
+    state.ringOffset = ring.dataset.target;
+  }
   $("health").innerHTML = (state.side.health || []).map((h) => {
     const cls = h.at === undefined ? "unknown" : h.ok ? "ok" : "bad";
     const detail = h.at === undefined ? "检查中" : h.ok ? `${h.ms} ms` : (h.code ? `HTTP ${h.code}` : h.error || "不可达");
@@ -585,6 +691,7 @@ function applyThreads(threads) {
   for (const t of threads) {
     const old = before.get(t.id);
     if (!old) continue;
+    if (statusKey(old) !== statusKey(t)) state.flash.add(t.id);
     if (old.status !== t.status && (t.status === "approval" || t.status === "input")) {
       notifyUser(t, t.status === "approval" ? "等你审批" : "等你回答");
     } else if (old.status === "running" && t.status === "idle") {
@@ -669,8 +776,51 @@ function connectEvents() {
   };
 }
 
+// ---------- clock & theme ----------
+function renderClock() {
+  const now = new Date();
+  $("clock-time").textContent = now.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  const weekday = now.toLocaleDateString("zh-CN", { weekday: "short" });
+  $("clock-date").textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${weekday}`;
+}
+
+const THEMES = [["auto", "◐", "外观：跟随系统"], ["light", "☀", "外观：浅色"], ["dark", "☾", "外观：深色"]];
+
+function applyTheme(name) {
+  const [key, icon, label] = THEMES.find((t) => t[0] === name) || THEMES[0];
+  if (key === "auto") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = key;
+  $("theme-toggle").textContent = icon;
+  $("theme-toggle").title = label + "（点击切换）";
+  try { localStorage.setItem("ma4-theme", key); } catch { /* private mode: theme just won't persist */ }
+}
+
+function savedTheme() {
+  try { return localStorage.getItem("ma4-theme") || "auto"; } catch { return "auto"; }
+}
+
 // ---------- wiring ----------
 function wire() {
+  applyTheme(savedTheme());
+  $("theme-toggle").addEventListener("click", () => {
+    const current = document.documentElement.dataset.theme || "auto";
+    applyTheme(THEMES[(THEMES.findIndex((t) => t[0] === current) + 1) % THEMES.length][0]);
+  });
+  renderClock();
+  setInterval(renderClock, 15000);
+  $("home").addEventListener("click", goHome);
+  document.querySelector(".stats").addEventListener("click", (e) => {
+    const button = e.target.closest(".stat");
+    if (!button) return;
+    state.filter = state.filter === button.dataset.filter ? null : button.dataset.filter;
+    renderThreads();
+  });
+  $("filter-clear").addEventListener("click", () => { state.filter = null; renderThreads(); });
+  $("empty").addEventListener("click", (e) => {
+    const card = e.target.closest("[data-open]");
+    if (card) openThread(card.dataset.open);
+  });
+  $("welcome-new").addEventListener("click", () => $("new-thread").click());
   $("search").addEventListener("input", renderThreads);
   $("thread-list").addEventListener("click", (e) => {
     const row = e.target.closest(".thread");

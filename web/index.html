@@ -4,41 +4,75 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MA4</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%224%22 fill=%22%232f6fed%22/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%224%22 fill=%22%235b6cff%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">MA4 <span class="brand-sub">Codex 工作台</span></div>
-  <div class="counters">
-    <span class="counter waiting" title="等待你审批或回答"><b id="count-waiting">0</b> 等你</span>
-    <span class="counter running"><b id="count-running">0</b> 运行中</span>
-    <span class="counter unread"><b id="count-unread">0</b> 新回复</span>
-  </div>
+<div class="backdrop" aria-hidden="true">
+  <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><span class="orb o4"></span>
+</div>
+
+<header class="topbar glass">
+  <button id="home" class="brand" type="button" title="回到总览">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6d7cff"/><stop offset="1" stop-color="#b16cff"/></linearGradient></defs>
+      <rect width="64" height="64" rx="16" fill="url(#lg)"/>
+      <rect x="12" y="16" width="16" height="32" rx="5" fill="#fff" opacity=".55"/>
+      <rect x="32" y="16" width="20" height="14" rx="5" fill="#fff"/>
+      <rect x="32" y="34" width="20" height="14" rx="5" fill="#fff" opacity=".8"/>
+    </svg>
+    <span class="brand-name">MA4</span>
+  </button>
+  <nav class="stats" aria-label="筛选会话">
+    <button class="stat waiting" data-filter="waiting" type="button" title="等你审批或回答；点一下只看这些">
+      <b id="count-waiting">0</b><span>等你</span>
+    </button>
+    <button class="stat running" data-filter="running" type="button" title="正在运行；点一下只看这些">
+      <b id="count-running">0</b><span>运行中</span>
+    </button>
+    <button class="stat unread" data-filter="unread" type="button" title="有新回复；点一下只看这些">
+      <b id="count-unread">0</b><span>新回复</span>
+    </button>
+  </nav>
   <div class="top-right">
     <button id="notify-toggle" class="ghost small" type="button">开启桌面提醒</button>
     <span id="daemon" class="daemon" title="Codex 守护进程">守护进程</span>
+    <button id="theme-toggle" class="icon-button" type="button" title="切换外观"></button>
+    <div class="clock"><b id="clock-time">--:--</b><span id="clock-date"></span></div>
   </div>
 </header>
 
 <main class="layout">
-  <aside class="sessions">
+  <aside class="sessions glass">
     <div class="sessions-head">
-      <input id="search" type="search" placeholder="搜索会话 / 目录" autocomplete="off">
+      <div class="search">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg>
+        <input id="search" type="search" placeholder="搜索会话 / 目录" autocomplete="off">
+      </div>
       <button id="new-thread" class="primary small" type="button">＋ 新建</button>
+    </div>
+    <div id="filter-bar" class="filter-bar" hidden>
+      <span id="filter-label"></span><button id="filter-clear" class="link" type="button">显示全部</button>
     </div>
     <ul id="thread-list" class="thread-list"></ul>
   </aside>
 
-  <section class="chat" id="chat">
-    <div id="empty" class="empty">
-      <h2>选一个会话开始</h2>
-      <p>左侧列出本机所有 Codex 会话。橙色表示在等你，蓝色在运行，绿色表示有新回复。</p>
+  <section class="chat glass" id="chat">
+    <div id="empty" class="welcome">
+      <div class="welcome-inner">
+        <p class="welcome-kicker" id="welcome-date"></p>
+        <h2 id="welcome-greeting">你好</h2>
+        <p id="welcome-summary" class="welcome-summary"></p>
+        <div id="welcome-attention" class="welcome-section"></div>
+        <div id="welcome-recent" class="welcome-section"></div>
+        <button id="welcome-new" class="primary" type="button">＋ 新建会话</button>
+      </div>
     </div>
     <div id="conversation" class="conversation" hidden>
       <div class="chat-head">
+        <div id="chat-avatar" class="avatar big"></div>
         <div class="chat-title">
-          <button id="rename" class="title-button" type="button" title="改名"></button>
+          <button id="rename" class="title-button" type="button" title="点击改名"></button>
           <div id="chat-meta" class="chat-meta"></div>
         </div>
         <div class="chat-actions">
@@ -53,26 +87,29 @@
         <div id="live-status" class="live-status" hidden></div>
       </div>
       <form id="composer" class="composer">
-        <ul id="palette" class="palette" hidden></ul>
-        <textarea id="input" rows="2" placeholder="发给这个会话。Enter 发送，Shift+Enter 换行；/ 是命令，$ 选 Skill"></textarea>
+        <ul id="palette" class="palette glass" hidden></ul>
+        <div class="composer-box">
+          <textarea id="input" rows="2" placeholder="发给这个会话…"></textarea>
+          <button id="send" class="primary send" type="submit">发送</button>
+        </div>
         <div class="composer-row">
           <span id="composer-hint" class="hint"></span>
-          <button id="send" class="primary" type="submit">发送</button>
+          <span class="keys"><kbd>/</kbd> 命令 <kbd>$</kbd> Skill <kbd>Shift</kbd>+<kbd>Enter</kbd> 换行</span>
         </div>
       </form>
     </div>
   </section>
 
   <aside class="side">
-    <section class="card" id="approvals-card" hidden>
+    <section class="card glass attention" id="approvals-card" hidden>
       <h3>待审批</h3>
       <div id="approvals"></div>
     </section>
-    <section class="card">
+    <section class="card glass">
       <h3>额度</h3>
       <div id="quota" class="quota"></div>
     </section>
-    <section class="card">
+    <section class="card glass">
       <h3>站点</h3>
       <ul id="health" class="health"></ul>
       <div id="links" class="links"></div>
@@ -80,7 +117,7 @@
   </aside>
 </main>
 
-<dialog id="new-dialog">
+<dialog id="new-dialog" class="glass">
   <form method="dialog" id="new-form">
     <h3>新建会话</h3>
     <label>工作目录
