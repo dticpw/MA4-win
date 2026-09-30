@@ -8,6 +8,7 @@ that the HTTP layer streams to browsers.
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import threading
 import time
@@ -18,6 +19,8 @@ from appserver import AppServer, DEFAULT_SOCKET, Disconnected, RpcError
 LIST_LIMIT = 80
 OUTPUT_LIMIT = 4000
 TEXT_LIMIT = 60000
+# "$name" as typed in the terminal UI; not preceded by a word character or another "$".
+SKILL_MENTION = re.compile(r"(?<![\w$])\$([A-Za-z0-9][A-Za-z0-9_:-]*)")
 APPROVAL_METHODS = {
     "item/commandExecution/requestApproval": "command",
     "item/fileChange/requestApproval": "file",
@@ -129,6 +132,8 @@ class Hub:
         self.subscribed = set()
         self.approvals = {}        # key -> approval summary (+ rid)
         self.sent = {}             # request_id -> result, to make retries harmless
+        self.skill_cache = {}      # cwd -> (fetched_at, skills)
+        self.model_override = {}   # id -> model chosen with /model for later turns
         self.events = []           # (seq, event)
         self.seq = 0
         self.refresh_soon = threading.Event()
@@ -370,8 +375,10 @@ class Hub:
         self.emit("threads", threads=self.thread_list())
         with self.lock:
             live = dict(self.live.get(tid, {}))
+        with self.lock:
+            override = self.model_override.get(tid)
         return {"turn": self.current_turn(tid) if row and row["status"] != "offline" else None,
-                "tokens": live.get("tokens")}
+                "tokens": live.get("tokens"), "model": override}
 
     def history(self, tid, cursor=None, limit=8):
         params = {"threadId": tid, "limit": limit, "sortDirection": "desc", "itemsView": "full"}
@@ -391,6 +398,38 @@ class Hub:
                           "items": [normalize_item(i) for i in turn.get("items") or []]})
         return {"turns": turns, "older": page.get("nextCursor")}
 
+    def skills(self, cwd):
+        """Enabled skills for a working directory, cached for a minute."""
+        with self.lock:
+            cached = self.skill_cache.get(cwd)
+        if cached and time.time() - cached[0] < 60:
+            return cached[1]
+        entries = self.call("skills/list", {"cwds": [cwd]}).get("data") or []
+        found = [{"name": s["name"], "path": s["path"],
+                  "description": s.get("shortDescription") or s.get("description", "")}
+                 for e in entries for s in e.get("skills", []) if s.get("enabled", True)]
+        found.sort(key=lambda s: s["name"])
+        with self.lock:
+            self.skill_cache[cwd] = (time.time(), found)
+        return found
+
+    def models(self):
+        data = self.call("model/list", {}).get("data") or []
+        return [{"id": m["id"], "name": m.get("displayName") or m["id"], "default": m.get("isDefault", False),
+                 "description": m.get("description", "")} for m in data if not m.get("hidden")]
+
+    def skill_inputs(self, tid, text):
+        """Turn $name mentions of known skills into explicit skill inputs, like the terminal UI."""
+        names = set(SKILL_MENTION.findall(text))
+        if not names:
+            return []
+        with self.lock:
+            cwd = (self.threads.get(tid) or {}).get("cwd")
+        if not cwd:
+            return []
+        return [{"type": "skill", "name": s["name"], "path": s["path"]}
+                for s in self.skills(cwd) if s["name"] in names]
+
     def send(self, tid, text, request_id):
         if not isinstance(text, str) or not text.strip() or len(text) > 50000:
             raise ValueError("消息需为 1–50000 个字符")
@@ -399,20 +438,54 @@ class Hub:
                 return self.sent[request_id]
         self.subscribe(tid)
         turn = self.current_turn(tid)
-        message = [{"type": "text", "text": text, "text_elements": []}]
+        message = [{"type": "text", "text": text, "text_elements": []}] + self.skill_inputs(tid, text)
         if turn:
             self.call("turn/steer", {"threadId": tid, "expectedTurnId": turn, "input": message,
                                      "clientUserMessageId": request_id})
             result = {"mode": "steer", "turnId": turn}
         else:
-            started = self.call("turn/start", {"threadId": tid, "input": message,
-                                               "clientUserMessageId": request_id})
+            params = {"threadId": tid, "input": message, "clientUserMessageId": request_id}
+            with self.lock:
+                if self.model_override.get(tid):
+                    params["model"] = self.model_override[tid]
+            started = self.call("turn/start", params)
             result = {"mode": "start", "turnId": (started.get("turn") or {}).get("id")}
         with self.lock:
             self.sent[request_id] = result
             if len(self.sent) > 200:
                 self.sent.pop(next(iter(self.sent)))
         return result
+
+    def command(self, tid, name, arg=""):
+        """Slash commands that the terminal UI handles itself, mapped to app-server calls."""
+        arg = (arg or "").strip()
+        if name == "rename":
+            return self.rename(tid, arg)
+        if name == "stop":
+            return self.interrupt(tid)
+        if name == "compact":
+            self.subscribe(tid)
+            if self.current_turn(tid):
+                raise ValueError("Agent 正在工作，等这一轮结束再压缩")
+            self.call("thread/compact/start", {"threadId": tid})
+            return {"message": "已开始压缩上下文"}
+        if name == "review":
+            self.subscribe(tid)
+            if self.current_turn(tid):
+                raise ValueError("Agent 正在工作，等这一轮结束再审查")
+            target = {"type": "baseBranch", "branch": arg} if arg else {"type": "uncommittedChanges"}
+            self.call("review/start", {"threadId": tid, "target": target})
+            return {"message": "已开始审查" + ("与 " + arg + " 分支的差异" if arg else "未提交的改动")}
+        if name == "model":
+            if not arg:
+                raise ValueError("用法：/model 模型名")
+            known = [m["id"] for m in self.models()]
+            if arg not in known:
+                raise ValueError("没有这个模型，可选：" + "、".join(known))
+            with self.lock:
+                self.model_override[tid] = arg
+            return {"message": "下一轮起使用 " + arg, "model": arg}
+        raise ValueError("不支持的命令：/" + name)
 
     def interrupt(self, tid):
         turn = self.current_turn(tid)

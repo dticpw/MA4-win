@@ -12,6 +12,8 @@ const state = {
   older: null,        // cursor for older history
   drafts: {},
   seq: 0,
+  skills: {},        // cwd -> skills
+  model: null,       // /model override for the selected thread
 };
 
 // ---------- helpers ----------
@@ -136,7 +138,8 @@ function renderHeader() {
   $("rename").textContent = title(t);
   const tokens = state.tokens && state.tokens.used
     ? ` · 上下文 ${kTokens(state.tokens.used)}${state.tokens.window ? " / " + kTokens(state.tokens.window) : ""}` : "";
-  $("chat-meta").textContent = `${shortPath(t.cwd)} · ${STATUS[t.status]?.label || t.status}${t.model ? " · " + t.model : ""}${tokens}`;
+  const model = state.model ? `${state.model}（已切换）` : t.model;
+  $("chat-meta").textContent = `${shortPath(t.cwd)} · ${STATUS[t.status]?.label || t.status}${model ? " · " + model : ""}${tokens}`;
   $("pin").textContent = t.pinned ? "取消置顶" : "置顶";
   const running = t.status === "running" || t.status === "approval" || t.status === "input";
   $("interrupt").hidden = !running;
@@ -210,6 +213,7 @@ async function openThread(id) {
   window.history.replaceState(null, "", "#" + id);
   state.turn = null;
   state.tokens = null;
+  state.model = null;
   $("empty").hidden = true;
   $("conversation").hidden = false;
   $("turns").innerHTML = `<div class="loading">读取中…</div>`;
@@ -221,6 +225,7 @@ async function openThread(id) {
     if (state.current !== id) return;
     state.turn = opened.turn;
     state.tokens = opened.tokens;
+    state.model = opened.model;
     state.older = history.older;
     $("turns").innerHTML = history.turns.map(turnHtml).join("") || `<div class="loading">还没有对话</div>`;
     $("older").hidden = !history.older;
@@ -284,8 +289,15 @@ function appendDelta(itemId, delta) {
 
 async function send(event) {
   event.preventDefault();
-  const text = $("input").value;
+  if (palette.open) return;
+  let text = $("input").value;
   if (!text.trim() || !state.current) return;
+  if (text.startsWith("//")) {
+    text = text.slice(1); // "//x" sends the literal text "/x"
+  } else if (/^\/\S/.test(text)) {
+    await runCommand(text.trim());
+    return;
+  }
   const id = state.current;
   const requestId = crypto.randomUUID();
   $("send").disabled = true;
@@ -303,6 +315,143 @@ async function send(event) {
   } finally {
     $("send").disabled = false;
   }
+}
+
+// ---------- slash commands & $skills ----------
+const COMMANDS = [
+  { name: "rename", args: "名称", text: "改会话名称" },
+  { name: "compact", args: "", text: "压缩上下文" },
+  { name: "model", args: "[模型]", text: "查看或切换模型（下一轮起）" },
+  { name: "review", args: "[分支]", text: "审查未提交的改动，或与某分支的差异" },
+  { name: "stop", args: "", text: "中断当前回合" },
+  { name: "new", args: "[目录]", text: "新建会话（默认同目录）" },
+  { name: "status", args: "", text: "显示会话信息" },
+  { name: "skills", args: "", text: "列出可用 Skill（输入 $ 也能选）" },
+  { name: "help", args: "", text: "列出所有命令" },
+];
+
+function note(html) {
+  $("turns").insertAdjacentHTML("beforeend", `<div class="note">${html}</div>`);
+  scrollBottom();
+}
+
+async function listSkills() {
+  const t = currentThread();
+  if (!t) return [];
+  if (!state.skills[t.cwd]) state.skills[t.cwd] = (await api(`/api/skills?id=${t.id}`)).skills;
+  return state.skills[t.cwd];
+}
+
+async function runCommand(line) {
+  const [, name, arg = ""] = line.match(/^\/(\S+)\s*([\s\S]*)$/);
+  const t = currentThread();
+  const clear = () => { $("input").value = ""; state.drafts[t.id] = ""; };
+  const known = COMMANDS.find((c) => c.name === name);
+  if (!known) {
+    toast(`不认识 /${name}。要当普通文字发出去，请在开头多打一个 /`, true);
+    return;
+  }
+  try {
+    if (name === "help") {
+      note("可用命令：<br>" + COMMANDS.map((c) => `<code>/${c.name}${c.args ? " " + c.args : ""}</code> ${c.text}`).join("<br>")
+        + "<br>以 <code>//</code> 开头会把 / 当普通文字发送。");
+    } else if (name === "status") {
+      const tokens = state.tokens?.used ? `${kTokens(state.tokens.used)} / ${kTokens(state.tokens.window || 0)}` : "本页还没收到用量";
+      note([`会话：${escapeHtml(title(t))}（<code>${t.id}</code>）`, `目录：${escapeHtml(t.cwd)}`,
+        `模型：${escapeHtml(state.model || t.model || "默认")}`, `状态：${STATUS[t.status]?.label || t.status}`,
+        `上下文：${tokens}`].join("<br>"));
+    } else if (name === "skills") {
+      const skills = await listSkills();
+      note(`这个目录可用的 Skill（发送时写 <code>$名称</code> 会作为 Skill 调用）：<br>`
+        + skills.map((k) => `<code>$${escapeHtml(k.name)}</code> ${escapeHtml(k.description.slice(0, 60))}`).join("<br>"));
+    } else if (name === "new") {
+      $("new-error").textContent = "";
+      $("new-cwd").value = arg.trim() || t.cwd;
+      $("new-dialog").showModal();
+    } else if (name === "model" && !arg.trim()) {
+      const { models } = await api("/api/models");
+      note(`当前：${escapeHtml(state.model || t.model || "默认")}。可选：<br>`
+        + models.map((m) => `<code>${escapeHtml(m.id)}</code>${m.default ? "（默认）" : ""}`).join("<br>")
+        + "<br>用 <code>/model 模型名</code> 切换，从下一轮开始生效。");
+    } else {
+      const result = await api("/api/command", { id: t.id, name, arg });
+      if (result.model) { state.model = result.model; renderHeader(); }
+      toast(result.message || `/${name} 已完成`);
+    }
+    clear();
+  } catch (error) {
+    toast(error.message, true);
+  }
+}
+
+// Popup above the composer: "/" at the start lists commands, "$word" lists skills.
+const palette = { open: false, items: [], index: 0, start: 0 };
+
+async function updatePalette() {
+  const input = $("input");
+  const before = input.value.slice(0, input.selectionStart);
+  let items = [];
+  const command = before.match(/^\/(\S*)$/);
+  const skill = before.match(/(?:^|\s)\$([\w:-]*)$/);
+  if (command) {
+    palette.start = 0;
+    items = COMMANDS.filter((c) => c.name.startsWith(command[1]))
+      .map((c) => ({ insert: `/${c.name}${c.args ? " " : ""}`, label: `/${c.name}`, hint: `${c.args} ${c.text}`.trim() }));
+  } else if (skill) {
+    palette.start = before.length - skill[1].length - 1;
+    const q = skill[1].toLowerCase();
+    items = (await listSkills().catch(() => []))
+      .filter((k) => k.name.toLowerCase().includes(q))
+      .map((k) => ({ insert: `$${k.name} `, label: `$${k.name}`, hint: k.description.slice(0, 50) }));
+  }
+  palette.items = items.slice(0, 12);
+  palette.index = 0;
+  palette.open = palette.items.length > 0;
+  renderPalette();
+}
+
+function renderPalette() {
+  const box = $("palette");
+  box.hidden = !palette.open;
+  box.innerHTML = palette.items.map((item, i) =>
+    `<li class="${i === palette.index ? "active" : ""}" data-index="${i}"><b>${escapeHtml(item.label)}</b><span>${escapeHtml(item.hint)}</span></li>`).join("");
+  box.querySelector(".active")?.scrollIntoView({ block: "nearest" });
+}
+
+function choosePalette(i) {
+  const item = palette.items[i];
+  const input = $("input");
+  const after = input.value.slice(input.selectionStart);
+  input.value = input.value.slice(0, palette.start) + item.insert + after;
+  const caret = palette.start + item.insert.length;
+  input.setSelectionRange(caret, caret);
+  palette.open = false;
+  renderPalette();
+  input.focus();
+}
+
+function paletteKeys(e) {
+  if (!palette.open) return false;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    const step = e.key === "ArrowDown" ? 1 : -1;
+    palette.index = (palette.index + step + palette.items.length) % palette.items.length;
+    renderPalette();
+  } else if (e.key === "Enter" && !e.isComposing
+      && palette.items[palette.index].insert.trim() === $("input").value.trim()) {
+    // Already fully typed (e.g. "/compact"): run it instead of re-inserting.
+    palette.open = false;
+    renderPalette();
+    $("composer").requestSubmit();
+  } else if (e.key === "Tab" || (e.key === "Enter" && !e.isComposing)) {
+    choosePalette(palette.index);
+  } else if (e.key === "Escape") {
+    palette.open = false;
+    renderPalette();
+  } else {
+    return false;
+  }
+  e.preventDefault();
+  return true;
 }
 
 // ---------- side panel ----------
@@ -459,7 +608,14 @@ function wire() {
     if (row) openThread(row.dataset.id);
   });
   $("composer").addEventListener("submit", send);
+  $("input").addEventListener("input", () => updatePalette());
+  $("input").addEventListener("blur", () => setTimeout(() => { palette.open = false; renderPalette(); }, 150));
+  $("palette").addEventListener("mousedown", (e) => {
+    const row = e.target.closest("li");
+    if (row) { e.preventDefault(); choosePalette(Number(row.dataset.index)); }
+  });
   $("input").addEventListener("keydown", (e) => {
+    if (paletteKeys(e)) return;
     if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       $("composer").requestSubmit();

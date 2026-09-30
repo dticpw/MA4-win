@@ -107,6 +107,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200, dict(hub.state(), side=self.side()))
             if url.path == "/api/side":
                 return self.send(200, self.side())
+            if url.path == "/api/skills":
+                row = hub.threads.get(query["id"][0]) or {}
+                return self.send(200, {"skills": hub.skills(row.get("cwd") or str(Path.home()))})
+            if url.path == "/api/models":
+                return self.send(200, {"models": hub.models()})
             if url.path == "/api/history":
                 return self.send(200, hub.history(query["id"][0], (query.get("cursor") or [None])[0]))
             if url.path == "/api/events":
@@ -128,6 +133,7 @@ class Handler(BaseHTTPRequestHandler):
                 "/api/open": lambda: hub.open(data["id"]),
                 "/api/send": lambda: hub.send(data["id"], data.get("text"), str(data["request_id"])),
                 "/api/interrupt": lambda: hub.interrupt(data["id"]),
+                "/api/command": lambda: hub.command(data["id"], data["name"], data.get("arg")),
                 "/api/new": lambda: hub.new_thread(data.get("cwd"), data.get("text")),
                 "/api/rename": lambda: hub.rename(data["id"], data.get("name")),
                 "/api/pin": lambda: hub.pin(data["id"], bool(data.get("pinned"))),

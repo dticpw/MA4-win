@@ -27,6 +27,13 @@ class FakeClient:
             return {"turn": {"id": "turn-new"}}
         if method == "thread/start":
             return {"thread": {"id": "fresh"}}
+        if method == "skills/list":
+            return {"data": [{"cwd": params["cwds"][0], "errors": [], "skills": [
+                {"name": "vibehub", "path": "/s/vibehub/SKILL.md", "description": "terms", "enabled": True},
+                {"name": "off", "path": "/s/off/SKILL.md", "description": "", "enabled": False}]}]}
+        if method == "model/list":
+            return {"data": [{"id": "gpt-a", "displayName": "A", "isDefault": True},
+                             {"id": "gpt-b", "displayName": "B", "hidden": False}]}
         return {}
 
     def respond(self, rid, result):
@@ -156,6 +163,45 @@ class HubTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.hub.new_thread("/definitely/not/here")
         self.assertEqual(self.hub.new_thread(self.dir.name), {"threadId": "fresh"})
+
+    def test_skill_mentions_become_skill_inputs(self):
+        self.client.threads = [thread("a")]
+        self.hub.refresh()
+        self.hub.send("a", "用 $vibehub 解释，$off 和 a$vibehub 不算，价格 $5 也不算", "req-s")
+        start = [p for m, p in self.client.calls if m == "turn/start"][-1]
+        self.assertEqual(start["input"][1:], [{"type": "skill", "name": "vibehub", "path": "/s/vibehub/SKILL.md"}])
+        self.hub.send("a", "no skills here", "req-t")
+        self.assertEqual(len([p for m, p in self.client.calls if m == "turn/start"][-1]["input"]), 1)
+        self.assertEqual(sum(1 for m, _ in self.client.calls if m == "skills/list"), 1)  # cached
+
+    def test_commands(self):
+        self.client.threads = [thread("a")]
+        self.hub.refresh()
+        self.hub.command("a", "rename", " 新名字 ")
+        self.assertIn(("thread/name/set", {"threadId": "a", "name": "新名字"}), self.client.calls)
+        self.hub.command("a", "compact")
+        self.assertIn(("thread/compact/start", {"threadId": "a"}), self.client.calls)
+        self.hub.command("a", "review", "main")
+        review = [p for m, p in self.client.calls if m == "review/start"][-1]
+        self.assertEqual(review["target"], {"type": "baseBranch", "branch": "main"})
+        self.hub.command("a", "review")
+        self.assertEqual([p for m, p in self.client.calls if m == "review/start"][-1]["target"],
+                         {"type": "uncommittedChanges"})
+        with self.assertRaises(ValueError):
+            self.hub.command("a", "model", "gpt-zzz")
+        self.hub.command("a", "model", "gpt-b")
+        self.hub.send("a", "hi", "req-m")
+        self.assertEqual([p for m, p in self.client.calls if m == "turn/start"][-1]["model"], "gpt-b")
+        self.assertEqual(self.hub.open("a")["model"], "gpt-b")
+        with self.assertRaises(ValueError):
+            self.hub.command("a", "launch-missiles")
+
+    def test_busy_thread_refuses_compact(self):
+        self.client.threads = [thread("a")]
+        self.hub.refresh()
+        self.hub.on_notification("turn/started", {"threadId": "a", "turn": {"id": "t1"}})
+        with self.assertRaises(ValueError):
+            self.hub.command("a", "compact")
 
     def test_normalize_items(self):
         user = normalize_item({"type": "userMessage", "id": "1",
