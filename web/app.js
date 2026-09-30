@@ -13,7 +13,7 @@ const state = {
   drafts: {},
   seq: 0,
   skills: {},        // cwd -> skills
-  model: null,       // /model override for the selected thread
+  override: null,    // {model, effort} chosen with /model for the selected thread
 };
 
 // ---------- helpers ----------
@@ -136,10 +136,18 @@ function renderHeader() {
   const t = currentThread();
   if (!t) return;
   $("rename").textContent = title(t);
-  const tokens = state.tokens && state.tokens.used
-    ? ` · 上下文 ${kTokens(state.tokens.used)}${state.tokens.window ? " / " + kTokens(state.tokens.window) : ""}` : "";
-  const model = state.model ? `${state.model}（已切换）` : t.model;
-  $("chat-meta").textContent = `${shortPath(t.cwd)} · ${STATUS[t.status]?.label || t.status}${model ? " · " + model : ""}${tokens}`;
+  const chips = [];
+  if (t.model) chips.push(`<span class="chip model">${escapeHtml(t.model)}</span>`);
+  if (t.effort) chips.push(`<span class="chip">思考 ${escapeHtml(t.effort)}</span>`);
+  const next = state.override;
+  if (next && (next.model !== t.model || (next.effort && next.effort !== t.effort))) {
+    chips.push(`<span class="chip pending" title="用 /model 选的，从下一轮开始生效">下一轮 → ${escapeHtml(next.model)}${next.effort ? " · " + escapeHtml(next.effort) : ""}</span>`);
+  }
+  if (t.branch) chips.push(`<span class="chip">⎇ ${escapeHtml(t.branch)}</span>`);
+  if (state.tokens && state.tokens.used) {
+    chips.push(`<span class="chip">上下文 ${kTokens(state.tokens.used)}${state.tokens.window ? " / " + kTokens(state.tokens.window) : ""}</span>`);
+  }
+  $("chat-meta").innerHTML = `<span>${escapeHtml(shortPath(t.cwd))} · ${STATUS[t.status]?.label || t.status}</span>${chips.join("")}`;
   $("pin").textContent = t.pinned ? "取消置顶" : "置顶";
   const running = t.status === "running" || t.status === "approval" || t.status === "input";
   $("interrupt").hidden = !running;
@@ -213,7 +221,7 @@ async function openThread(id) {
   window.history.replaceState(null, "", "#" + id);
   state.turn = null;
   state.tokens = null;
-  state.model = null;
+  state.override = null;
   $("empty").hidden = true;
   $("conversation").hidden = false;
   $("turns").innerHTML = `<div class="loading">读取中…</div>`;
@@ -225,7 +233,7 @@ async function openThread(id) {
     if (state.current !== id) return;
     state.turn = opened.turn;
     state.tokens = opened.tokens;
-    state.model = opened.model;
+    state.override = opened.override;
     state.older = history.older;
     $("turns").innerHTML = history.turns.map(turnHtml).join("") || `<div class="loading">还没有对话</div>`;
     $("older").hidden = !history.older;
@@ -321,7 +329,7 @@ async function send(event) {
 const COMMANDS = [
   { name: "rename", args: "名称", text: "改会话名称" },
   { name: "compact", args: "", text: "压缩上下文" },
-  { name: "model", args: "[模型]", text: "查看或切换模型（下一轮起）" },
+  { name: "model", args: "[模型] [思考深度]", text: "查看或切换模型与思考深度（下一轮起）" },
   { name: "review", args: "[分支]", text: "审查未提交的改动，或与某分支的差异" },
   { name: "stop", args: "", text: "中断当前回合" },
   { name: "new", args: "[目录]", text: "新建会话（默认同目录）" },
@@ -358,8 +366,10 @@ async function runCommand(line) {
     } else if (name === "status") {
       const tokens = state.tokens?.used ? `${kTokens(state.tokens.used)} / ${kTokens(state.tokens.window || 0)}` : "本页还没收到用量";
       note([`会话：${escapeHtml(title(t))}（<code>${t.id}</code>）`, `目录：${escapeHtml(t.cwd)}`,
-        `模型：${escapeHtml(state.model || t.model || "默认")}`, `状态：${STATUS[t.status]?.label || t.status}`,
-        `上下文：${tokens}`].join("<br>"));
+        `模型：${escapeHtml(t.model || "默认")} · 思考 ${escapeHtml(t.effort || "默认")}`
+          + (state.override ? `（下一轮 → ${escapeHtml(state.override.model)}${state.override.effort ? " · " + escapeHtml(state.override.effort) : ""}）` : ""),
+        `状态：${STATUS[t.status]?.label || t.status}`, t.branch ? `Git 分支：${escapeHtml(t.branch)}` : "",
+        `上下文：${tokens}`].filter(Boolean).join("<br>"));
     } else if (name === "skills") {
       const skills = await listSkills();
       note(`这个目录可用的 Skill（发送时写 <code>$名称</code> 会作为 Skill 调用）：<br>`
@@ -370,12 +380,13 @@ async function runCommand(line) {
       $("new-dialog").showModal();
     } else if (name === "model" && !arg.trim()) {
       const { models } = await api("/api/models");
-      note(`当前：${escapeHtml(state.model || t.model || "默认")}。可选：<br>`
-        + models.map((m) => `<code>${escapeHtml(m.id)}</code>${m.default ? "（默认）" : ""}`).join("<br>")
-        + "<br>用 <code>/model 模型名</code> 切换，从下一轮开始生效。");
+      note(`当前：${escapeHtml(t.model || "默认")} · 思考 ${escapeHtml(t.effort || "默认")}。可选：<br>`
+        + models.map((m) => `<code>${escapeHtml(m.id)}</code>${m.default ? "（默认）" : ""}`
+          + (m.efforts.length ? ` 思考：${m.efforts.map(escapeHtml).join(" / ")}` : "")).join("<br>")
+        + "<br>用 <code>/model 模型名 [思考深度]</code> 切换，从下一轮开始生效。");
     } else {
       const result = await api("/api/command", { id: t.id, name, arg });
-      if (result.model) { state.model = result.model; renderHeader(); }
+      if (result.override) { state.override = result.override; renderHeader(); }
       toast(result.message || `/${name} 已完成`);
     }
     clear();

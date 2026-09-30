@@ -33,7 +33,8 @@ class FakeClient:
                 {"name": "off", "path": "/s/off/SKILL.md", "description": "", "enabled": False}]}]}
         if method == "model/list":
             return {"data": [{"id": "gpt-a", "displayName": "A", "isDefault": True},
-                             {"id": "gpt-b", "displayName": "B", "hidden": False}]}
+                             {"id": "gpt-b", "displayName": "B", "hidden": False,
+                              "supportedReasoningEfforts": [{"reasoningEffort": "low"}, {"reasoningEffort": "high"}]}]}
         return {}
 
     def respond(self, rid, result):
@@ -189,12 +190,27 @@ class HubTest(unittest.TestCase):
                          {"type": "uncommittedChanges"})
         with self.assertRaises(ValueError):
             self.hub.command("a", "model", "gpt-zzz")
-        self.hub.command("a", "model", "gpt-b")
+        with self.assertRaises(ValueError):
+            self.hub.command("a", "model", "gpt-b medium")
+        self.hub.command("a", "model", "gpt-b high")
         self.hub.send("a", "hi", "req-m")
-        self.assertEqual([p for m, p in self.client.calls if m == "turn/start"][-1]["model"], "gpt-b")
-        self.assertEqual(self.hub.open("a")["model"], "gpt-b")
+        start = [p for m, p in self.client.calls if m == "turn/start"][-1]
+        self.assertEqual((start["model"], start["effort"]), ("gpt-b", "high"))
+        self.assertEqual(self.hub.open("a")["override"], {"model": "gpt-b", "effort": "high"})
         with self.assertRaises(ValueError):
             self.hub.command("a", "launch-missiles")
+
+    def test_model_and_effort_shown_and_live_settings_win(self):
+        self.client.threads = [thread("a", model="gpt-a", reasoningEffort="medium", gitInfo={"branch": "main"})]
+        self.hub.refresh()
+        row = self.names()["a"]
+        self.assertEqual((row["model"], row["effort"], row["branch"]), ("gpt-a", "medium", "main"))
+        self.hub.on_notification("thread/settings/updated",
+                                 {"threadId": "a", "threadSettings": {"model": "gpt-b", "effort": "high"}})
+        row = self.names()["a"]
+        self.assertEqual((row["model"], row["effort"]), ("gpt-b", "high"))
+        self.hub.on_notification("thread/status/changed", {"threadId": "a", "status": {"type": "idle"}})
+        self.assertEqual(self.names()["a"]["branch"], "main")
 
     def test_busy_thread_refuses_compact(self):
         self.client.threads = [thread("a")]

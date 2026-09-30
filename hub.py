@@ -259,12 +259,17 @@ class Hub:
         return {"id": tid, "name": t.get("name") or "", "preview": (t.get("preview") or "")[:120],
                 "cwd": t.get("cwd") or "", "status": state, "updatedAt": updated,
                 "source": t.get("source") if isinstance(t.get("source"), str) else "other",
-                "model": t.get("model"), "pinned": tid in self.prefs.pinned,
+                "model": t.get("model"), "effort": t.get("reasoningEffort"),
+                "branch": (t.get("gitInfo") or {}).get("branch"), "pinned": tid in self.prefs.pinned,
                 "unread": state in ("idle", "offline", "error") and updated > self.prefs.seen.get(tid, 0)}
 
     def thread_list(self):
         with self.lock:
-            rows = [dict(r, tokens=self.live.get(r["id"], {}).get("tokens")) for r in self.threads.values()]
+            rows = []
+            for r in self.threads.values():
+                live = self.live.get(r["id"], {})
+                # Settings reported by the daemon for a loaded thread beat the list snapshot.
+                rows.append(dict(r, **live.get("settings", {}), tokens=live.get("tokens")))
         return sorted(rows, key=lambda r: -r["updatedAt"])
 
     def update_status(self, tid, status):
@@ -275,7 +280,8 @@ class Hub:
                 return
             new = self.summarize({"id": tid, "status": status, "name": row["name"], "preview": row["preview"],
                                   "cwd": row["cwd"], "updatedAt": max(row["updatedAt"], int(time.time())),
-                                  "source": row["source"], "model": row["model"]})
+                                  "source": row["source"], "model": row["model"],
+                                  "reasoningEffort": row["effort"], "gitInfo": {"branch": row["branch"]}})
             self.threads[tid] = new
         self.emit("threads", threads=self.thread_list())
 
@@ -310,6 +316,12 @@ class Hub:
             with self.lock:
                 self.live.setdefault(tid, {})["tokens"] = tokens
             self.emit("tokens", threadId=tid, tokens=tokens)
+        elif method == "thread/settings/updated":
+            settings = params.get("threadSettings") or {}
+            with self.lock:
+                self.live.setdefault(tid, {})["settings"] = {"model": settings.get("model"),
+                                                             "effort": settings.get("effort")}
+            self.emit("threads", threads=self.thread_list())
         elif method == "serverRequest/resolved":
             key = str(params.get("requestId"))
             with self.lock:
@@ -341,9 +353,12 @@ class Hub:
         with self.lock:
             if tid in self.subscribed:
                 return
-        self.call("thread/resume", {"threadId": tid, "excludeTurns": True}, timeout=60)
+        resumed = self.call("thread/resume", {"threadId": tid, "excludeTurns": True}, timeout=60)
         with self.lock:
             self.subscribed.add(tid)
+            if resumed.get("model"):
+                self.live.setdefault(tid, {})["settings"] = {"model": resumed["model"],
+                                                             "effort": resumed.get("reasoningEffort")}
 
     def current_turn(self, tid):
         with self.lock:
@@ -378,7 +393,7 @@ class Hub:
         with self.lock:
             override = self.model_override.get(tid)
         return {"turn": self.current_turn(tid) if row and row["status"] != "offline" else None,
-                "tokens": live.get("tokens"), "model": override}
+                "tokens": live.get("tokens"), "override": override}
 
     def history(self, tid, cursor=None, limit=8):
         params = {"threadId": tid, "limit": limit, "sortDirection": "desc", "itemsView": "full"}
@@ -415,8 +430,12 @@ class Hub:
 
     def models(self):
         data = self.call("model/list", {}).get("data") or []
+        def effort_name(e):
+            return e if isinstance(e, str) else (e.get("reasoningEffort") or e.get("effort") or "")
         return [{"id": m["id"], "name": m.get("displayName") or m["id"], "default": m.get("isDefault", False),
-                 "description": m.get("description", "")} for m in data if not m.get("hidden")]
+                 "description": m.get("description", ""), "defaultEffort": m.get("defaultReasoningEffort"),
+                 "efforts": [effort_name(e) for e in m.get("supportedReasoningEfforts") or []]}
+                for m in data if not m.get("hidden")]
 
     def skill_inputs(self, tid, text):
         """Turn $name mentions of known skills into explicit skill inputs, like the terminal UI."""
@@ -446,8 +465,11 @@ class Hub:
         else:
             params = {"threadId": tid, "input": message, "clientUserMessageId": request_id}
             with self.lock:
-                if self.model_override.get(tid):
-                    params["model"] = self.model_override[tid]
+                override = self.model_override.get(tid) or {}
+                if override.get("model"):
+                    params["model"] = override["model"]
+                if override.get("effort"):
+                    params["effort"] = override["effort"]
             started = self.call("turn/start", params)
             result = {"mode": "start", "turnId": (started.get("turn") or {}).get("id")}
         with self.lock:
@@ -477,14 +499,21 @@ class Hub:
             self.call("review/start", {"threadId": tid, "target": target})
             return {"message": "已开始审查" + ("与 " + arg + " 分支的差异" if arg else "未提交的改动")}
         if name == "model":
-            if not arg:
-                raise ValueError("用法：/model 模型名")
-            known = [m["id"] for m in self.models()]
-            if arg not in known:
-                raise ValueError("没有这个模型，可选：" + "、".join(known))
+            parts = arg.split()
+            if not parts or len(parts) > 2:
+                raise ValueError("用法：/model 模型名 [思考深度]")
+            models = {m["id"]: m for m in self.models()}
+            if parts[0] not in models:
+                raise ValueError("没有这个模型，可选：" + "、".join(models))
+            efforts = models[parts[0]]["efforts"]
+            effort = parts[1] if len(parts) == 2 else None
+            if effort and efforts and effort not in efforts:
+                raise ValueError(parts[0] + " 支持的思考深度：" + "、".join(efforts))
+            override = {"model": parts[0], "effort": effort}
             with self.lock:
-                self.model_override[tid] = arg
-            return {"message": "下一轮起使用 " + arg, "model": arg}
+                self.model_override[tid] = override
+            return {"message": "下一轮起使用 " + parts[0] + ("，思考 " + effort if effort else ""),
+                    "override": override}
         raise ValueError("不支持的命令：/" + name)
 
     def interrupt(self, tid):
