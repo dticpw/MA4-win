@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MA4</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%224%22 fill=%22%232f6fed%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">MA4 <span class="brand-sub">Codex 工作台</span></div>
+  <div class="counters">
+    <span class="counter waiting" title="等待你审批或回答"><b id="count-waiting">0</b> 等你</span>
+    <span class="counter running"><b id="count-running">0</b> 运行中</span>
+    <span class="counter unread"><b id="count-unread">0</b> 新回复</span>
+  </div>
+  <div class="top-right">
+    <button id="notify-toggle" class="ghost small" type="button">开启桌面提醒</button>
+    <span id="daemon" class="daemon" title="Codex 守护进程">守护进程</span>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="sessions">
+    <div class="sessions-head">
+      <input id="search" type="search" placeholder="搜索会话 / 目录" autocomplete="off">
+      <button id="new-thread" class="primary small" type="button">＋ 新建</button>
+    </div>
+    <ul id="thread-list" class="thread-list"></ul>
+  </aside>
+
+  <section class="chat" id="chat">
+    <div id="empty" class="empty">
+      <h2>选一个会话开始</h2>
+      <p>左侧列出本机所有 Codex 会话。橙色表示在等你，蓝色在运行，绿色表示有新回复。</p>
+    </div>
+    <div id="conversation" class="conversation" hidden>
+      <div class="chat-head">
+        <div class="chat-title">
+          <button id="rename" class="title-button" type="button" title="改名"></button>
+          <div id="chat-meta" class="chat-meta"></div>
+        </div>
+        <div class="chat-actions">
+          <button id="pin" class="ghost small" type="button">置顶</button>
+          <button id="terminal" class="ghost small" type="button" title="用 codex resume 在终端接入同一会话">在终端打开</button>
+          <button id="interrupt" class="danger small" type="button" hidden>中断</button>
+        </div>
+      </div>
+      <div id="messages" class="messages">
+        <button id="older" class="ghost small older" type="button" hidden>加载更早的记录</button>
+        <div id="turns"></div>
+        <div id="live-status" class="live-status" hidden></div>
+      </div>
+      <form id="composer" class="composer">
+        <textarea id="input" rows="2" placeholder="发给这个会话。Enter 发送，Shift+Enter 换行"></textarea>
+        <div class="composer-row">
+          <span id="composer-hint" class="hint"></span>
+          <button id="send" class="primary" type="submit">发送</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <aside class="side">
+    <section class="card" id="approvals-card" hidden>
+      <h3>待审批</h3>
+      <div id="approvals"></div>
+    </section>
+    <section class="card">
+      <h3>额度</h3>
+      <div id="quota" class="quota"></div>
+    </section>
+    <section class="card">
+      <h3>站点</h3>
+      <ul id="health" class="health"></ul>
+      <div id="links" class="links"></div>
+    </section>
+  </aside>
+</main>
+
+<dialog id="new-dialog">
+  <form method="dialog" id="new-form">
+    <h3>新建会话</h3>
+    <label>工作目录
+      <input id="new-cwd" list="cwd-options" required placeholder="/mnt/e/PG/项目名">
+    </label>
+    <datalist id="cwd-options"></datalist>
+    <label>第一条消息（可选）
+      <textarea id="new-text" rows="4"></textarea>
+    </label>
+    <p id="new-error" class="error"></p>
+    <div class="dialog-row">
+      <button value="cancel" class="ghost" type="submit" formnovalidate>取消</button>
+      <button id="new-submit" class="primary" type="button">创建</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" hidden></div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

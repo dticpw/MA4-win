@@ -1,0 +1,19 @@
+[Unit]
+Description=MA4 Codex workbench (http://127.0.0.1:8764)
+After=graphical-session-pre.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dticpw/PG_linux/MA4
+ExecStart=/home/dticpw/conda/envs/py310/bin/python /home/dticpw/PG_linux/MA4/server.py
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=3
+# MA4 may start the shared Codex app-server daemon; stopping MA4 must not kill it
+# (terminal sessions depend on it), so only the server process is stopped.
+KillMode=process
+TimeoutStopSec=30
+
+[Install]
+WantedBy=graphical-session.target
