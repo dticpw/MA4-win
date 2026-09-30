@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=MA4
+Comment=Codex 多会话工作台
+Exec=/usr/bin/google-chrome --app=http://127.0.0.1:8764
+Icon=/home/dticpw/PG_linux/MA4/deploy/ma4-icon.svg
+Terminal=false
+Categories=Development;
+StartupWMClass=127.0.0.1

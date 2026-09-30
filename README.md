@@ -62,6 +62,7 @@ Codex 自带一个共享的 app-server 守护进程（`codex app-server daemon`�
 | `config.json` | 端口、链接、检测地址、额度来源文件路径（不含密钥） |
 | `deploy/ma4.service` | 用户服务，以符号链接装在 `~/.config/systemd/user/` |
 | `tools/ui_check.mjs` | 用系统 Chrome 截图检查页面 |
+| `deploy/ma4.desktop`、`deploy/ma4-icon.svg` | 桌面启动器：以 Chrome 应用模式打开页面。以符号链接装在 `~/.local/share/applications/`；换 Logo 时要一起更新图标 |
 
 几条设计取舍：
 - **未读判定：** 会话的 `updatedAt` 晚于你上次打开它的时间，且当前不在运行，就算有新回复。第一次出现的会话不算未读。
