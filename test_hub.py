@@ -3,7 +3,7 @@ import time
 import unittest
 
 from appserver import RpcError
-from hub import Hub, normalize_item, status_of
+from hub import Hub, describe, normalize_item, permissions, status_of
 
 
 class FakeClient:
@@ -26,7 +26,11 @@ class FakeClient:
         if method == "turn/start":
             return {"turn": {"id": "turn-new"}}
         if method == "thread/start":
-            return {"thread": {"id": "fresh"}}
+            return {"thread": {"id": "fresh"}, "model": "gpt-a", "sandbox": {"type": "readOnly"},
+                    "approvalPolicy": "on-request"}
+        if method == "thread/resume":
+            return {"model": "gpt-a", "reasoningEffort": "high", "sandbox": {"type": "dangerFullAccess"},
+                    "approvalPolicy": "never"}
         if method == "skills/list":
             return {"data": [{"cwd": params["cwds"][0], "errors": [], "skills": [
                 {"name": "vibehub", "path": "/s/vibehub/SKILL.md", "description": "terms", "enabled": True},
@@ -164,6 +168,7 @@ class HubTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.hub.new_thread("/definitely/not/here")
         self.assertEqual(self.hub.new_thread(self.dir.name), {"threadId": "fresh"})
+        self.assertEqual(self.hub.live["fresh"]["settings"]["sandbox"], "readOnly")
 
     def test_skill_mentions_become_skill_inputs(self):
         self.client.threads = [thread("a")]
@@ -211,6 +216,44 @@ class HubTest(unittest.TestCase):
         self.assertEqual((row["model"], row["effort"]), ("gpt-b", "high"))
         self.hub.on_notification("thread/status/changed", {"threadId": "a", "status": {"type": "idle"}})
         self.assertEqual(self.names()["a"]["branch"], "main")
+
+    def test_permissions_from_resume(self):
+        self.client.threads = [thread("a")]
+        self.hub.refresh()
+        self.hub.subscribe("a")
+        row = self.names()["a"]
+        self.assertEqual((row["sandbox"], row["approval"], row["effort"]), ("dangerFullAccess", "never", "high"))
+        self.assertEqual(permissions("readOnly", {"granular": {}}), {"sandbox": "readOnly", "approval": "granular"})
+
+    def test_run_tracks_start_and_activity(self):
+        self.client.threads = [thread("a", {"type": "active", "activeFlags": []})]
+        self.hub.subscribed.add("a")
+        self.hub.refresh()
+        self.hub.on_notification("turn/started", {"threadId": "a", "turn": {"id": "t1", "startedAt": 1000}})
+        self.hub.on_notification("item/started", {"threadId": "a", "turnId": "t1",
+                                                  "item": {"type": "commandExecution", "id": "i1", "command": "npm test"}})
+        run = self.names()["a"]["run"]
+        self.assertEqual((run["startedAt"], run["activity"]), (1000, "执行 npm test"))
+        self.hub.on_notification("item/completed", {"threadId": "a", "turnId": "t1",
+                                                    "item": {"type": "commandExecution", "id": "i1"}})
+        self.assertIsNone(self.names()["a"]["run"]["activity"])
+        self.hub.on_notification("turn/completed", {"threadId": "a", "turn": {"id": "t1", "durationMs": 5000}})
+        self.assertIsNone(self.names()["a"]["run"])
+        done = [e for _, e in self.hub.events if e["kind"] == "turn" and e["state"] != "started"][-1]
+        self.assertEqual(done["durationMs"], 5000)
+
+    def test_threads_running_elsewhere_are_followed(self):
+        self.client.turns["a"] = [{"id": "t7", "status": "inProgress", "startedAt": 900}]
+        self.client.threads = [thread("a", {"type": "active", "activeFlags": []}), thread("b")]
+        self.hub.refresh()
+        resumed = [p["threadId"] for m, p in self.client.calls if m == "thread/resume"]
+        self.assertEqual(resumed, ["a"])
+        self.assertEqual(self.names()["a"]["run"]["startedAt"], 900)
+
+    def test_describe(self):
+        self.assertEqual(describe({"type": "fileChange", "changes": [{"path": "/x/a.py"}, {"path": "/x/b.py"}]}), "修改 a.py、b.py")
+        self.assertEqual(describe({"type": "webSearch", "query": "codex"}), "搜索 codex")
+        self.assertIsNone(describe({"type": "userMessage"}))
 
     def test_busy_thread_refuses_compact(self):
         self.client.threads = [thread("a")]

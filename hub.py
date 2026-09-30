@@ -83,6 +83,38 @@ def normalize_item(item):
     return base
 
 
+def describe(item):
+    """One-line "what is it doing now" text for a started item, or None."""
+    kind = item.get("type")
+    if kind == "commandExecution":
+        return "执行 " + (item.get("command") or "")[:120]
+    if kind == "fileChange":
+        paths = [c.get("path", "").rsplit("/", 1)[-1] for c in item.get("changes") or []]
+        return "修改 " + "、".join(paths[:3]) + ("等" if len(paths) > 3 else "") if paths else "修改文件"
+    if kind in ("mcpToolCall", "dynamicToolCall"):
+        return "调用 " + str(item.get("tool") or "")
+    if kind == "webSearch":
+        return "搜索 " + str(item.get("query") or "")[:80]
+    if kind == "reasoning":
+        return "思考中"
+    if kind == "agentMessage":
+        return "回复中"
+    if kind in ("collabAgentToolCall", "subAgentActivity"):
+        return "子 Agent 工作中"
+    if kind == "contextCompaction":
+        return "压缩上下文"
+    return None
+
+
+def permissions(sandbox, approval):
+    """Normalize sandbox/approval settings to short strings (None when unknown)."""
+    if isinstance(sandbox, dict):
+        sandbox = sandbox.get("type")
+    if isinstance(approval, dict):
+        approval = "granular"
+    return {"sandbox": sandbox, "approval": approval}
+
+
 def status_of(thread):
     status = thread.get("status") or {}
     kind = status.get("type", "notLoaded")
@@ -251,6 +283,16 @@ class Hub:
             if summaries != self.threads:
                 self.threads = summaries
                 self.emit("threads", threads=self.thread_list())
+            busy = [tid for tid, r in summaries.items()
+                    if r["status"] in ("running", "approval", "input") and tid not in self.subscribed]
+        # Follow threads that are working elsewhere (e.g. in a terminal) so the list can
+        # show what they are doing and for how long. They are already loaded.
+        for tid in busy:
+            try:
+                self.subscribe(tid)
+                self.current_turn(tid)
+            except (RpcError, Disconnected, TimeoutError):
+                pass
 
     def summarize(self, t):
         tid = t["id"]
@@ -269,8 +311,15 @@ class Hub:
             for r in self.threads.values():
                 live = self.live.get(r["id"], {})
                 # Settings reported by the daemon for a loaded thread beat the list snapshot.
-                rows.append(dict(r, **live.get("settings", {}), tokens=live.get("tokens")))
+                rows.append(dict(r, **live.get("settings", {}), tokens=live.get("tokens"),
+                                 run=live.get("run") if r["status"] in ("running", "approval", "input") else None))
         return sorted(rows, key=lambda r: -r["updatedAt"])
+
+    def set_run(self, tid, run):
+        """Track the in-progress turn (start time and current activity) for lists and headers."""
+        with self.lock:
+            self.live.setdefault(tid, {})["run"] = run
+        self.emit("run", threadId=tid, run=run)
 
     def update_status(self, tid, status):
         with self.lock:
@@ -283,6 +332,8 @@ class Hub:
                                   "source": row["source"], "model": row["model"],
                                   "reasoningEffort": row["effort"], "gitInfo": {"branch": row["branch"]}})
             self.threads[tid] = new
+        if new["status"] in ("running", "approval", "input") and tid not in self.subscribed:
+            self.refresh_soon.set()
         self.emit("threads", threads=self.thread_list())
 
     # ---- daemon callbacks (reader thread) ------------------------------
@@ -294,19 +345,34 @@ class Hub:
                         "thread/unarchived", "thread/closed"):
             self.refresh_soon.set()
         elif method == "turn/started":
+            turn = params["turn"]
             with self.lock:
-                self.live.setdefault(tid, {})["turn"] = params["turn"]["id"]
-            self.emit("turn", threadId=tid, turnId=params["turn"]["id"], state="started")
+                self.live.setdefault(tid, {})["turn"] = turn["id"]
+            self.set_run(tid, {"turnId": turn["id"], "startedAt": turn.get("startedAt") or int(time.time()),
+                               "activity": None})
+            self.emit("turn", threadId=tid, turnId=turn["id"], state="started", startedAt=turn.get("startedAt"))
         elif method == "turn/completed":
             turn = params.get("turn") or {}
             with self.lock:
                 self.live.setdefault(tid, {})["turn"] = None
+            self.set_run(tid, None)
             self.emit("turn", threadId=tid, turnId=turn.get("id"), state=turn.get("status"),
+                      startedAt=turn.get("startedAt"), durationMs=turn.get("durationMs"),
                       error=(turn.get("error") or {}).get("message") if isinstance(turn.get("error"), dict) else None)
             self.refresh_soon.set()
         elif method in ("item/started", "item/completed"):
+            item = params.get("item") or {}
+            with self.lock:
+                run = dict(self.live.get(tid, {}).get("run") or {})
+            if run:
+                if method == "item/started" and describe(item):
+                    run.update(activity=describe(item), activityItem=item.get("id"))
+                    self.set_run(tid, run)
+                elif method == "item/completed" and run.get("activityItem") == item.get("id"):
+                    run.update(activity=None, activityItem=None)
+                    self.set_run(tid, run)
             self.emit("item", threadId=tid, turnId=params.get("turnId"),
-                      done=method == "item/completed", item=normalize_item(params.get("item") or {}))
+                      done=method == "item/completed", item=normalize_item(item))
         elif method == "item/agentMessage/delta":
             self.emit("delta", threadId=tid, itemId=params.get("itemId"), delta=params.get("delta", ""))
         elif method == "thread/tokenUsage/updated":
@@ -319,8 +385,9 @@ class Hub:
         elif method == "thread/settings/updated":
             settings = params.get("threadSettings") or {}
             with self.lock:
-                self.live.setdefault(tid, {})["settings"] = {"model": settings.get("model"),
-                                                             "effort": settings.get("effort")}
+                self.live.setdefault(tid, {})["settings"] = {
+                    "model": settings.get("model"), "effort": settings.get("effort"),
+                    **permissions(settings.get("sandboxPolicy"), settings.get("approvalPolicy"))}
             self.emit("threads", threads=self.thread_list())
         elif method == "serverRequest/resolved":
             key = str(params.get("requestId"))
@@ -357,8 +424,9 @@ class Hub:
         with self.lock:
             self.subscribed.add(tid)
             if resumed.get("model"):
-                self.live.setdefault(tid, {})["settings"] = {"model": resumed["model"],
-                                                             "effort": resumed.get("reasoningEffort")}
+                self.live.setdefault(tid, {})["settings"] = {
+                    "model": resumed["model"], "effort": resumed.get("reasoningEffort"),
+                    **permissions(resumed.get("sandbox"), resumed.get("approvalPolicy"))}
 
     def current_turn(self, tid):
         with self.lock:
@@ -374,6 +442,11 @@ class Hub:
             raise
         turns = page.get("data") or []
         if turns and turns[0].get("status") == "inProgress":
+            with self.lock:
+                known_run = self.live.get(tid, {}).get("run")
+            if not known_run:
+                self.set_run(tid, {"turnId": turns[0]["id"], "activity": None,
+                                   "startedAt": turns[0].get("startedAt") or int(time.time())})
             return turns[0]["id"]
         return None
 
@@ -408,10 +481,12 @@ class Hub:
         turns = []
         for turn in reversed(page.get("data") or []):
             turns.append({"id": turn["id"], "status": turn.get("status"), "startedAt": turn.get("startedAt"),
+                          "completedAt": turn.get("completedAt"),
                           "durationMs": turn.get("durationMs"),
                           "error": (turn.get("error") or {}).get("message") if isinstance(turn.get("error"), dict) else None,
                           "items": [normalize_item(i) for i in turn.get("items") or []]})
-        return {"turns": turns, "older": page.get("nextCursor")}
+        # A short page means there is nothing older, even if a cursor comes back.
+        return {"turns": turns, "older": page.get("nextCursor") if len(turns) >= limit else None}
 
     def skills(self, cwd):
         """Enabled skills for a working directory, cached for a minute."""
@@ -531,6 +606,9 @@ class Hub:
         tid = started["thread"]["id"]
         with self.lock:
             self.subscribed.add(tid)
+            self.live.setdefault(tid, {})["settings"] = {
+                "model": started.get("model"), "effort": started.get("reasoningEffort"),
+                **permissions(started.get("sandbox"), started.get("approvalPolicy"))}
             self.prefs.seen[tid] = int(time.time())
             self.prefs.save()
         if text and text.strip():

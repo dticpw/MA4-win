@@ -30,6 +30,19 @@ function ago(seconds) {
   return `${Math.floor(d / 86400)} 天前`;
 }
 
+function duration(seconds) {
+  const s = Math.max(0, Math.round(seconds));
+  if (s < 60) return `${s} 秒`;
+  if (s < 3600) return `${Math.floor(s / 60)} 分 ${s % 60} 秒`;
+  return `${Math.floor(s / 3600)} 时 ${Math.floor((s % 3600) / 60)} 分`;
+}
+
+const clock = (seconds) => new Date(seconds * 1000).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+const elapsed = (run) => (run && run.startedAt ? duration(Date.now() / 1000 - run.startedAt) : "");
+
+const SANDBOX = { dangerFullAccess: "完全访问", workspaceWrite: "工作区可写", readOnly: "只读", externalSandbox: "外部沙箱" };
+const APPROVAL = { never: "从不审批", "on-request": "按需审批", untrusted: "不可信命令需审批", "on-failure": "失败时审批", granular: "细粒度审批" };
+
 const kTokens = (n) => (n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`);
 
 const STATUS = {
@@ -98,6 +111,7 @@ function renderThreads() {
     }
     const key = statusKey(t);
     const label = key === "unread" ? "新回复" : STATUS[t.status]?.label || t.status;
+    const since = t.run && t.run.startedAt ? ` data-since="${t.run.startedAt}"` : "";
     html.push(`<li class="thread ${t.id === state.current ? "selected" : ""}" data-id="${t.id}">
       <span class="dot ${key}" title="${label}"></span>
       <div class="thread-main">
@@ -105,7 +119,7 @@ function renderThreads() {
         <div class="thread-sub">${escapeHtml(shortPath(t.cwd))}</div>
       </div>
       <div class="thread-side">
-        <span class="thread-state ${key}">${label}</span>
+        <span class="thread-state ${key}"${since} data-label="${label}">${label}${since ? " " + elapsed(t.run) : ""}</span>
         <span class="thread-time">${ago(t.updatedAt)}</span>
       </div>
     </li>`);
@@ -144,6 +158,10 @@ function renderHeader() {
     chips.push(`<span class="chip pending" title="用 /model 选的，从下一轮开始生效">下一轮 → ${escapeHtml(next.model)}${next.effort ? " · " + escapeHtml(next.effort) : ""}</span>`);
   }
   if (t.branch) chips.push(`<span class="chip">⎇ ${escapeHtml(t.branch)}</span>`);
+  if (t.sandbox) {
+    const perm = [SANDBOX[t.sandbox] || t.sandbox, APPROVAL[t.approval] || t.approval].filter(Boolean).join(" · ");
+    chips.push(`<span class="chip ${t.sandbox === "dangerFullAccess" ? "warn" : ""}" title="权限模式（沙箱 · 审批）">${escapeHtml(perm)}</span>`);
+  }
   if (state.tokens && state.tokens.used) {
     chips.push(`<span class="chip">上下文 ${kTokens(state.tokens.used)}${state.tokens.window ? " / " + kTokens(state.tokens.window) : ""}</span>`);
   }
@@ -156,7 +174,25 @@ function renderHeader() {
     ? "这个会话未载入，发送时会先载入（不会重复启动）" : running ? "Agent 正在工作，消息会插入当前回合" : "";
   const live = $("live-status");
   live.hidden = !running;
-  live.textContent = t.status === "approval" ? "等你审批（见右侧）" : t.status === "input" ? "Agent 在等你回答" : "运行中…";
+  live.textContent = liveText(t);
+}
+
+function liveText(t) {
+  if (t.status === "approval") return "等你审批（见右侧）";
+  if (t.status === "input") return "Agent 在等你回答";
+  const parts = ["运行中"];
+  if (t.run && t.run.startedAt) parts.push(elapsed(t.run));
+  if (t.run && t.run.activity) parts.push(t.run.activity);
+  return parts.join(" · ");
+}
+
+// Once a second: refresh running timers without re-rendering the list.
+function tick() {
+  for (const el of document.querySelectorAll("[data-since]")) {
+    el.textContent = `${el.dataset.label} ${duration(Date.now() / 1000 - Number(el.dataset.since))}`;
+  }
+  const t = currentThread();
+  if (t && !$("live-status").hidden) $("live-status").textContent = liveText(t);
 }
 
 function itemHtml(item) {
@@ -198,11 +234,20 @@ function itemHtml(item) {
   }
 }
 
+function turnFooter(turn) {
+  const bits = [];
+  if (turn.startedAt) bits.push(clock(turn.startedAt));
+  if (turn.durationMs) bits.push(`用时 ${duration(turn.durationMs / 1000)}`);
+  if (turn.status === "interrupted") bits.push("已中断");
+  let html = bits.length ? `<div class="turn-meta">${bits.join(" · ")}</div>` : "";
+  if (turn.status === "failed") html += `<div class="turn-note failed">出错：${escapeHtml(turn.error || "")}</div>`;
+  return html;
+}
+
 function turnHtml(turn) {
   const items = turn.items.map(itemHtml).join("");
-  const note = turn.status === "interrupted" ? `<div class="turn-note">已中断</div>`
-    : turn.status === "failed" ? `<div class="turn-note failed">出错：${escapeHtml(turn.error || "")}</div>` : "";
-  return `<div class="turn" data-turn="${escapeHtml(turn.id)}">${items}${note}</div>`;
+  const footer = turn.status === "inProgress" ? "" : turnFooter(turn);
+  return `<div class="turn" data-turn="${escapeHtml(turn.id)}">${items}${footer}</div>`;
 }
 
 function nearBottom() {
@@ -570,9 +615,22 @@ function handle(event) {
       if (event.threadId !== state.current) break;
       state.turn = event.state === "started" ? event.turnId : null;
       if (event.state === "started") turnElement(event.turnId);
+      else if (event.turnId) {
+        const el = turnElement(event.turnId);
+        el.querySelector(".turn-meta")?.remove();
+        el.insertAdjacentHTML("beforeend", turnFooter({ ...event, status: event.state }));
+      }
       if (event.state === "failed" && event.error) toast("这一轮出错：" + event.error, true);
       renderHeader();
       break;
+    case "run": {
+      const t = state.threads.find((x) => x.id === event.threadId);
+      if (t) {
+        t.run = event.run;
+        renderThreads();
+      }
+      break;
+    }
     case "item":
       if (event.threadId === state.current) upsertItem(event.turnId, event.item);
       break;
@@ -686,6 +744,7 @@ function wire() {
   });
   setInterval(() => api("/api/side").then((side) => { state.side = side; renderSide(); }).catch(() => {}), 60000);
   setInterval(renderThreads, 60000); // keep "n 分钟前" fresh
+  setInterval(tick, 1000);
 }
 
 setupNotifyToggle();
@@ -694,6 +753,6 @@ loadState()
   .then(() => {
     connectEvents();
     const wanted = location.hash.slice(1);
-    if (wanted && state.threads.some((t) => t.id === wanted)) openThread(wanted);
+    if (wanted) openThread(wanted); // may be newer than the list; the header fills in on refresh
   })
   .catch((e) => toast("读取失败：" + e.message, true));
