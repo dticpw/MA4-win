@@ -133,7 +133,7 @@ curl -s --noproxy 127.0.0.1 -X POST -H 'Content-Type: application/json' -H 'X-MA
 
 MA3（`/home/dticpw/PG_linux/MA3`，8763 端口）仍在运行，没有改动。
 
-2026-10-01 用户决定：全局指令中 MA3 已淘汰，不再用于新任务，派活改走 MA4（见「中控派发」）。停掉 `ma3-workbench.service`、`ma3-control` Skill 的去留、`runs/` 的清理仍待和用户商量，尚未执行。
+2026-10-01 用户决定：中控默认经 MA4 派发（见「中控派发」）；只有用户明确说「MA3 的中控」时才用 MA3。停掉 `ma3-workbench.service`、`ma3-control` Skill 的去留、`runs/` 的清理仍待和用户商量，尚未执行。
 
 MA4 取代的是它的日常用途（会话浏览、聊天、额度），不包括它的任务协议。等 MA4 日常够用，再和用户商量：
 - 停掉 `ma3-workbench.service`；
