@@ -43,7 +43,7 @@
 - 斜杠命令只在浏览器里实测了菜单、`/help`、`/status`、`/model` 列表、`/skills` 和拦截未知命令。`/compact`、`/review`、`/model 切换` 以及 `$Skill` 调用只有单元测试，因为实测要在真实会话里消耗模型额度。
 - `/model` 的切换只存在后台内存里，服务重启后要重新切。
 - 重新登录后服务是否自动启动，还没有实际验证。
-- 不做：中控、任务协议、手机访问、网页终端（第二版再议）。
+- 不做：任务协议、手机访问、网页终端（第二版再议）。中控派发见「中控派发」一节。
 
 **下一步**
 
@@ -99,9 +99,41 @@ systemctl --user restart ma4.service
   - 通知 `thread/status/changed`、`turn/*`、`item/*`、`thread/tokenUsage/updated`、`serverRequest/resolved`
 - **本机版本：** 2026-09-30 为 CLI 0.158.0，守护进程 0.159.0。
 
+## 中控派发
+
+另一个 Agent（如 Claude Code）当中控时，可以经 MA4 新建 Codex 会话派活：中控写任务单、审查结果，Codex 实现。会话是普通的 Codex 交互会话，用户在 MA4 里能实时看到过程，也能插话或中断。2026-10-01 首次实际使用（RPGO3dPixel 任务 001）。
+
+**前提**
+
+- 用户已明确同意这次派发，以及执行权限。Codex 按 `~/.codex/config.toml` 的默认设置运行（当前为完全访问、从不请求审批）；需要更严的权限时先和用户商量。显式 `workspace-write` 沙箱里 Godot 等图形程序打不开窗口，无法截图（2026-10-01 实测）。
+- 任务单已写进目标项目，执行者没有对话上下文也能读懂：目标、范围、硬约束、交付物、验收方法、不做的事、报告写在哪里。
+
+**步骤**（写操作必须带 `X-MA4-Request` 头）
+
+```bash
+# 1. 新建会话并发出第一条消息；返回 {"threadId": ...}
+curl -s --noproxy 127.0.0.1 -X POST -H 'Content-Type: application/json' -H 'X-MA4-Request: 1' \
+  --data '{"cwd":"<项目目录>","text":"请执行任务单 <路径>……"}' http://127.0.0.1:8764/api/new
+# 2. 起一个好认的名字
+curl -s --noproxy 127.0.0.1 -X POST -H 'Content-Type: application/json' -H 'X-MA4-Request: 1' \
+  --data '{"id":"<threadId>","name":"<项目> · <任务>"}' http://127.0.0.1:8764/api/rename
+```
+
+3. 等待：轮询 `GET /api/state`，找到该 `id` 的 `status`（running、approval、input、idle、error、offline 之一）。会话列表每 3 秒刷新，新建后先等它出现在列表里，再判断状态；`approval`、`input` 表示要人处理，`idle` 是这一轮结束，`error`、`offline` 要查原因。间隔 60 秒即可；Claude Code 用后台 Bash 的 until 循环，状态离开 running 时只通知一次。
+4. 审查：读任务单里的执行报告、`git status`/diff、截图，必要时亲自运行；把结论写回任务单。
+5. 返工或补充要求：`POST /api/send`，内容 `{"id":"<threadId>","text":"……","request_id":"<唯一字符串>"}`。会话运行中发送会插进当前回合。
+
+**边界**
+
+- 派发方负责审查和收尾，Codex 自报「完成」不能代替审查。
+- 不对同一工作区并发派多个会话，除非已经划分好文件范围或用了独立 worktree。
+- Codex 运行期间，派发方不写它可能改动的同一批文件；补充要求走 `/api/send`。
+
 ## 与 MA3 的关系
 
 MA3（`/home/dticpw/PG_linux/MA3`，8763 端口）仍在运行，没有改动。
+
+2026-10-01 用户决定：全局指令中 MA3 已淘汰，不再用于新任务，派活改走 MA4（见「中控派发」）。停掉 `ma3-workbench.service`、`ma3-control` Skill 的去留、`runs/` 的清理仍待和用户商量，尚未执行。
 
 MA4 取代的是它的日常用途（会话浏览、聊天、额度），不包括它的任务协议。等 MA4 日常够用，再和用户商量：
 - 停掉 `ma3-workbench.service`；
