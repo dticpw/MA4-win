@@ -6,7 +6,7 @@
 
 ## 现状与接续
 
-更新于 2026-09-30。
+更新于 2026-10-01。
 
 **能用的**
 
@@ -34,7 +34,7 @@
 - 真实模型的新建、发送、流式回复、完成、上下文用量、状态切换，API 和网页各走了一遍。
 - 另一个客户端（模拟终端）发起的回合，MA4 能实时看到。
 - 三种宽度、深色模式无报错，无横向溢出。
-- 30 项 Python 测试、6 项 Node 测试通过。
+- 34 项 Python 测试、6 项 Node 测试通过。
 
 **没验证或没做**
 
@@ -86,7 +86,7 @@ journalctl --user -u ma4.service -n 50
 # 改了 Python 代码后重启（只改 web/ 下的文件时刷新网页即可）
 systemctl --user restart ma4.service
 # 测试（不调用模型）
-/home/dticpw/conda/envs/py310/bin/python -m unittest -q test_appserver test_hub test_server
+/home/dticpw/conda/envs/py310/bin/python -m unittest -q test_appserver test_hub test_server test_quota
 ~/.nvm/versions/node/*/bin/node --test test_markdown.mjs
 # 页面截图检查（服务需在运行），截图写到 .agent-tmp/ui-check/
 ~/.nvm/versions/node/*/bin/node tools/ui_check.mjs [会话ID]
@@ -109,6 +109,10 @@ MA4 取代的是它的日常用途（会话浏览、聊天、额度），不包�
 - MA3 的 `runs/`（227M）去留。
 
 重写原因见 2026-09-29/30 的会话。
+
+## 归档
+
+muQ 公开主题 `ma4`：https://muq.koa-ol.com/e/ma4/ （总览、使用手册、技术机制与维护、从 MA3 到 MA4、过程记录）。以后归档续更同一主题 ID，不另建。
 
 ## 仓库
 
