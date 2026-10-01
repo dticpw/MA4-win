@@ -18,6 +18,7 @@ const state = {
   flash: new Set(),  // thread ids whose status just changed
   counts: {},
   openFolds: new Set(), // fold groups the user expanded
+  quotaSignature: null, // last rendered quota figures
 };
 
 // ---------- helpers ----------
@@ -654,32 +655,45 @@ function renderApprovals() {
   renderCounters();
 }
 
+function resetText(at) {
+  if (!at) return "";
+  const left = at - Date.now() / 1000;
+  if (left <= 0) return "已到重置时间";
+  if (left < 86400) return `${Math.floor(left / 3600)} 小时 ${Math.floor((left % 3600) / 60)} 分后重置`;
+  return `${Math.floor(left / 86400)} 天 ${Math.floor((left % 86400) / 3600)} 小时后重置`;
+}
+
 function renderSide() {
   const q = state.side.quota || {};
-  let quota = "暂无数据";
-  if (Number.isFinite(q.used)) {
-    const left = q.reset_at ? Math.max(0, q.reset_at - Date.now() / 1000) : null;
-    const reset = left === null ? "重置时间未知"
-      : `${Math.floor(left / 86400)} 天 ${Math.floor((left % 86400) / 3600)} 小时后重置`;
-    const r = 30, circumference = 2 * Math.PI * r;
-    const color = q.used >= 85 ? "var(--bad)" : q.used >= 60 ? "var(--wait)" : "var(--accent)";
-    quota = `<div class="ring-wrap">
-        <svg class="ring" viewBox="0 0 72 72"><circle class="track" cx="36" cy="36" r="${r}"/>
-          <circle class="value" cx="36" cy="36" r="${r}" stroke="${color}" stroke-dasharray="${circumference}"
-            stroke-dashoffset="${circumference}" data-target="${circumference * (1 - q.used / 100)}"/></svg>
-        <div class="ring-label">${q.used}%</div>
-      </div>
-      <div class="quota-text">7 日已用 <b>${q.used}%</b><small>${reset}</small></div>`;
+  const families = q.families || [];
+  const signature = JSON.stringify([families.map((f) => f.windows.map((w) => w.used)), q.error, q.stale]);
+  if (signature === state.quotaSignature) {
+    // Same figures: only the countdowns move; do not replay the bar animation.
+    for (const el of $("quota").querySelectorAll("[data-reset]")) el.textContent = resetText(Number(el.dataset.reset));
+  } else {
+    state.quotaSignature = signature;
+    renderQuota(q, families);
   }
-  if (q.error || q.stale) quota += `<div class="hint">${escapeHtml(q.error || "数据可能过期")}</div>`;
-  $("quota").innerHTML = quota;
-  // Animate the ring from empty on first paint, then from its last value.
-  const ring = $("quota").querySelector(".ring .value");
-  if (ring) {
-    if (state.ringOffset !== undefined) ring.style.strokeDashoffset = state.ringOffset;
-    requestAnimationFrame(() => requestAnimationFrame(() => { ring.style.strokeDashoffset = ring.dataset.target; }));
-    state.ringOffset = ring.dataset.target;
-  }
+  renderSites();
+}
+
+function renderQuota(q, families) {
+  let html = families.map((f) => `<div class="quota-family">
+      <div class="quota-name">${escapeHtml(f.label)}</div>
+      ${f.windows.map((w) => {
+        const level = w.used >= 85 ? "bad" : w.used >= 60 ? "warn" : "";
+        return `<div class="quota-row ${level}">
+          <div class="quota-line"><span>${escapeHtml(w.label)}</span><b>${w.used}%</b></div>
+          <div class="quota-bar"><span style="width:${w.used}%"></span></div>
+          <div class="quota-reset" data-reset="${w.reset_at || 0}">${resetText(w.reset_at)}</div>
+        </div>`;
+      }).join("")}
+    </div>`).join("") || `<div class="hint">暂无额度数据</div>`;
+  if (q.error || q.stale) html += `<div class="hint">${escapeHtml(q.error || "数据可能过期")}</div>`;
+  $("quota").innerHTML = html;
+}
+
+function renderSites() {
   $("health").innerHTML = (state.side.health || []).map((h) => {
     const cls = h.at === undefined ? "unknown" : h.ok ? "ok" : "bad";
     const detail = h.at === undefined ? "检查中" : h.ok ? `${h.ms} ms` : (h.code ? `HTTP ${h.code}` : h.error || "不可达");

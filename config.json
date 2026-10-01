@@ -1,7 +1,6 @@
 {
   "port": 8764,
   "codex_bin": null,
-  "quota_source": "/home/dticpw/PG_linux/MA3/.ma3/quota-source.json",
   "links": [
     {
       "name": "muQ",

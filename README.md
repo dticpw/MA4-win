@@ -20,7 +20,7 @@
 - 运行中的会话在列表和对话里显示已用时间和当前动作（如「执行 npm test」）；在终端里运行的会话也会被自动跟随。每一轮结尾显示开始时间和用时。`/model 模型名 [思考深度]` 从下一轮开始切换。
 - 输入 `$` 可以选 Skill。消息里的 `$名称` 会像终端一样作为 Skill 调用，而不只是一段文字。
 - 审批请求显示在右侧，可以允许、本会话都允许或拒绝。
-- 侧栏：额度、muQ 和 21 点服务的在线检测，以及 muQ、个人主页的链接。
+- 侧栏：Codex 与 Claude 的额度（5 小时、7 天、Fable 周窗口的已用比例和重置倒计时，每 5 分钟查询一次）、muQ 和 21 点服务的在线检测，以及 muQ、个人主页的链接。
 - 标签页标题显示需要你处理的数量，可开启桌面提醒。
 - 界面（2026-09-30 美化）：磨砂玻璃风格，浅色、深色可切换，也可以跟随系统（右上角按钮）。
   - 没选会话时显示总览：问候语、需要留意的会话、最近会话。点左上角 MA4 回到总览。
@@ -62,10 +62,10 @@ Codex 自带一个共享的 app-server 守护进程（`codex app-server daemon`�
 | `appserver.py` | 用标准库实现的 WebSocket 与 JSON-RPC 客户端 |
 | `hub.py` | 维护连接（守护进程不在时会自动 `daemon start`）、会话列表轮询（3 秒）、订阅、审批、偏好，以及发给网页的事件 |
 | `server.py` | HTTP 接口、SSE 事件流、静态页面；只接受本机请求，写操作必须带 `X-MA4-Request` 头 |
-| `quota.py` | 额度轮询，沿用 MA3 |
+| `quota.py` | 额度轮询：解析 quota-detail 格式（Codex + Claude），兼容 MA3 的旧格式 |
 | `health.py` | 站点在线检测，每 5 分钟一次 |
 | `web/` | 页面：`app.js`、`markdown.js`（先转义再渲染的安全 Markdown）、`style.css` |
-| `config.json` | 端口、链接、检测地址、额度来源文件路径（不含密钥） |
+| `config.json` | 端口、链接、检测地址、折叠规则（不含密钥） |
 | `deploy/ma4.service` | 用户服务，以符号链接装在 `~/.config/systemd/user/` |
 | `tools/ui_check.mjs` | 用系统 Chrome 截图检查页面 |
 | `deploy/ma4.desktop`、`deploy/ma4-icon.svg` | 桌面启动器：以 Chrome 应用模式打开页面。以符号链接装在 `~/.local/share/applications/`；换 Logo 时要一起更新图标 |
@@ -92,7 +92,7 @@ systemctl --user restart ma4.service
 ~/.nvm/versions/node/*/bin/node tools/ui_check.mjs [会话ID]
 ```
 
-- **额度来源：** 暂时读 MA3 的 `.ma3/quota-source.json`，这是个私有文件，不复制它。以后停用 MA3 时，把它移到 `.ma4/` 并改 `config.json`。
+- **额度来源：** 来源地址存在私有文件 `.ma4/quota-source.json` 里（`{"url": ...}`，权限 600，不进 Git），格式是 HTTH 的 `/api/public/quota-detail?k=…`。地址里带访问口令，不要写进代码、配置或文档。2026-10-01 起不再依赖 MA3 的配置。
 - **Codex 升级：** app-server 协议标着 experimental。升级后如果页面顶部显示守护进程异常，或者列表、对话读不出来，先跑测试，再用 `codex app-server generate-json-schema --out <临时目录>` 导出新协议，对照 `hub.py` 里用到的方法。用到的方法有：
   - `thread/list`、`thread/read`、`thread/turns/list`、`thread/resume`、`thread/start`、`thread/name/set`
   - `turn/start`、`turn/steer`、`turn/interrupt`

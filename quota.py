@@ -1,4 +1,11 @@
-"""Thirty-minute quota polling (from MA3). The source URL lives in a private local file."""
+"""Quota polling for the side bar. The source URL (it carries an access key) lives in a
+private local file and never reaches the browser, the logs or Git.
+
+Two source formats are understood:
+- quota-detail: {"families": [{"key", "label", "account": {h5_used, h5_reset, d7_used,
+  d7_reset, fable_used, fable_reset, updated}}], "generated_at"}  (Codex and Claude)
+- legacy codex-quota: {"d7_used", "d7_reset", "updated"}  (Codex only, from MA3)
+"""
 import datetime as dt
 import json
 import math
@@ -6,27 +13,53 @@ import threading
 import time
 import urllib.request
 
-INTERVAL = 1800
-WEEK = 7 * 86400
+INTERVAL = 300
+WINDOWS = (("h5", "5 小时"), ("d7", "7 天"), ("fable", "Fable 周"))
+
+
+def percent(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        return None
+    return value if 0 <= value <= 100 else None
+
+
+def timestamp(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
+        return None
+    return value
+
+
+def iso(value):
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace('Z', '+00:00'))
+    except ValueError:
+        return None
+    return parsed.isoformat() if parsed.tzinfo else None
+
+
+def family(key, label, account):
+    windows = []
+    for name, title in WINDOWS:
+        used = percent(account.get(name + '_used'))
+        if used is not None:
+            windows.append(dict(key=name, label=title, used=used, reset_at=timestamp(account.get(name + '_reset'))))
+    return dict(key=key, label=label, windows=windows, updated=iso(account.get('updated')))
 
 
 def normalize(data):
-    used = data.get('d7_used')
-    if isinstance(used, bool) or not isinstance(used, (int, float)) or not math.isfinite(used) or not 0 <= used <= 100:
-        raise ValueError('invalid usage')
-    reset = data.get('d7_reset')
-    if isinstance(reset, bool) or not isinstance(reset, (int, float)) or not math.isfinite(reset) or reset <= 0:
-        reset = None
-    updated = data.get('updated')
-    if isinstance(updated, str):
-        try:
-            parsed = dt.datetime.fromisoformat(updated.replace('Z', '+00:00'))
-            updated = parsed.isoformat() if parsed.tzinfo else None
-        except ValueError:
-            updated = None
+    if isinstance(data.get('families'), list):
+        families = [family(str(f.get('key', '')), str(f.get('label') or f.get('key', '')), f.get('account') or {})
+                    for f in data['families'] if isinstance(f, dict)]
+        families = [f for f in families if f['windows']]
+        updated = iso(data.get('generated_at'))
     else:
-        updated = None
-    return dict(used=used, reset_at=reset, updated=updated)
+        families = [family('codex', 'Codex', data)]
+        updated = families[0]['updated']
+    if not families or not any(f['windows'] for f in families):
+        raise ValueError('no usage figures')
+    return dict(families=families, updated=updated)
 
 
 class QuotaPoller:
@@ -43,6 +76,8 @@ class QuotaPoller:
             self.cache = json.loads((directory/'quota-cache.json').read_text())
         except (OSError, ValueError):
             pass
+        if 'families' not in self.cache:
+            self.cache = {}  # older single-figure cache: refetch now
         self.thread = threading.Thread(target=self.loop, daemon=True)
         if start:
             self.thread.start()
@@ -52,7 +87,7 @@ class QuotaPoller:
         if not source.startswith('https://'):
             raise ValueError('HTTPS required')
         with urllib.request.urlopen(source, timeout=20) as response:
-            return json.loads(response.read(65536))
+            return json.loads(response.read(500_000))
 
     def tick(self):
         now = self.clock()
@@ -70,16 +105,13 @@ class QuotaPoller:
                 self.cache['error'] = '额度查询失败，保留上次结果'
         with self.lock:
             tmp = self.directory/'quota-cache.tmp'
-            tmp.write_text(json.dumps(self.cache)+'\n')
+            tmp.write_text(json.dumps(self.cache, ensure_ascii=False)+'\n')
             tmp.replace(self.directory/'quota-cache.json')
 
     def snapshot(self):
         with self.lock:
             result = dict(self.cache)
-        now = self.clock()
-        result['stale'] = bool(result.get('error')) or now-result.get('fetched_at', 0) > INTERVAL+60
-        reset = result.get('reset_at')
-        result['reset_pending'] = bool(reset and reset <= now)
+        result['stale'] = bool(result.get('error')) or self.clock()-result.get('fetched_at', 0) > INTERVAL+60
         return result
 
     def loop(self):
