@@ -298,6 +298,9 @@ code, pre, kbd { font-family: "JetBrains Mono", "Cascadia Code", ui-monospace, m
 .fold-arrow { transition: transform .25s ease; }
 .fold.open .fold-arrow { transform: rotate(90deg); }
 .fold-name { flex: 1; font-weight: 600; }
+.fold-badge { font-size: 12px; font-weight: 600; }
+.fold-badge.running { color: var(--accent); }
+.fold-badge.unread { color: var(--ok); }
 .fold-count { font-size: 12px; padding: 0 8px; border-radius: 999px; background: var(--glass-soft); border: 1px solid var(--line); }
 .fold.open ~ .thread { animation: rise .25s ease both; }
 .thread-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

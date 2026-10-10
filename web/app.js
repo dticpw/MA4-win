@@ -127,9 +127,20 @@ function sortedThreads() {
 const GROUPS = ["等你处理", "运行中", "新回复", "置顶", "其他"];
 
 // Quiet threads whose cwd matches a configured prefix collapse into one row at the bottom.
+// A fold with include_active also keeps running / unread threads inside (its row shows their counts);
+// threads waiting for you or pinned always stay in the main list.
 function foldOf(t) {
-  if (t.status === "approval" || t.status === "input" || t.status === "running" || t.unread || t.pinned) return null;
-  return (state.side.folds || []).find((f) => (t.cwd || "").startsWith(f.cwd_prefix)) || null;
+  if (t.status === "approval" || t.status === "input" || t.pinned) return null;
+  const fold = (state.side.folds || []).find((f) => (t.cwd || "").startsWith(f.cwd_prefix)) || null;
+  if (fold && !fold.include_active && (t.status === "running" || t.unread)) return null;
+  return fold;
+}
+
+function foldBadges(members) {
+  const running = members.filter((t) => t.status === "running").length;
+  const unread = members.filter((t) => t.unread && t.status !== "running").length;
+  return (running ? `<span class="fold-badge running">${running} 运行中</span>` : "")
+    + (unread ? `<span class="fold-badge unread">${unread} 新回复</span>` : "");
 }
 
 function saveFolds() {
@@ -180,7 +191,7 @@ function renderThreads() {
   for (const [name, members] of folded) {
     const open = state.openFolds.has(name);
     html.push(`<li class="fold${open ? " open" : ""}" data-fold="${escapeHtml(name)}" title="${open ? "收起" : "展开"}">
-      <span class="fold-arrow">›</span><span class="fold-name">${escapeHtml(name)}</span><span class="fold-count">${members.length}</span>
+      <span class="fold-arrow">›</span><span class="fold-name">${escapeHtml(name)}</span>${foldBadges(members)}<span class="fold-count">${members.length}</span>
     </li>`);
     if (open) html.push(...members.map(threadRow));
   }

@@ -25,6 +25,11 @@
     {
       "name": "MA3 执行任务",
       "cwd_prefix": "/home/dticpw/PG_linux/MA3/runs/"
+    },
+    {
+      "name": "MA4-RPGO3dPixel",
+      "cwd_prefix": "/mnt/e/PG/RPGO3dPixel",
+      "include_active": true
     }
   ]
 }
