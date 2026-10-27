@@ -4,6 +4,8 @@
 
 ## 现状与接续
 
+2026-10-28：GitHub 公开仓库为 [dticpw/MA4-win](https://github.com/dticpw/MA4-win)，维护主分支为 `main`。本共享目录的 `origin` 使用 `https://github.com/dticpw/MA4-win.git`，旧私有仓库 `dticpw/MA4` 保留为 `upstream`，不作为当前共享版本的默认推送目标。Linux 和 Windows 均在同一目录维护并向 `origin/main` 提交，继续遵守两侧不同时写入及公共功能兼容性检查约定；各系统使用各自的 GitHub 认证。首次公开保留原有 17 个提交的历史，检查了 169 个历史文件版本及截图，未发现凭据正文；公开范围为 Git 已跟踪的源码、配置、文档和验证材料，本机路径与历史测试标识仍在其中。`.ma4/`、`.agent-tmp/`、凭据库、Codex 会话状态和本地快捷方式不上传。此次只更新发布说明与 Git 连接，不改业务代码、不重启服务。
+
 2026-10-28：共享源码已在两侧运行，Windows 核心实测及返回 Linux 的针对性回归已完成；核心迁移可投入日常使用，明确缺项见下文。**唯一维护源码为 `E:/PG/MA4-win`（Linux `/mnt/e/PG/MA4-win`）**，两边看到的是同一个 NTFS 文件夹。公共 Python/前端文件共用，系统接口在 `os_adapters/linux.py` / `windows.py`，设置按系统覆盖；不建立第二份源码或持续同步。
 
 Linux 当前中控、预算、跨目录授权、报告回传、恢复、临时材料、服务活动和界面已合入，并保留 Windows 启动器、TCP、路径和编码修复。Linux 上一阶段 178 项 Python 检查（174 通过、4 个 Windows 专属跳过）、22 项 Node、五组模拟页面及实际网页通过；12 项任务和原 9 个载入会话保留。四份全局指令已完成独立审查与同步。
@@ -179,7 +181,7 @@ node --test test_markdown.mjs test_controllers.mjs test_paths.mjs
 - `activity.py` / `health.py` / `quota.py` 分别负责服务活动、站点健康和额度。`DESIGN.md` 与 `ARCHITECTURE.html` 解释既有中控设计，传输与路径的最新约定以本 README 为准。
 - 正式源码、测试与当前验证说明留项目；临时输出 `.agent-tmp/<任务>/`，运行数据在上表各自目录，两类均不进 Git。没有持续同步、历史快照或完整会话副本。
 - 新增/修改共享代码时同步有关测试和说明，提交前查看实际 Git 差异；仓库 `core.fileMode=false`，`.gitattributes` 保持 LF。
-- 旧任务遗留的协议 schema 等仍按原记录保留，不能以这次迁移为由删除。没有 push、远程部署或全局 Codex/MCP 配置变更。
+- 旧任务遗留的协议 schema 等仍按原记录保留，不能以这次迁移为由删除。迁移阶段没有 push、远程部署或全局 Codex/MCP 配置变更；后续 GitHub 公开发布见「现状与接续」。
 
 ## 与 MA3 的关系
 
