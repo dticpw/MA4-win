@@ -948,12 +948,19 @@ async function loadState() {
 
 function connectEvents() {
   const source = new EventSource(`/api/events?since=${state.seq}`);
+  let interrupted = false;
+  source.onopen = () => {
+    if (!interrupted) return;
+    interrupted = false;
+    loadState().catch(() => {});
+  };
   source.onmessage = (message) => {
     state.seq = Number(message.lastEventId) || state.seq;
     handle(JSON.parse(message.data));
   };
   source.addEventListener("resync", () => loadState().catch(() => {}));
   source.onerror = () => {
+    interrupted = true;
     // EventSource reconnects by itself and resends Last-Event-ID.
     state.daemon = { connected: false, error: "与 MA4 后台的连接中断，正在重连" };
     renderDaemon();

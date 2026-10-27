@@ -30,7 +30,8 @@ try {
       if (r.url().startsWith(base) && r.status() >= 400) problems.push(w + ": HTTP " + r.status() + " " + r.url());
     });
     await page.goto(base + "/" + (id ? "#" + id : ""));
-    await page.waitForSelector(id ? ".turn" : ".thread, .project-group", { timeout: 15000 });
+    // An empty controller tab is a valid loaded state on a fresh installation.
+    await page.waitForSelector(id ? ".turn" : ".thread, .project-group, #thread-list > .group", { timeout: 15000 });
     await page.waitForTimeout(300);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (overflow > 0) problems.push(w + ": horizontal overflow " + overflow + "px");

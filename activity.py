@@ -94,9 +94,9 @@ class ActivityPoller:
     def credential(self):
         if self.password is None:
             result = subprocess.run(
-                [sys.executable, self.config["credential_cli"], "get", self.config["stats_credential"]],
+                [sys.executable, "-B", "-X", "utf8", self.config["credential_cli"], "get", self.config["stats_credential"]],
                 env={**os.environ, "AGENTFLOW_CREDENTIALS_FILE": self.config["credential_file"]},
-                capture_output=True, text=True, timeout=10, check=True)
+                capture_output=True, text=True, encoding="utf-8", timeout=10, check=True)
             value = json.loads(result.stdout)
             if value.get("credential_status") != "ok":
                 raise ValueError("credential unavailable")

@@ -1,0 +1,470 @@
+{
+  "date": "2026-10-28",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": {
+    "run": 179,
+    "passed": 175,
+    "failures": [],
+    "errors": [],
+    "skipped": [
+      [
+        "test_artifact_cleanup_requires_exact_safe_owned_files (test_controllers.ControllerTest)",
+        "Windows 尚未授予符号链接权限；Junction 另有实机检查"
+      ],
+      [
+        "test_invalid_owner_markers_are_never_replaced (test_controllers.ControllerTest)",
+        "Windows 尚未授予符号链接权限；Junction 另有实机检查"
+      ],
+      [
+        "test_shared_artifact_links_and_busy_workers_are_not_cleaned (test_controllers.ControllerTest)",
+        "Windows 尚未授予符号链接权限；Junction 另有实机检查"
+      ],
+      [
+        "test_symlinks_checked_again_at_launch_and_grant_confirmation (test_controllers.ControllerTest)",
+        "Windows 尚未授予符号链接权限；Junction 另有实机检查"
+      ]
+    ]
+  },
+  "baseCommit": "505fe34",
+  "result": "Windows core passed; explicit verification gaps remain",
+  "versions": {
+    "selectedCli": "0.164.0",
+    "nativeDaemon": "0.164.0",
+    "desktopAppBinaryDiskOnly": "0.164.0-alpha.11.1",
+    "node": "24.11.1"
+  },
+  "testedSourceSha256": {
+    "activity.py": "3331e7e9940284d47a8152d7fcb8787fcf8054743be840f4b1c5519f0101fb62",
+    "web/app.js": "cfa1c113fb984d87f74b8711bd508e8db2a555db90f942904ae8bf6610bf36ec",
+    "test_activity.py": "e0c9fb30af65b9e6a6fb6f9c65f8631e5e1471a10b769acb89cc4ce2dfa122d0",
+    "test_controllers.py": "e491d92e290ac010dcf6b4f2b7468d0f5b55a40b1cc09e3e004c561e517bc839",
+    "tools/controller_discussion_check.mjs": "d665808a45471f691c315e29107593e4ac26ed4024ecb9c634844fa300d48c0e",
+    "tools/service_activity_check.mjs": "2402258b84ebd4f0aed10043563a77a9fa05a1d2dbfe5ce9c434d20a3fce4e61",
+    "tools/ui_check.mjs": "f86ff8c5a019ae2bffa71630c071e7d71008bd3aa1ccc9903ed8ddbad0a5681d"
+  },
+  "node": {
+    "passed": 22,
+    "failed": 0
+  },
+  "mockUi": {
+    "passed": [
+      "session_creation",
+      "controller_discussion",
+      "controller_details",
+      "skill_selection",
+      "service_activity"
+    ],
+    "widths": [
+      1440,
+      1024,
+      390
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "reconnectRegression": true
+  },
+  "liveUi": {
+    "result": "passed",
+    "checks": [
+      "1440x900 light: rendered, no horizontal overflow",
+      "1024x800 dark: rendered, no horizontal overflow",
+      "390x844 light: rendered, no horizontal overflow"
+    ],
+    "problems": []
+  },
+  "native": {
+    "endpoint": "proxy://C:\\Users\\DTICPW\\.codex\\app-server-control\\app-server-control.sock",
+    "cycles": [
+      {
+        "proxyPid": 5184,
+        "loaded": 1,
+        "peerDisconnect": false,
+        "proxyReaped": true
+      },
+      {
+        "proxyPid": 10024,
+        "loaded": 1,
+        "peerDisconnect": true,
+        "proxyReaped": true
+      },
+      {
+        "proxyPid": 3924,
+        "loaded": 1,
+        "peerDisconnect": false,
+        "proxyReaped": true
+      }
+    ],
+    "isolatedLauncher": {
+      "webPid": 23432,
+      "proxyPids": [
+        27420
+      ],
+      "duplicateReused": true,
+      "includeBackendStoppedOnlyWeb": true,
+      "proxyReaped": true
+    },
+    "nativeStillConnected": true,
+    "originalCodexPidsPreserved": true,
+    "mainWebStillConnected": true
+  },
+  "desktop": {
+    "actualShortcutDoubleClick": true,
+    "webPidReused": 3332,
+    "duplicateWindowClosed": true,
+    "backendSurvivedWindowClose": true,
+    "liveReconnectBannerRecovered": true
+  },
+  "files": {
+    "html": [
+      200,
+      {
+        "opened": true
+      }
+    ],
+    "text": [
+      200,
+      {
+        "opened": true
+      }
+    ],
+    "launch.py": [
+      400,
+      {
+        "error": "不通过文件链接执行程序、脚本或快捷方式"
+      }
+    ],
+    "启动MA4.cmd": [
+      400,
+      {
+        "error": "不通过文件链接执行程序、脚本或快捷方式"
+      }
+    ],
+    "MA4.lnk": [
+      400,
+      {
+        "error": "不通过文件链接执行程序、脚本或快捷方式"
+      }
+    ],
+    "textContentObservedInNotepad3": true,
+    "htmlOpenedInChrome": true,
+    "htmlContentObservation": "Blocked by browser file URL policy"
+  },
+  "side": {
+    "quotaFamilies": [
+      "codex",
+      "claude",
+      "grok",
+      "gemini"
+    ],
+    "quotaStale": false,
+    "health": [
+      {
+        "name": "muQ 首页",
+        "status": 200,
+        "ok": true
+      },
+      {
+        "name": "21点联机服务",
+        "status": 200,
+        "ok": true
+      }
+    ],
+    "activity": [
+      {
+        "key": "texas",
+        "count": 0,
+        "stale": false,
+        "error": null
+      },
+      {
+        "key": "ace21",
+        "count": 0,
+        "stale": false,
+        "error": null
+      },
+      {
+        "key": "chat",
+        "count": 0,
+        "stale": false,
+        "error": null
+      }
+    ]
+  },
+  "smoke": {
+    "id": "dd779cf589e74a48",
+    "host": "01a17e40-f24f-74e1-ab04-7d1ac5f0d7bc",
+    "status": "completed",
+    "hostBusy": false,
+    "note": "请核对临时材料去向",
+    "usageTotal": {
+      "totalTokens": 288401,
+      "inputTokens": 285280,
+      "cachedInputTokens": 233984,
+      "outputTokens": 3121
+    },
+    "statistics": {
+      "roles": [
+        {
+          "role": "host",
+          "usage": {
+            "totalTokens": 199291,
+            "inputTokens": 197241,
+            "cachedInputTokens": 167936,
+            "outputTokens": 2050
+          },
+          "durationMs": 77180,
+          "turnCount": 2
+        },
+        {
+          "role": "worker",
+          "usage": {
+            "totalTokens": 89110,
+            "inputTokens": 88039,
+            "cachedInputTokens": 66048,
+            "outputTokens": 1071
+          },
+          "durationMs": 39850,
+          "turnCount": 1
+        }
+      ],
+      "sessions": [
+        {
+          "threadId": "01a17e40-f24f-74e1-ab04-7d1ac5f0d7bc",
+          "role": "host",
+          "name": "当前中控",
+          "usage": {
+            "totalTokens": 199291,
+            "inputTokens": 197241,
+            "cachedInputTokens": 167936,
+            "outputTokens": 2050
+          },
+          "turns": [
+            {
+              "id": "01a17e42-e318-7522-88b9-d567a32971cf",
+              "startedAt": 1793119675,
+              "status": "completed",
+              "completedAt": 1793119694,
+              "durationMs": 19645,
+              "usage": {
+                "totalTokens": 51317,
+                "inputTokens": 50889,
+                "cachedInputTokens": 25344,
+                "outputTokens": 428
+              }
+            },
+            {
+              "id": "01a17e43-cc05-7992-a7cd-f18f15ddb960",
+              "startedAt": 1793119734,
+              "status": "completed",
+              "completedAt": 1793119792,
+              "durationMs": 57535,
+              "usage": {
+                "totalTokens": 147974,
+                "inputTokens": 146352,
+                "cachedInputTokens": 142592,
+                "outputTokens": 1622
+              }
+            }
+          ],
+          "durationMs": 77180,
+          "unattributedTokens": 0
+        },
+        {
+          "threadId": "01a17e43-1a92-73b3-b32e-f0ef7aef46cc",
+          "role": "worker",
+          "name": "Windows 单文件验证",
+          "usage": {
+            "totalTokens": 89110,
+            "inputTokens": 88039,
+            "cachedInputTokens": 66048,
+            "outputTokens": 1071
+          },
+          "turns": [
+            {
+              "id": "01a17e43-3032-7521-8880-cbec27a8d68b",
+              "startedAt": 1793119694,
+              "status": "completed",
+              "completedAt": 1793119734,
+              "durationMs": 39850,
+              "usage": {
+                "totalTokens": 89110,
+                "inputTokens": 88039,
+                "cachedInputTokens": 66048,
+                "outputTokens": 1071
+              }
+            }
+          ],
+          "durationMs": 39850,
+          "unattributedTokens": 0
+        }
+      ]
+    },
+    "completion": {
+      "outcome": "met",
+      "summary": "单文件验收通过：中控已亲自读取验证 结果.txt，实际路径、UTF-8、LF 与准确两行内容全部符合目标；成果暂留供外层核验。",
+      "evidence": "本次新测：中控使用 D:/python/anaconda/envs/th123/python.exe -B -X utf8 只读检查，exec chunk 3c4b40 退出码 0。实际路径 E:\\PG\\MA4-win\\.agent-tmp\\windows-parity-smoke\\验证 结果.txt；66 字节；UTF-8 严格解码成功；无 BOM/CR；LF 恰为 2 个；splitlines 恰为 2 行；全文逐字等于 'MA4 Windows shared-source smoke\\n中文与空格路径验证通过\\n'，全部 7 项检查为 true。未复用执行者自检作为验收结论。首次只读命令因 PowerShell 参数引号解析报 SyntaxError，未读写文件；改用标准输入完成实际核验，未重新派工或重跑制作。只有一个执行者；成果保留。程序提供临时目录为空，无需重复检查。失败或未完成项：无。",
+      "decidedAt": 1793119785.925977,
+      "threadId": "01a17e40-f24f-74e1-ab04-7d1ac5f0d7bc",
+      "turnId": "01a17e43-cc05-7992-a7cd-f18f15ddb960",
+      "usageTotal": {
+        "totalTokens": 288401,
+        "inputTokens": 285280,
+        "cachedInputTokens": 233984,
+        "outputTokens": 3121
+      },
+      "estimatedCost": null,
+      "settling": false,
+      "turnDurationMs": 117030,
+      "elapsedMs": 116957.17000961304,
+      "completedAt": 1793119792
+    },
+    "firstStartedAt": 1793119675.04283
+  },
+  "hostIndependentRead": {
+    "exitCodes": [
+      1,
+      0
+    ],
+    "proof": {
+      "actual_path": "E:\\PG\\MA4-win\\.agent-tmp\\windows-parity-smoke\\验证 结果.txt",
+      "bytes": 66,
+      "content": "MA4 Windows shared-source smoke\n中文与空格路径验证通过\n",
+      "checks": {
+        "actual_path_correct": true,
+        "utf8_strict": true,
+        "no_bom": true,
+        "no_cr": true,
+        "lf_count_two": true,
+        "exactly_two_lines": true,
+        "exact_content": true
+      }
+    }
+  },
+  "artifact": {
+    "bytes": 66,
+    "sha256": "f3be67d616443ecf41d94abf87641a2443e05b6cd17bea50b7f9d5345ec71128",
+    "exactContent": "MA4 Windows shared-source smoke\n中文与空格路径验证通过\n"
+  },
+  "realtime": {
+    "webEventCounts": {
+      "run": 26,
+      "turn": 4,
+      "item": 26,
+      "delta": 200,
+      "tokens": 7
+    },
+    "webTurns": [
+      {
+        "kind": "turn",
+        "turnId": "01a17e42-e318-7522-88b9-d567a32971cf",
+        "state": "started",
+        "at": 1793119675242
+      },
+      {
+        "kind": "turn",
+        "turnId": "01a17e42-e318-7522-88b9-d567a32971cf",
+        "state": "completed",
+        "at": 1793119694883
+      },
+      {
+        "kind": "turn",
+        "turnId": "01a17e43-cc05-7992-a7cd-f18f15ddb960",
+        "state": "started",
+        "at": 1793119734828
+      },
+      {
+        "kind": "turn",
+        "turnId": "01a17e43-cc05-7992-a7cd-f18f15ddb960",
+        "state": "completed",
+        "at": 1793119792358
+      }
+    ],
+    "webRendered": {
+      "renderedDispatch": true,
+      "renderedFinish": true,
+      "renderedWorkerReport": true,
+      "renderedFile": true
+    },
+    "terminal": {
+      "attachedBeforeTurn": true,
+      "apiTerminalPids": [
+        26488
+      ],
+      "capturedTerminalPid": 19736,
+      "endpoint": "unix://C:\\Users\\DTICPW\\.codex\\app-server-control\\app-server-control.sock",
+      "threadId": "01a17e40-f24f-74e1-ab04-7d1ac5f0d7bc",
+      "observedWorkerReport": true,
+      "observedHostRead": true,
+      "observedFinish": true,
+      "observedFinal": true
+    }
+  },
+  "crossBackendIdleResume": {
+    "httpStatus": 200,
+    "modelTurnStarted": false,
+    "meaning": "Idle resume allowed; does not establish live event sharing or busy-writer conflict behavior"
+  },
+  "hostSurvey": {
+    "ordinaryCli": {
+      "pid": 29788,
+      "explicitRemote": false,
+      "resume": true,
+      "nativeDaemonChildPids": [
+        30180,
+        30264
+      ],
+      "realtimeTest": "Not injected into user session"
+    },
+    "desktopApp": {
+      "appServerPid": 25700,
+      "separateProcess": true,
+      "liveSharedEvents": "Not verified"
+    }
+  },
+  "gaps": [
+    "4 symlink tests skipped because Windows lacks privilege; real Junction passed",
+    "Native notification permission/default and actual toast untested",
+    "HTML rendering cannot be observed under file URL browser policy",
+    "Busy cross-backend HTTP 409 only covered by unit tests; idle real attachment returned 200",
+    "Linux targeted regression and real login startup pending"
+  ],
+  "cleanup": {
+    "testThreadsArchived": true,
+    "temporaryFiles": "retained: policy rejected deletion before execution",
+    "preservedOldTasks": true,
+    "push": false,
+    "newAutostartOrScheduledTasks": false,
+    "archivedThreadCount": 2,
+    "retained": [
+      {
+        "path": ".agent-tmp\\windows-parity",
+        "files": 65,
+        "bytes": 8824720
+      },
+      {
+        "path": ".agent-tmp\\windows-parity-smoke",
+        "files": 1,
+        "bytes": 66
+      }
+    ],
+    "deletedFiles": 0,
+    "testTerminalProcessesExited": true,
+    "isolatedTestProcessesStopped": true,
+    "mainMa4Running": true,
+    "htmlTab": "file URL policy prevents observation/claiming for automatic close; retained",
+    "inventory": {
+      "since": "2026-10-27T23:58:29+08:00",
+      "run": true,
+      "formalProjectFiles": 11,
+      "boardFiles": 1,
+      "runtimeFiles": 5,
+      "temporaryFiles": 66,
+      "temporaryBytes": 8824786,
+      "backupOrArchiveFiles": 0,
+      "newScheduledTasksCreated": false
+    }
+  },
+  "pythonVersion": "3.10.19"
+}

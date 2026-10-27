@@ -63,7 +63,10 @@ try {
       else { errors.push("Unexpected API: " + path); result = {}; }
       await route.fulfill({ contentType: "application/json", body: JSON.stringify(result) });
     });
-    const ready = async () => page.waitForFunction(() => !document.getElementById("task-dialog").open);
+    // Closing the dialog precedes refresh(); wait for the clicked submit handler
+    // to finish so a stale /api/state response cannot overwrite the next event.
+    const ready = async (button = "task-save") => page.waitForFunction((id) =>
+      !document.getElementById("task-dialog").open && !document.getElementById(id).disabled, button);
     await page.goto(process.env.MA4_URL || "http://127.0.0.1:8764");
     await page.waitForFunction(() => window.fixtureEvents);
     await page.locator("#new-controller").click();
@@ -122,7 +125,7 @@ try {
     assert.match(await page.locator("#task-workspace-note").innerText(), /将发生变更/);
     assert.equal(await page.locator("#task-duration").inputValue(), "480");
     await page.locator("#task-save-draft").click();
-    await ready();
+    await ready("task-save-draft");
     assert.equal(task.target, "");
     assert.equal(task.workspaces, undefined);
     assert.deepEqual(task.draft.workspaces, [
@@ -134,7 +137,7 @@ try {
     assert.equal(await page.locator("#task-duration").inputValue(), "480");
     await page.screenshot({ path: join(out, `review-${width}.png`) });
     await page.locator("#task-confirm-only").click();
-    await ready();
+    await ready("task-confirm-only");
     assert.equal(task.status, "paused");
     assert.equal(task.workspaces.length, 2);
     task.workers = { worker: { name: "Skill 维护", cwd: "/mnt/c/Users/DTICPW/agent-workflows", access: "write", scope: ["skills/godot-tech"], state: "idle" } };
@@ -182,7 +185,7 @@ try {
     assert.equal(await page.locator("#task-duration").inputValue(), "");
     assert.match(await page.locator("#task-duration-hint").innerText(), /不是在旧截止时间上追加/);
     await page.locator(".workspace-row textarea").fill("assets");
-    await page.locator("#task-confirm-only").click(); await ready();
+    await page.locator("#task-confirm-only").click(); await ready("task-confirm-only");
     assert.deepEqual(task.budget, { ...otherLimits, deadline: originalDeadline });
     assert.deepEqual(task.workspaces[0].write_scope, ["assets"]);
 
@@ -222,14 +225,14 @@ try {
     assert.equal(task.budget.deadline, relativeDeadline);
     // A draft stores a fixed cutoff, but does not change the active budget.
     await page.locator("#task-duration").fill("15");
-    await page.locator("#task-save-draft").click(); await ready();
+    await page.locator("#task-save-draft").click(); await ready("task-save-draft");
     const draftDeadline = clickedAt / 1000 + 15 * 60;
     assert.equal(task.budget.deadline, relativeDeadline);
     assert.equal(task.draft.budget.deadline, draftDeadline);
     await page.evaluate((now) => { Date.now = () => now; }, clickedAt + 60000);
     await page.locator("#task-edit").click();
     assert.equal(await page.locator("#task-duration").inputValue(), "");
-    await page.locator("#task-confirm-only").click(); await ready();
+    await page.locator("#task-confirm-only").click(); await ready("task-confirm-only");
     assert.deepEqual(task.budget, { ...otherLimits, deadline: draftDeadline });
 
     // Clearing a relative entry restores manual calendar input.
@@ -237,18 +240,18 @@ try {
     await page.locator("#task-duration").fill("30");
     await page.locator("#task-duration").fill("");
     await page.locator("#task-deadline").fill("2030-10-14T09:45");
-    await page.locator("#task-confirm-only").click(); await ready();
+    await page.locator("#task-confirm-only").click(); await ready("task-confirm-only");
     assert.equal(task.budget.deadline, new Date("2030-10-14T09:45").getTime() / 1000);
 
     // Token/money-only tasks can also add a deadline in minutes.
     task.budget = { ...otherLimits }; await publish();
     await page.locator("#task-edit").click();
     assert.equal(await page.getByLabel("从现在起的时限（min）", { exact: true }).isEnabled(), true);
-    await page.locator("#task-confirm-only").click(); await ready();
+    await page.locator("#task-confirm-only").click(); await ready("task-confirm-only");
     assert.deepEqual(task.budget, otherLimits);
     await page.locator("#task-edit").click();
     await page.locator("#task-duration").fill("30");
-    await page.locator("#task-confirm-only").click(); await ready();
+    await page.locator("#task-confirm-only").click(); await ready("task-confirm-only");
     assert.equal(task.budget.deadline, (clickedAt + 60000) / 1000 + 30 * 60);
     await page.locator("#new-controller").click();
     assert.equal(await page.getByLabel("启动后时限（min）", { exact: true }).isEnabled(), true);

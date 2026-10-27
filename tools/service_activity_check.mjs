@@ -21,7 +21,7 @@ try {
           { ip: "2001:db8:1234:5678:1234:5678:1234:5678", city: "", country: "<img src=x onerror=alert(1)>", last_seen: now - 60, requests: 1 }] },
     ];
     await page.addInitScript(() => {
-      window.EventSource = class { addEventListener() {} };
+      window.EventSource = class { constructor() { window.fixtureEvents = this; } addEventListener() {} };
       const original = window.setInterval;
       window.setInterval = (fn, ms, ...args) => ms === 15000 ? (window.refreshActivity = fn, 123) : original(fn, ms, ...args);
     });
@@ -36,6 +36,12 @@ try {
     });
     await page.goto(process.env.MA4_URL || "http://127.0.0.1:8764");
     await page.locator("#activity-card").waitFor({ state: "visible" });
+    // A reconnected event stream may send no daemon-status event. Restore the
+    // real server state instead of leaving the temporary disconnected banner.
+    await page.evaluate(() => window.fixtureEvents.onerror());
+    assert.match(await page.locator("#daemon").innerText(), /未连接/);
+    await page.evaluate(() => window.fixtureEvents.onopen());
+    await page.waitForFunction(() => document.getElementById("daemon").textContent === "守护进程已连接");
     assert.equal(await page.locator("#service-activity button").count(), 1, "Games must not expose details");
     assert.deepEqual(await page.locator(".activity-value").allTextContents(), ["3", "0", "2›"]);
     await page.locator("#activity-card").scrollIntoViewIfNeeded();
@@ -61,6 +67,6 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     assert.deepEqual(errors, []);
     await page.close();
-    console.log(`${width}px ${scheme}: counts, keyboard details, location fallback, escaping, live refresh and failure states passed`);
+    console.log(`${width}px ${scheme}: reconnect status, counts, keyboard details, location fallback, escaping, live refresh and failure states passed`);
   }
 } finally { await browser.close(); }

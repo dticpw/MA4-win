@@ -1,6 +1,6 @@
 # 共享源码迁移 · 当前验证记录
 
-2026-10-27。Linux 阶段已完成；Windows 实机验收待做。此文件维护当前结果，不新增每轮历史副本。
+2026-10-28。Linux 实施完成，Windows 本轮核心实测完成并保留明确缺项，下一步回 Linux 做针对性回归。此文件维护当前结果，不新增每轮历史副本。
 
 ## 新实现与证据
 
@@ -16,11 +16,26 @@
 - 实际 8764 网页三宽度浅深主题无脚本/资源错误、无横向溢出；8 个静态资源 HTTP 200。没有用用户在途任务做发送/停止试验。
 - 四份全局指令只有 MA4 条目改变。`/root/global_rules_review` 审前和写入后均 PASS；实际字节/SHA256 等于通过版本，共享正文一致、LF。persona-sync status 修改前后均 22/22；facts 均通过。Linux 全局 Codex 30,311 字节。备份/完整审查证据见 `D:/Linux_share/persona-history/20261027-ma4-shared-source/`。
 
+## Windows 本轮实测（2026-10-27/28）
+
+详细数量、任务/会话 ID、文件摘要、关键进程与回合证据见 [windows-parity.json](windows-parity.json)。测试对象为共享仓库 `505fe34` 加本轮修正；该 JSON 记录被测源码 SHA256。Windows 11 build 26200、th123 Python 3.10、Node 24.11.1；MA4 所选 CLI 与实际原生 daemon 均为 0.164.0。桌面 App 独立 app-server 进程所用二进制磁盘版本为 0.164.0-alpha.11.1，不能当作它的运行握手版本。
+
+- **自动检查通过：** 最终 Python 179 项中 175 通过、0 失败、0 错误、4 跳过。跳过的是 `test_artifact_cleanup_requires_exact_safe_owned_files`、`test_invalid_owner_markers_are_never_replaced`、`test_shared_artifact_links_and_busy_workers_are_not_cleaned`、`test_symlinks_checked_again_at_launch_and_grant_confirmation`，原因均为本机无符号链接权限；未修改系统权限。真实 Windows Junction 和 3 项 TCP 启动器集成测试通过。Node 22 项全部通过。
+- **页面通过：** 五组模拟 API 检查覆盖 1440/1024/390、浅深主题、键盘、讨论确认、报告、附件、服务活动及失败状态；实际页面三宽度无脚本/资源错误或横向溢出，查看了桌面/窄屏图。未使用真实用户会话发送测试消息。
+- **实际修正：** `activity.py` 的父进程采用 UTF-8，但原凭据 CLI 子进程会输出 Windows 本地编码，导致解码失败。现在子进程显式 `-B -X utf8`、父进程显式 `encoding=utf-8`；新增真实子进程的非 UTF-8 默认环境回归检查，`test_activity` 7 项通过，真实 Chat 统计恢复。`web/app.js` 原先只在 SSE 错误时显示“未连接”，重连且无新 daemon 事件时不复原；现在重连后读取当前状态。模拟三宽度和实际网页重启连接均确认提示恢复。
+- **测试修正：** `test_controllers.py` 对 JSON 解码后比较 Windows 路径，并用实际盘根代替字面 `/`；讨论页面测试等提交后的状态刷新结束再注入下一事件；实际网页脚本允许空中控列表这种合法已载入状态。未削弱原功能断言。
+- **原生与启动通过：** 选中 `proxy://C:\Users\DTICPW\.codex\app-server-control\app-server-control.sock`，真实 initialize/loaded/list 成功。三次连接中含一次主动终止本次代理模拟断线，代理均回收，随后可重新连接；用户原生 daemon 保留。独立原生网页重复启动复用进程，`include_backend=True` 只停止该测试网页及其 proxy。现有快捷方式实际双击打开新窗口但复用网页 PID；关闭重复窗口后网页和 daemon 仍正常。没有启动新服务或自启。
+- **终端通过与边界：** 对专属测试会话调用 `/api/terminal`，实际 remote TUI 连接相同原生端点；另一受控 TUI 在模型开始前接入并捕获报告、读取结果与完成事件，网页同时收到两轮 started/completed、流式 item/delta 和 token 事件。普通 CLI 的 resume 进程未带显式 `--remote`，其子进程为当前原生 daemon；桌面 App 另有独立 app-server。未对用户会话注入消息，因此不宣称这两类客户端的实时共享已经通过。另起并清理的隔离 TCP 后台可恢复本次**已空闲**的测试会话，HTTP 200；没有启动模型，不能以此证明运行中 409。
+- **路径与侧栏：** 中文/空格文本文件由 `/api/file/open` 打开，在 Notepad3 中确认准确两行；小写盘符与编码后的 file URI 成功。实际 `.py`、`.cmd`、`.lnk` 均 HTTP 400 拒绝执行。HTML 由默认 Chrome 打开，窗口标题可见，但浏览器策略拒绝观察 `file://` 内容，故渲染未验收。通知为未授权状态，未操作授权弹窗或测试真实通知。凭据通过 credential-vault 读取，仅写本侧私有 `.ma4/quota-source.json`；使用同服务文档已支持的多家额度接口，当前 Codex/Claude/Grok/Gemini 均有效，muQ 与 21 点健康 HTTP 200，德州/21 点/Chat 统计均不陈旧（本次均 0）。不输出密钥 URL 或访客详情。
+- **一次真实模型实验通过：** 任务 `dd779cf589e74a48`，中控 `01a17e40-f24f-74e1-ab04-7d1ac5f0d7bc`（2 轮），执行者 `01a17e43-1a92-73b3-b32e-f0ef7aef46cc`（1 轮）。116.96 秒，288,401 tokens，其中缓存输入 233,984、输出 3,121；没有提高 15 分钟/300,000 上限，没有第二次模型实验。只产生 `验证 结果.txt`，66 字节，SHA256 `f3be67d616443ecf41d94abf87641a2443e05b6cd17bea50b7f9d5345ec71128`。中控真实命令读取后核对路径、UTF-8 无 BOM、无 CR、两处 LF、准确两行和全文内容，外层再次逐字节核对。中控同一回合中一次 PowerShell 引号错误及一次缺少 finish 结论参数均得到明确错误并修正，未增加回合。最终 completed/met，两个会话已通过现有移除接口归档，中控任务数回到 0；原始 Codex 历史仍由 Codex 管理，未复制。
+
 ## 尚待验证
 
-Windows 双击入口/原生 proxy/同端点终端事件共享、桌面 App 与普通 CLI 的实际宿主、Junction/路径/文件关联/通知、额度来源与服务活动、获准小模型任务。返回 Linux 后按 Windows 实际修改做必要回归，并核实真实登录启动。Windows 本轮尚无新的运行结果；旧 `validation/*.json` 是其各自日期的原版本证据。
+Windows：4 项 symlink 检查受权限限制；真实通知弹出未测；HTML 的 `file://` 内容观察被浏览器安全策略拒绝；普通 CLI/App 的完整实时共享和运行中跨后台 409 未测（相关错误映射单元测试已通过）。这些缺项不以模拟结果替代，也不为补测另开整套模型实验。
 
-模型验收上限：1 中控 + 1 执行者，各最多 2 轮，15 分钟、300,000 累计 tokens（含缓存）。在途消耗可能越界。本轮 Linux 模型验收调用为 0。详见清单与看板 B-20261027-02。
+Linux 接续：当前共享源码无需复制。运行 `test_activity` 和 `tools/service_activity_check.mjs`（后者输出放本轮独立临时目录），按需复核改过的跨平台路径/讨论脚本；重启现有 `ma4.service` 后检查真实统计与 SSE 重连提示，核实真正登录启动。不能用 Windows 通过替代 Linux 实测，也不能宣布双系统迁移全部验收。
+
+模型验收上限保持不变且本次已用完授权的一次实验。Linux 实施阶段模型调用为 0。详见清单与看板 B-20261027-02。
 
 ## 回退与保留
 
@@ -30,7 +45,11 @@ Windows 原版可从本仓库 `1fec307` 查阅差异并定点恢复；禁止直�
 
 ## 文件收尾
 
-正式成果为共享源码/测试/配置/文档与当前验证记录。两张保留的 [桌面确认窗口](shared-source-desktop.png) / [窄屏确认窗口](shared-source-mobile.png) 来自模拟数据，已人工查看；没有保存用户聊天截图作为正式证据。其余本次 `.agent-tmp/shared-source/` 的45个截图/摘要文件（9,738,015字节）已清理，该任务临时目录无残留；隔离预览和测试进程已停止。
+Windows 正式改动为两处共享业务修正、相关测试、README/清单和本验证记录；必要证据汇总在 `validation/windows-parity.json`。`.ma4/quota-source.json` 是本侧私有运行配置，Git 忽略；服务自行更新 controllers、额度缓存及启动器状态。两个测试会话已归档，受控终端与隔离原生/TCP 测试进程已退出，主 MA4 与用户 daemon 保留。没有压缩包、备份、自启、定时任务、全局配置变更或 push。
+
+**Windows 临时清理未执行：** 清理仅限本轮 `.agent-tmp/windows-parity/`（原计划保留仍在浏览器中的 HTML）和 `.agent-tmp/windows-parity-smoke/`，已核对绝对路径与非链接边界，但命令在运行前被自动审批策略拒绝，仅返回“blocked by policy”，未提供更具体原因。没有改用其他方式绕过，故两目录全部保留；含截图、测试脚本/摘要、已停止实例的私有临时状态及 66 字节文本成果。HTML 测试标签的内容读取/自动关闭也受 file URL 策略限制，样例保留。复查条件：用户关闭该 HTML 标签，且清理可在批准策略允许的方式下执行；不得把本记录当作绕过拒绝的授权。旧 `.agent-tmp/B-20261027-01/` 等完全未动。实际数量见 Windows 摘要的 cleanup 字段。已按会话起点运行只读文件清点。
+
+Linux 实施阶段正式成果为共享源码/测试/配置/文档与当前验证记录。两张保留的 [桌面确认窗口](shared-source-desktop.png) / [窄屏确认窗口](shared-source-mobile.png) 来自模拟数据，已人工查看；没有保存用户聊天截图作为正式证据。其余本次 `.agent-tmp/shared-source/` 的45个截图/摘要文件（9,738,015字节）已清理，该任务临时目录无残留；隔离预览和测试进程已停止。
 
 一次性回退材料：两个本地 Git 提交、原位旧 Linux 源码、上述全局指令原文备份/审查目录；保留到 Windows 验收与 Linux 回归完成时复查。旧任务 `.agent-tmp/B-20261027-01/` 等原样保留，不属于本次清理。没有压缩包、持续备份、计划任务或新自启；未 push。
 

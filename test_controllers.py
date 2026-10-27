@@ -50,6 +50,12 @@ class Hub:
 
 
 class ControllerTest(unittest.TestCase):
+    def assert_active_writer_path(self, message, path):
+        marker = "以下是仍在写入的范围（发送时快照）：\n"
+        self.assertIn(marker, message)
+        writers = json.loads(message.split(marker, 1)[1].split("\n", 1)[0])
+        self.assertTrue(any(str(path) in writer["paths"] for writer in writers), writers)
+
     def symlink(self, link, target):
         try:
             link.symlink_to(target, target_is_directory=target.is_dir())
@@ -849,7 +855,7 @@ class ControllerTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.c.stage_draft(t, "新草案", "user", workspaces=grants)
             self.assertEqual(t, before)
-        self.assertTrue(overlap(["/"], [str(extra)]))
+        self.assertTrue(overlap([extra.anchor], [str(extra)]))
 
     def test_cross_project_worker_real_cwd_scope_budget_and_old_schema(self):
         t = self.cross_task(); extra = self.root / "shared"
@@ -914,7 +920,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(len(self.hub.sent), before + 1)
         self.assertEqual(self.hub.sent[-1][0], b["host"])
         self.assertEqual(w["state"], "running")
-        self.assertIn(str(shared), self.hub.sent[-1][1])
+        self.assert_active_writer_path(self.hub.sent[-1][1], shared)
         self.assertIn("暂缓验收", self.hub.sent[-1][1])
         self.assertFalse(self.hub.interrupted)
 
@@ -931,7 +937,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(writer["state"], "running")
         self.assertEqual(self.hub.sent[-1][0], t["host"])
         self.assertIn("评估已完成", self.hub.sent[-1][1])
-        self.assertIn(str(archive), self.hub.sent[-1][1])
+        self.assert_active_writer_path(self.hub.sent[-1][1], archive)
         self.assertEqual(t["pending"], [])
         # Completion notifications may be duplicated; they must not redeliver.
         self.c.complete_worker(t, assessment_id, turn)
@@ -1029,7 +1035,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(wb["state"], "running")
         self.assertTrue(a["closing"]["reviewStarted"])
         self.assertIn("到期收尾汇总", self.hub.sent[-1][1])
-        self.assertIn(str(shared), self.hub.sent[-1][1])
+        self.assert_active_writer_path(self.hub.sent[-1][1], shared)
         self.assertIn("暂缓验收", self.hub.sent[-1][1])
         self.finish_host(a); self.c.tick()
         self.assertEqual(a["status"], "budget")

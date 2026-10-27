@@ -1,4 +1,7 @@
 import json
+import os
+from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 import urllib.error
@@ -18,6 +21,18 @@ def chat(now, rows=None, total=None):
 
 
 class ActivityTest(unittest.TestCase):
+    def test_credential_cli_unicode_with_non_utf8_child_defaults(self):
+        with tempfile.TemporaryDirectory() as folder:
+            cli = Path(folder) / "credential.py"
+            cli.write_text("import json, sys\njson.dump({'credential_status': 'ok', "
+                           "'content': '用途：统计\\nPassword: 测试-token'}, sys.stdout, ensure_ascii=False)\n",
+                           encoding="utf-8", newline="\n")
+            config = {"credential_cli": str(cli), "credential_file": str(Path(folder) / "unused"),
+                      "stats_credential": "fixture"}
+            with patch.dict(os.environ, {"PYTHONUTF8": "0", "PYTHONCOERCECLOCALE": "0", "LC_ALL": "C"}):
+                poller = ActivityPoller(config, start=False)
+                self.assertEqual(poller.credential(), "测试-token")
+
     def test_only_connected_seats_count_and_private_fields_are_removed(self):
         seat = {"id": "p1", "online": True, "name": "private", "token": "secret"}
         raw = game("texas", [None, seat, seat, {"id": "p2", "online": False}])
