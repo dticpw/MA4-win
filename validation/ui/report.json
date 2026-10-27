@@ -1,0 +1,10 @@
+{
+  "result": "passed",
+  "checks": [
+    "1440x900 light: rendered, no horizontal overflow",
+    "new dialog / Escape / create+send / streamed reply / pin / help / overview",
+    "1024x800 dark: rendered, no horizontal overflow",
+    "390x844 light: rendered, no horizontal overflow"
+  ],
+  "problems": []
+}

@@ -1,3 +1,4 @@
+import { isWithin, shortPath as displayPath } from "/paths.js";
 import { renderMarkdown, escapeHtml } from "/markdown.js";
 
 const $ = (id) => document.getElementById(id);
@@ -22,8 +23,7 @@ const state = {
 };
 
 // ---------- helpers ----------
-const home = "/home/dticpw";
-const shortPath = (p) => (p || "").replace(home, "~");
+const shortPath = (p) => displayPath(p, state.side.runtime?.home);
 const title = (t) => t.name || t.preview || t.id.slice(0, 8);
 
 function ago(seconds) {
@@ -131,7 +131,7 @@ const GROUPS = ["等你处理", "运行中", "新回复", "置顶", "其他"];
 // threads waiting for you or pinned always stay in the main list.
 function foldOf(t) {
   if (t.status === "approval" || t.status === "input" || t.pinned) return null;
-  const fold = (state.side.folds || []).find((f) => (t.cwd || "").startsWith(f.cwd_prefix)) || null;
+  const fold = (state.side.folds || []).find((f) => isWithin(t.cwd, f.cwd_prefix)) || null;
   if (fold && !fold.include_active && (t.status === "running" || t.unread)) return null;
   return fold;
 }
@@ -302,7 +302,7 @@ function renderHeader() {
   $("interrupt").hidden = !running;
   $("send").textContent = running ? "插话" : "发送";
   $("composer-hint").textContent = t.status === "offline"
-    ? "这个会话未载入，发送时会先载入（不会重复启动）" : running ? "Agent 正在工作，消息会插入当前回合" : "";
+    ? "当前仅查看历史；发送时会尝试接入，其他后台占用时需先释放" : running ? "Agent 正在工作，消息会插入当前回合" : "";
   const live = $("live-status");
   live.hidden = !running;
   live.textContent = liveText(t);
@@ -475,7 +475,11 @@ function appendDelta(itemId, delta) {
 
 async function send(event) {
   event.preventDefault();
-  if (palette.open) return;
+  if (palette.open) {
+    if (event.submitter !== $("send")) return;
+    palette.open = false;
+    renderPalette();
+  }
   let text = $("input").value;
   if (!text.trim() || !state.current) return;
   if (text.startsWith("//")) {
@@ -718,7 +722,7 @@ function renderDaemon() {
   const el = $("daemon");
   const ok = state.daemon.connected;
   el.className = "daemon " + (ok ? "ok" : "bad");
-  el.textContent = ok ? "守护进程已连接" : "守护进程未连接";
+  el.textContent = ok ? "共享后台已连接" : "共享后台未连接";
   el.title = state.daemon.error || state.daemon.version || "";
 }
 
@@ -936,7 +940,7 @@ function wire() {
   });
   $("new-thread").addEventListener("click", () => {
     $("new-error").textContent = "";
-    $("new-cwd").value = currentThread()?.cwd || "";
+    $("new-cwd").value = currentThread()?.cwd || state.side.runtime?.defaultCwd || "";
     $("new-dialog").showModal();
   });
   $("new-submit").addEventListener("click", async () => {

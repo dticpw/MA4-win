@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-11",
+  "result": "passed",
+  "source": "deploy/ma4-icon.svg (unchanged imported Linux asset)",
+  "icoSizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    128,
+    256
+  ],
+  "checks": [
+    {
+      "path": "/favicon.ico",
+      "status": 200,
+      "mime": "image/x-icon"
+    },
+    {
+      "path": "/ma4-icon.svg",
+      "status": 200,
+      "mime": "image/svg+xml"
+    }
+  ],
+  "chromeDecoded": true,
+  "shortcut": "MA4.lnk -> 启动MA4.cmd; deploy/ma4-icon.ico",
+  "webRestarted": true,
+  "codexBackendPreserved": true,
+  "nativeWindowIconVisuallyVerified": false
+}

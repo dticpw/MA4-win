@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-11",
+  "implementation": "Chrome/Edge --app mode; installed browser reused; no additional profile or service",
+  "tests": {
+    "python_passed": 44,
+    "app_window_launch": "real Chrome window titled MA4 was returned by window inventory",
+    "native_visual_and_close_check": "not completed; Computer Use could not confidently identify the current browser URL and stopped"
+  },
+  "linux": {
+    "upstream_head": "3ce173f5b0b5bdb8be71dfa639c2a2e000241f1f",
+    "desktop": "google-chrome --app=http://127.0.0.1:8764",
+    "service": {
+      "WantedBy": "graphical-session.target",
+      "PartOf": "graphical-session.target",
+      "Restart": "on-failure",
+      "KillMode": "process"
+    },
+    "current_installed_service_state": "not accessible from this Windows dual-boot session",
+    "read_only_check": "tools/check-linux-service.sh"
+  },
+  "cleanup": "isolated test servers stopped; existing user MA4 services preserved"
+}

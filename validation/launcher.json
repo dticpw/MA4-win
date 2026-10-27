@@ -1,0 +1,10 @@
+{
+  "result": "passed",
+  "checks": [
+    "run.ps1 backend started isolated app-server",
+    "run.ps1 web connected",
+    "Ctrl+C stopped web while backend remained accessible",
+    "no global configuration changes",
+    "Ctrl+C stopped owned backend and released its port"
+  ]
+}

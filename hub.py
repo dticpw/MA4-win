@@ -9,12 +9,12 @@ import json
 import os
 from pathlib import Path
 import re
-import subprocess
 import threading
 import time
 import uuid
 
-from appserver import AppServer, DEFAULT_SOCKET, Disconnected, RpcError
+from appserver import AppServer, DEFAULT_ENDPOINT, Disconnected, RpcError
+from runtime import open_terminal
 
 LIST_LIMIT = 80
 OUTPUT_LIMIT = 4000
@@ -89,7 +89,7 @@ def describe(item):
     if kind == "commandExecution":
         return "执行 " + (item.get("command") or "")[:120]
     if kind == "fileChange":
-        paths = [c.get("path", "").rsplit("/", 1)[-1] for c in item.get("changes") or []]
+        paths = [c.get("path", "").replace("\\", "/").rsplit("/", 1)[-1] for c in item.get("changes") or []]
         return "修改 " + "、".join(paths[:3]) + ("等" if len(paths) > 3 else "") if paths else "修改文件"
     if kind in ("mcpToolCall", "dynamicToolCall"):
         return "调用 " + str(item.get("tool") or "")
@@ -147,11 +147,12 @@ class Prefs:
 
 
 class Hub:
-    def __init__(self, data_dir, codex_bin, socket_path=DEFAULT_SOCKET, poll_seconds=3,
-                 connect=AppServer):
+    def __init__(self, data_dir, codex_bin, socket_path=DEFAULT_ENDPOINT, poll_seconds=3,
+                 connect=AppServer, codex_home=None):
         self.data_dir = Path(data_dir)
         self.codex_bin = codex_bin
-        self.socket_path = Path(socket_path)
+        self.endpoint = str(socket_path)
+        self.codex_home = codex_home
         self.poll_seconds = poll_seconds
         self.connect_factory = connect
         self.prefs = Prefs(self.data_dir / "prefs.json")
@@ -159,6 +160,7 @@ class Hub:
         self.changed = threading.Condition(self.lock)
         self.client = None
         self.daemon = {"connected": False, "error": None, "version": None}
+        self.local_threads = {}    # newly created, before Codex persists the first turn
         self.threads = {}          # id -> summary
         self.live = {}             # id -> {"turn": id|None, "tokens": {...}}
         self.subscribed = set()
@@ -170,7 +172,6 @@ class Hub:
         self.seq = 0
         self.refresh_soon = threading.Event()
         self.stop = threading.Event()
-        self.last_daemon_start = 0
         self.worker = threading.Thread(target=self.run, daemon=True)
 
     def start(self):
@@ -201,30 +202,18 @@ class Hub:
             if self.client is not None and not self.client.closed:
                 try:
                     self.refresh()
+                    self.set_daemon(error=None)
                 except (Disconnected, OSError, TimeoutError, RpcError) as exc:
                     self.set_daemon(error="读取会话列表失败：" + str(exc)[:200])
             self.refresh_soon.wait(self.poll_seconds)
             self.refresh_soon.clear()
 
     def try_connect(self):
-        if not self.socket_path.exists():
-            # The daemon starts on demand; after a reboot nothing else may start it.
-            if time.time() - self.last_daemon_start > 30:
-                self.last_daemon_start = time.time()
-                try:
-                    subprocess.run([self.codex_bin, "app-server", "daemon", "start"],
-                                   capture_output=True, timeout=60)
-                except (OSError, subprocess.TimeoutExpired) as exc:
-                    self.set_daemon(error="启动 Codex 守护进程失败：" + str(exc)[:200])
-                    return
-            if not self.socket_path.exists():
-                self.set_daemon(error="Codex 守护进程未运行")
-                return
         try:
-            client = self.connect_factory(self.socket_path, on_notification=self.on_notification,
+            client = self.connect_factory(self.endpoint, on_notification=self.on_notification,
                                           on_request=self.on_request, on_disconnect=self.on_disconnect)
         except (OSError, Disconnected, TimeoutError, RpcError) as exc:
-            self.set_daemon(error="连接 Codex 守护进程失败：" + str(exc)[:200])
+            self.set_daemon(error="共享后台未连接，请先运行 run.ps1 backend：" + str(exc)[:200])
             return
         with self.lock:
             self.client = client
@@ -242,7 +231,7 @@ class Hub:
         with self.lock:
             self.client = None
             self.approvals.clear()
-        self.set_daemon(connected=False, error="与 Codex 守护进程断开：" + reason[:200])
+        self.set_daemon(connected=False, error="与 Codex 共享后台断开：" + reason[:200])
         self.emit("approvals", approvals=[])
         self.refresh_soon.set()
 
@@ -257,7 +246,7 @@ class Hub:
     def call(self, method, params, timeout=30):
         client = self.client
         if client is None or client.closed:
-            raise Disconnected("Codex 守护进程未连接")
+            raise Disconnected("Codex 共享后台未连接")
         return client.call(method, params, timeout)
 
     # ---- thread list --------------------------------------------------
@@ -269,6 +258,11 @@ class Hub:
                 continue
             fresh[t["id"]] = t
         with self.lock:
+            for tid, pending in list(self.local_threads.items()):
+                if tid in fresh:
+                    self.local_threads.pop(tid, None)
+                else:
+                    fresh[tid] = pending
             seen_dirty = False
             summaries = {}
             for tid, t in fresh.items():
@@ -428,13 +422,24 @@ class Hub:
                     "model": resumed["model"], "effort": resumed.get("reasoningEffort"),
                     **permissions(resumed.get("sandbox"), resumed.get("approvalPolicy"))}
 
+    def read_turns(self, params, timeout=30):
+        # On Windows a just-created rollout can be briefly visible but empty.
+        # Retry this specific publication race; preserve other protocol errors.
+        for attempt in range(4):
+            try:
+                return self.call("thread/turns/list", params, timeout=timeout)
+            except RpcError as exc:
+                if "rollout" not in str(exc) or "is empty" not in str(exc) or attempt == 3:
+                    raise
+                time.sleep((.05, .15, .4)[attempt])
+
     def current_turn(self, tid):
         with self.lock:
             known = self.live.get(tid, {}).get("turn")
         if known:
             return known
         try:
-            page = self.call("thread/turns/list", {"threadId": tid, "limit": 1, "sortDirection": "desc",
+            page = self.read_turns({"threadId": tid, "limit": 1, "sortDirection": "desc",
                                                    "itemsView": "notLoaded"})
         except RpcError as exc:
             if "not materialized" in str(exc):
@@ -473,7 +478,7 @@ class Hub:
         if cursor:
             params["cursor"] = cursor
         try:
-            page = self.call("thread/turns/list", params, timeout=60)
+            page = self.read_turns(params, timeout=60)
         except RpcError as exc:
             if "not materialized" in str(exc):
                 return {"turns": [], "older": None}
@@ -599,12 +604,16 @@ class Hub:
         return {"interrupted": turn}
 
     def new_thread(self, cwd, text=None):
-        path = Path(os.path.expanduser(cwd or "")).resolve()
+        if not isinstance(cwd, str) or not cwd.strip():
+            raise ValueError("请填写工作目录")
+        path = Path(os.path.expanduser(cwd)).resolve()
         if not path.is_dir():
             raise ValueError("工作目录不存在：" + str(path))
         started = self.call("thread/start", {"cwd": str(path)}, timeout=60)
         tid = started["thread"]["id"]
         with self.lock:
+            self.local_threads[tid] = started["thread"]
+            self.threads[tid] = self.summarize(started["thread"])
             self.subscribed.add(tid)
             self.live.setdefault(tid, {})["settings"] = {
                 "model": started.get("model"), "effort": started.get("reasoningEffort"),
@@ -654,16 +663,20 @@ class Hub:
         self.emit("approvals", approvals=self.approval_list())
         return {"decided": decision}
 
-    def open_terminal(self, tid, terminal="/usr/bin/gnome-terminal"):
+    def open_terminal(self, tid):
         with self.lock:
             row = self.threads.get(tid)
         if not row:
             raise ValueError("未知会话")
-        title = "MA4 | " + (row["name"] or row["preview"][:30] or tid[:8])
-        subprocess.Popen([terminal, "--title=" + title, "--", self.codex_bin, "resume", tid,
-                          "-C", row["cwd"] or str(Path.home())],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-        return {"opened": True}
+        # An unmaterialized thread cannot yet be resumed by another client.
+        try:
+            self.read_turns({"threadId": tid, "limit": 1, "itemsView": "notLoaded"})
+        except RpcError as exc:
+            if "not materialized" in str(exc) or "no rollout found" in str(exc):
+                raise ValueError("请先在网页发送第一条消息，再在终端打开") from exc
+            raise
+        return open_terminal(self.codex_bin, self.endpoint, row["cwd"] or str(Path.home()),
+                             tid, self.codex_home)
 
     def state(self):
         with self.lock:
@@ -675,3 +688,5 @@ class Hub:
         self.refresh_soon.set()
         if self.client:
             self.client.close()
+        if self.worker.is_alive() and self.worker is not threading.current_thread():
+            self.worker.join(timeout=5)

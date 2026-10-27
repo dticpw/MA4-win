@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-11",
+  "result": "passed",
+  "python_tests": 43,
+  "new_windows_integration_tests": 3,
+  "checks": [
+    "CMD entry with Chinese and spaced config path",
+    "concurrent double launch reuses one backend and one web process",
+    "browser open called only after readiness",
+    "foreign web/backend ports preserved",
+    "stale PID creation time cannot stop another process",
+    "stop web preserves shared backend",
+    "restart reuses shared backend",
+    "externally started backend survives launcher stop"
+  ],
+  "isolation": "temporary CODEX_HOME; no model requests or global configuration changes",
+  "cleanup": "test processes stopped; temporary profiles removed"
+}

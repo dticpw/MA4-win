@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-10",
+  "python": {
+    "command": "python -B -X utf8 -m unittest -q test_appserver test_hub test_server test_quota test_runtime",
+    "passed": 40,
+    "failed": 0,
+    "skipped": 0
+  },
+  "node": {
+    "command": "node --test test_markdown.mjs test_paths.mjs",
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0
+  },
+  "python_runtime": "D:/python/anaconda/envs/th123/python.exe",
+  "notes": "Actual test commands completed with exit code 0; smoke, TUI and UI evidence stored separately."
+}

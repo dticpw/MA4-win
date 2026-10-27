@@ -1,0 +1,11 @@
+{
+  "result": "passed",
+  "nativeWindowsTerminalWindow": "not tested",
+  "model": "local mock; no external model calls",
+  "checks": [
+    "same thread resumed with --remote",
+    "existing history visible in TUI",
+    "terminal-origin message and reply retrieved through MA4 HTTP"
+  ],
+  "client": "Codex 0.149.1 TUI through Windows ConPTY"
+}

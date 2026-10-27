@@ -1,3 +1,5 @@
 .agent-tmp/
 .ma4/
 __pycache__/
+# Local shortcut contains absolute paths; source and icon remain portable.
+/MA4.lnk

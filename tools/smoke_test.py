@@ -1,0 +1,263 @@
+"""Offline end-to-end check: real Codex, a local mock model, Hub and HTTP/SSE.
+
+Never uses the user's CODEX_HOME, credentials, model quota or existing threads.
+--serve leaves the isolated fixture available briefly for browser/terminal QA.
+"""
+import argparse
+import contextlib
+import json
+import os
+from pathlib import Path
+import socket
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+import urllib.request
+import urllib.error
+import uuid
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from appserver import AppServer
+from hub import Hub
+from runtime import child_environment, find_codex
+from server import Server
+
+
+def wait_for(predicate, timeout=15):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        value = predicate()
+        if value:
+            return value
+        time.sleep(.05)
+    raise AssertionError("condition not reached within %ss" % timeout)
+
+
+class MockModel(BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+    def do_POST(self):
+        self.rfile.read(int(self.headers["Content-Length"]))
+        message_id = "msg_" + uuid.uuid4().hex
+        response_id = "resp_" + uuid.uuid4().hex
+        text = "本机模拟回复：Windows 共享会话连接成功。"
+        item = {"id": message_id, "type": "message", "role": "assistant",
+                "status": "completed", "content": [
+                    {"type": "output_text", "text": text, "annotations": []}]}
+        events = [
+            {"type": "response.created", "response": {"id": response_id, "object": "response",
+                "status": "in_progress", "output": []}},
+            {"type": "response.output_item.added", "output_index": 0,
+                "item": dict(item, status="in_progress", content=[])},
+            {"type": "response.content_part.added", "item_id": message_id, "output_index": 0,
+                "content_index": 0, "part": {"type": "output_text", "text": "", "annotations": []}},
+        ]
+        events += [{"type": "response.output_text.delta", "item_id": message_id,
+                    "output_index": 0, "content_index": 0, "delta": chunk}
+                   for chunk in ("本机模拟回复：", "Windows 共享会话", "连接成功。")]
+        events += [
+            {"type": "response.output_item.done", "output_index": 0, "item": item},
+            {"type": "response.completed", "response": {
+                "id": response_id, "object": "response", "status": "completed",
+                "output": [item], "usage": {"input_tokens": 1, "output_tokens": 8, "total_tokens": 9}}},
+        ]
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Connection", "close")
+        self.end_headers()
+        try:
+            for event in events:
+                self.wfile.write(("event: " + event["type"] + "\ndata: " +
+                                  json.dumps(event, ensure_ascii=False) + "\n\n").encode())
+                self.wfile.flush()
+                time.sleep(self.server.delay)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            pass
+        self.close_connection = True
+
+
+class Side:
+    def __init__(self, value):
+        self.value = value
+
+    def snapshot(self):
+        return self.value
+
+
+@contextlib.contextmanager
+def fixture(port=0):
+    temp_parent = ROOT / ".agent-tmp"
+    temp_parent.mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="smoke-", dir=temp_parent) as directory:
+        work = Path(directory).resolve()
+        assert work.is_relative_to(temp_parent.resolve())
+        home = work / "codex-home"
+        home.mkdir()
+        model = ThreadingHTTPServer(("127.0.0.1", 0), MockModel)
+        model.daemon_threads = True
+        model.delay = .04
+        threading.Thread(target=model.serve_forever, daemon=True).start()
+        (home / "config.toml").write_text(
+            'model = "gpt-5"\nmodel_provider = "mock"\napproval_policy = "never"\n'
+            'sandbox_mode = "read-only"\n[features]\nplugins = false\napps = false\ncode_mode_host = false\n[model_providers.mock]\nname = "MA4 local test"\n'
+            'base_url = "http://127.0.0.1:%d/v1"\nwire_api = "responses"\n'
+            'requires_openai_auth = false\n' % model.server_port, encoding="utf-8", newline="\n")
+        with socket.socket() as free:
+            free.bind(("127.0.0.1", 0))
+            endpoint = "ws://127.0.0.1:%d" % free.getsockname()[1]
+        binary = find_codex()
+        with (work / "backend.log").open("w", encoding="utf-8", newline="\n") as log:
+            options = {"env": child_environment(binary, home), "stdin": subprocess.DEVNULL,
+                       "stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
+            if os.name == "nt":
+                options["creationflags"] = subprocess.CREATE_NO_WINDOW
+            process = subprocess.Popen([binary, "app-server", "--listen", endpoint], **options)
+            client = hub = web = None
+            try:
+                for _ in range(100):
+                    try:
+                        client = AppServer(endpoint, client_name="ma4_smoke_terminal")
+                        break
+                    except OSError:
+                        if process.poll() is not None:
+                            raise RuntimeError("test backend exited")
+                        time.sleep(.05)
+                if client is None:
+                    raise RuntimeError("test backend did not start")
+                hub = Hub(work / "state", binary, endpoint, poll_seconds=.1, codex_home=str(home))
+                hub.start()
+                wait_for(lambda: hub.daemon["connected"])
+                web = Server(("127.0.0.1", port), hub,
+                             Side({"families": [], "error": "测试未连接额度来源"}),
+                             Side([]), [{"name": "muQ", "url": "https://muq.koa-ol.com"}],
+                             runtime={"home": str(Path.home()), "defaultCwd": str(work), "platform": os.name})
+                threading.Thread(target=web.serve_forever, daemon=True).start()
+                opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                base = "http://127.0.0.1:%d" % web.server_port
+
+                def api(path, data=None):
+                    req = urllib.request.Request(base + path,
+                        data=json.dumps(data).encode() if data is not None else None,
+                        headers={"X-MA4-Request": "1", "Content-Type": "application/json"})
+                    try:
+                        with opener.open(req, timeout=15) as response:
+                            return json.load(response)
+                    except urllib.error.HTTPError as exc:
+                        raise AssertionError("HTTP " + str(exc.code) + " " + path + " " + exc.read().decode()) from exc
+
+                yield {"root": work, "home": home, "binary": binary, "endpoint": endpoint,
+                       "client": client, "hub": hub, "web": web, "model": model, "api": api, "url": base}
+            finally:
+                if web:
+                    web.shutdown()
+                    web.server_close()
+                if hub:
+                    hub.close()
+                if client:
+                    client.close()
+                process.terminate()
+                process.wait(timeout=10)
+                model.shutdown()
+                model.server_close()
+
+
+def checks(f):
+    api, client, hub = f["api"], f["client"], f["hub"]
+    # Empty new threads must remain visible until their first turn is persisted.
+    tid = api("/api/new", {"cwd": str(f["root"]), "text": ""})["threadId"]
+    wait_for(lambda: any(t["id"] == tid for t in api("/api/state")["threads"]))
+    assert api("/api/history?id=" + tid)["turns"] == []
+    first = api("/api/send", {"id": tid, "text": "离线端到端验证", "request_id": "smoke-first"})
+    wait_for(lambda: len(api("/api/history?id=" + tid)["turns"]) >= 1)
+    wait_for(lambda: api("/api/history?id=" + tid)["turns"][-1]["status"] == "completed")
+    assert api("/api/send", {"id": tid, "text": "离线端到端验证", "request_id": "smoke-first"}) == first
+    assert client.call("thread/resume", {"threadId": tid, "excludeTurns": True})["thread"]["id"] == tid
+
+    # A second client starts a turn; the real Hub gets deltas and completion.
+    since = hub.seq
+    notes = []
+    client.on_notification = lambda m, p: notes.append((m, p))
+    client.call("turn/start", {"threadId": tid, "input": [
+        {"type": "text", "text": "从第二个客户端发起", "text_elements": []}]})
+    wait_for(lambda: any(m == "turn/completed" for m, p in notes))
+    events = [e for seq, e in hub.events if seq > since]
+    assert any(e["kind"] == "delta" for e in events)
+    assert any(e["kind"] == "turn" and e["state"] == "completed" for e in events)
+    assert any(m == "item/agentMessage/delta" for m, p in notes)
+
+    # Send during an active turn -> steer, then interrupt that same turn.
+    f["model"].delay = .25
+    result = api("/api/send", {"id": tid, "text": "测试插话和中断", "request_id": "smoke-slow"})
+    steered = api("/api/send", {"id": tid, "text": "追加一条输入", "request_id": "smoke-steer"})
+    assert steered["mode"] == "steer", steered
+    assert steered["turnId"] == result["turnId"]
+    api("/api/interrupt", {"id": tid})
+    wait_for(lambda: api("/api/history?id=" + tid)["turns"][-1]["status"] == "interrupted")
+    f["model"].delay = .04
+    api("/api/rename", {"id": tid, "name": "Windows 接入验证 · 本机模拟回复"})
+    api("/api/pin", {"id": tid, "pinned": True})
+
+    # Disconnect/reconnect only the workbench. The separate client's thread stays loaded.
+    hub.client.close()
+    wait_for(lambda: hub.daemon["connected"] and hub.client is not None and not hub.client.closed)
+    assert tid in client.call("thread/loaded/list", {})["data"]
+    api("/api/send", {"id": tid, "text": "重连后继续", "request_id": "smoke-after-reconnect"})
+    wait_for(lambda: api("/api/history?id=" + tid)["turns"][-1]["status"] == "completed")
+
+    # Verify actual SSE serialization through the HTTP server.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    with opener.open(f["url"] + "/api/events?since=" + str(hub.seq), timeout=3) as stream:
+        hub.emit("smoke_check", threadId=tid)
+        line = stream.readline()
+        assert line.startswith(b"id:"), line
+        assert b"smoke_check" in stream.readline()
+
+    summary = {"result": "passed", "backend": client.info["userAgent"],
+               "tests": ["empty_thread", "http_send_history", "send_deduplication",
+                         "shared_stream", "steer", "interrupt", "rename_pin",
+                         "reconnect_preserves_backend", "http_sse"],
+               "model": "local mock; no external model calls"}
+    return tid, summary
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--serve", action="store_true")
+    parser.add_argument("--port", type=int, default=0)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    with fixture(args.port) as f:
+        tid, summary = checks(f)
+        print(json.dumps(summary, ensure_ascii=False, indent=2), flush=True)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+                                   encoding="utf-8", newline="\n")
+        if args.serve:
+            descriptor = ROOT / ".agent-tmp/ui-fixture.json"
+            stop = ROOT / ".agent-tmp/ui-fixture.stop"
+            if stop.exists():
+                stop.unlink()
+            descriptor.write_text(json.dumps({
+                "url": f["url"], "endpoint": f["endpoint"], "threadId": tid,
+                "codexHome": str(f["home"]), "binary": f["binary"],
+                "cwd": str(f["root"]), "ownerPid": os.getpid()},
+                ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
+            print("FIXTURE " + f["url"] + " · stop via .agent-tmp/ui-fixture.stop; max 20 minutes", flush=True)
+            deadline = time.monotonic() + 1200
+            try:
+                while not stop.exists() and time.monotonic() < deadline:
+                    time.sleep(.2)
+            finally:
+                descriptor.unlink(missing_ok=True)
+                stop.unlink(missing_ok=True)
+
+
+if __name__ == "__main__":
+    main()
+

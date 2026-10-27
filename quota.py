@@ -73,7 +73,7 @@ class QuotaPoller:
         self.stop = threading.Event()
         self.cache = {}
         try:
-            self.cache = json.loads((directory/'quota-cache.json').read_text())
+            self.cache = json.loads((directory/'quota-cache.json').read_text(encoding="utf-8"))
         except (OSError, ValueError):
             pass
         if 'families' not in self.cache:
@@ -83,7 +83,7 @@ class QuotaPoller:
             self.thread.start()
 
     def download(self):
-        source = json.loads(self.source_file.read_text())['url']
+        source = json.loads(self.source_file.read_text(encoding="utf-8"))['url']
         if not source.startswith('https://'):
             raise ValueError('HTTPS required')
         with urllib.request.urlopen(source, timeout=20) as response:
@@ -105,7 +105,7 @@ class QuotaPoller:
                 self.cache['error'] = '额度查询失败，保留上次结果'
         with self.lock:
             tmp = self.directory/'quota-cache.tmp'
-            tmp.write_text(json.dumps(self.cache, ensure_ascii=False)+'\n')
+            tmp.write_text(json.dumps(self.cache, ensure_ascii=False)+'\n', encoding='utf-8', newline='\n')
             tmp.replace(self.directory/'quota-cache.json')
 
     def snapshot(self):

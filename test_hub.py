@@ -1,6 +1,7 @@
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 from appserver import RpcError
 from hub import Hub, describe, normalize_item, permissions, status_of
@@ -115,6 +116,31 @@ class HubTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.hub.send("a", "   ", "req-3")
 
+    def test_writer_conflict_can_retry_without_switching_threads(self):
+        original_call = self.client.call
+        writer_active = True
+
+        def call(method, params, timeout=30):
+            if method == "thread/resume" and writer_active:
+                raise RpcError({"code": -32600,
+                                "message": "thread a already has an active writer"})
+            return original_call(method, params, timeout)
+
+        with patch.object(self.client, "call", side_effect=call) as rpc:
+            for _ in range(2):
+                with self.assertRaisesRegex(RpcError, "active writer"):
+                    self.hub.send("a", "retry me", "same-request")
+                self.assertNotIn("a", self.hub.subscribed)
+                self.assertNotIn("same-request", self.hub.sent)
+            self.assertEqual([c.args[0] for c in rpc.call_args_list],
+                             ["thread/resume", "thread/resume"])
+            writer_active = False
+            # No open(), refresh(), reconnect, or thread switch between attempts.
+            result = self.hub.send("a", "retry me", "same-request")
+            self.assertEqual(result, {"mode": "start", "turnId": "turn-new"})
+            self.assertEqual(self.hub.send("a", "retry me", "same-request"), result)
+            self.assertEqual(sum(m == "turn/start" for m, _ in self.client.calls), 1)
+
     def test_in_progress_turn_found_from_history(self):
         self.client.turns["a"] = [{"id": "t9", "status": "inProgress"}]
         self.assertEqual(self.hub.current_turn("a"), "t9")
@@ -124,6 +150,34 @@ class HubTest(unittest.TestCase):
     def test_fresh_thread_has_no_turns(self):
         self.assertIsNone(self.hub.current_turn("fresh"))
         self.assertEqual(self.hub.history("fresh"), {"turns": [], "older": None})
+
+    def test_new_empty_thread_survives_refresh_until_materialized(self):
+        tid = self.hub.new_thread(self.dir.name)["threadId"]
+        self.hub.refresh()
+        self.hub.refresh()
+        self.assertIn(tid, self.names())
+        self.client.threads = [thread(tid, name="persisted")]
+        self.hub.refresh()
+        self.assertEqual(self.names()[tid]["name"], "persisted")
+        self.assertNotIn(tid, self.hub.local_threads)
+
+    def test_transient_empty_rollout_is_retried_but_other_errors_are_not(self):
+        race = RpcError({"message": "rollout file is empty"})
+        denied = RpcError({"message": "access denied"})
+        params = {"threadId": "a"}
+        with patch.object(self.client, "call", side_effect=[race, {"data": []}]) as call, patch("hub.time.sleep") as sleep:
+            self.assertEqual(self.hub.read_turns(params), {"data": []})
+            self.assertEqual(call.call_count, 2)
+            sleep.assert_called_once_with(.05)
+        with patch.object(self.client, "call", side_effect=denied) as call, patch("hub.time.sleep") as sleep:
+            with self.assertRaises(RpcError):
+                self.hub.read_turns(params)
+            self.assertEqual(call.call_count, 1)
+            sleep.assert_not_called()
+        with patch.object(self.client, "call", side_effect=race) as call, patch("hub.time.sleep"):
+            with self.assertRaises(RpcError):
+                self.hub.read_turns(params)
+            self.assertEqual(call.call_count, 4)
 
     def test_approval_lifecycle(self):
         self.hub.on_request(5, "item/commandExecution/requestApproval",

@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -8,7 +10,7 @@ import threading
 import time
 import unittest
 
-from appserver import AppServer, Disconnected, RpcError
+from appserver import AppServer, Disconnected, RpcError, WebSocket
 
 
 def read_frame(conn, buffer):
@@ -43,18 +45,19 @@ def server_frame(opcode, payload, fin=True):
 
 
 class FakeDaemon:
-    """Unix-socket WebSocket peer that answers JSON-RPC calls with a script."""
+    """Loopback TCP WebSocket peer that answers JSON-RPC calls with a script."""
 
     def __init__(self, handler):
         self.dir = tempfile.TemporaryDirectory()
-        self.path = Path(self.dir.name) / "sock"
-        self.listener = socket.socket(socket.AF_UNIX)
-        self.listener.bind(str(self.path))
+        self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.listener.bind(("127.0.0.1", 0))
+        self.path = "ws://127.0.0.1:" + str(self.listener.getsockname()[1])
         self.listener.listen(1)
         self.handler = handler
         self.conn = None
         self.received = []
-        threading.Thread(target=self.serve, daemon=True).start()
+        self.worker = threading.Thread(target=self.serve, daemon=True)
+        self.worker.start()
 
     def send(self, obj, split=False):
         data = json.dumps(obj).encode()
@@ -69,7 +72,10 @@ class FakeDaemon:
         head = b""
         while b"\r\n\r\n" not in head:
             head += self.conn.recv(4096)
-        self.conn.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
+        key = next(line.split(b":", 1)[1].strip() for line in head.split(b"\r\n")
+                   if line.lower().startswith(b"sec-websocket-key:"))
+        accept = base64.b64encode(hashlib.sha1(key + b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest())
+        self.conn.sendall(b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: " + accept + b"\r\n\r\n")
         buffer = head.split(b"\r\n\r\n", 1)[1]
         try:
             while True:
@@ -85,8 +91,13 @@ class FakeDaemon:
 
     def close(self):
         if self.conn:
+            try:
+                self.conn.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
             self.conn.close()
         self.listener.close()
+        self.worker.join(timeout=2)
         self.dir.cleanup()
 
 
@@ -123,6 +134,8 @@ class AppServerTest(unittest.TestCase):
 
     def test_initialize_then_initialized(self):
         self.assertEqual(self.client.info, {"userAgent": "fake/1"})
+        initialize = next(m for m in self.daemon.received if m.get("method") == "initialize")
+        self.assertTrue(initialize["params"]["capabilities"]["experimentalApi"])
         self.wait(lambda: any(m.get("method") == "initialized" for m in self.daemon.received))
 
     def test_call_with_fragmented_reply_and_large_payload(self):

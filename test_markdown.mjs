@@ -36,3 +36,11 @@ test("local file links show the name only", () => {
   assert.ok(html.includes('<span class="file-ref" title="/mnt/e/PG/x/README.md">README.md</span>'));
   assert.ok(!html.includes("href="));
 });
+
+test("Windows and spaced local links stay inert and escaped", () => {
+  const html = renderMarkdown('[文档](<E:/中文 项目/README.md>) [x](C:\\Users\\a.txt)');
+  assert.ok(html.includes('title="E:/中文 项目/README.md"'));
+  assert.ok(html.includes('title="C:\\Users\\a.txt"'));
+  assert.ok(!html.includes('href='));
+  assert.ok(!renderMarkdown('[x](javascript:alert(1))').includes('href='));
+});

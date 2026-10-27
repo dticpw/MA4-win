@@ -14,7 +14,7 @@ function inline(text) {
   s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
     (_, label, url) => `<a href="${url}" target="_blank" rel="noopener">${label}</a>`);
   // Codex links local files as [name](/abs/path); show the name, keep the path in a tooltip.
-  s = s.replace(/\[([^\]]+)\]\((\/[^\s)]+)\)/g,
+  s = s.replace(/\[([^\]]+)\]\((?:&lt;)?((?:\/|[A-Za-z]:[\\/]|\\\\)[^\n)]*?)(?:&gt;)?\)/g,
     (_, label, path) => `<span class="file-ref" title="${path}">${label}</span>`);
   s = s.replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g,
     (_, pre, url) => `${pre}<a href="${url}" target="_blank" rel="noopener">${url}</a>`);

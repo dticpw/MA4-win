@@ -2,8 +2,11 @@ import http.client
 import json
 import threading
 import unittest
+from unittest.mock import Mock, patch
 
-from server import Server
+from appserver import RpcError
+
+from server import Handler, Server
 
 
 class FakeHub:
@@ -61,6 +64,41 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(self.request("POST", "/api/pin", headers, body)[0], 403)
         status, data = self.request("POST", "/api/pin", dict(headers, **{"X-MA4-Request": "1"}), body)
         self.assertEqual((status, json.loads(data)), (200, {"pinned": True}))
+
+    def test_windows_sse_disconnect_is_normal(self):
+        handler = object.__new__(Handler)
+        handler.send_response = Mock()
+        handler.send_header = Mock()
+        handler.end_headers = Mock()
+        handler.server = Mock()
+        handler.server.hub.events_after.return_value = []
+        handler.wfile = Mock()
+        handler.wfile.write.side_effect = ConnectionAbortedError(10053, "browser closed")
+        handler.stream(0)
+        self.assertTrue(handler.close_connection)
+        handler.wfile.write.assert_called_once_with(b": keep-alive\n\n")
+
+    def test_writer_conflict_is_actionable_and_other_rpc_errors_are_preserved(self):
+        cases = [
+            ("thread a already has an active writer", 409, "thread_in_use"),
+            ("model unavailable", 502, None),
+        ]
+        for message, expected_status, code in cases:
+            with self.subTest(message=message), patch.object(
+                    self.server.hub, "send", create=True,
+                    side_effect=RpcError({"code": -32600, "message": message})):
+                status, body = self.request(
+                    "POST", "/api/send", {"X-MA4-Request": "1"},
+                    json.dumps({"id": "a", "text": "hello", "request_id": "one"}))
+            data = json.loads(body)
+            self.assertEqual(status, expected_status)
+            self.assertEqual(data.get("code"), code)
+            if code:
+                self.assertIn("占用", data["error"])
+                self.assertIn("等待释放后重试", data["error"])
+                self.assertIn("在终端打开", data["error"])
+            else:
+                self.assertEqual(data["error"], "Codex：" + message)
 
     def test_unknown_paths(self):
         self.assertEqual(self.request("GET", "/../config.json")[0], 404)

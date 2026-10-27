@@ -4,7 +4,6 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
-import shutil
 import signal
 import threading
 from urllib.parse import parse_qs, urlsplit
@@ -13,36 +12,26 @@ from appserver import Disconnected, RpcError
 from health import HealthPoller
 from hub import Hub
 from quota import QuotaPoller
+from runtime import child_environment, find_codex, load_config, runtime_key
 
 ROOT = Path(__file__).resolve().parent
 WEB = ROOT / "web"
 DATA = ROOT / ".ma4"
 STATIC = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js",
-          "/markdown.js": "markdown.js", "/style.css": "style.css"}
+          "/markdown.js": "markdown.js", "/paths.js": "paths.js", "/style.css": "style.css",
+          "/ma4-icon.svg": "../deploy/ma4-icon.svg", "/favicon.ico": "../deploy/ma4-icon.ico"}
 TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
-         ".css": "text/css; charset=utf-8"}
-
-
-def find_codex(configured):
-    if configured:
-        return configured
-    found = shutil.which("codex")
-    if found:
-        return found
-    # Services do not load nvm; fall back to the newest nvm-installed CLI.
-    candidates = sorted(Path.home().glob(".nvm/versions/node/*/bin/codex"))
-    if candidates:
-        return str(candidates[-1])
-    raise SystemExit("找不到 codex 命令，请在 config.json 设置 codex_bin")
+         ".css": "text/css; charset=utf-8", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
 
 
 class Server(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, hub, quota, health, links, folds=()):
+    def __init__(self, address, hub, quota, health, links, folds=(), runtime=None):
         super().__init__(address, Handler)
         self.hub, self.quota, self.health, self.links = hub, quota, health, links
         self.folds = list(folds)
+        self.runtime = runtime or {}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -86,14 +75,19 @@ class Handler(BaseHTTPRequestHandler):
         if isinstance(exc, (ValueError, KeyError, TypeError)):
             return self.send(400, {"error": str(exc)})
         if isinstance(exc, RpcError):
+            if str(exc).startswith("thread ") and str(exc).endswith(" already has an active writer"):
+                return self.send(409, {
+                    "code": "thread_in_use",
+                    "error": "会话正被另一个 Codex 后台占用。请先在原 CLI/App 中退出该会话，等待释放后重试；"
+                             "如需与终端同时使用，请通过 MA4 的“在终端打开”连接共享后台。"})
             return self.send(502, {"error": "Codex：" + str(exc)})
         if isinstance(exc, (Disconnected, TimeoutError, OSError)):
-            return self.send(503, {"error": str(exc) or "Codex 守护进程不可用"})
+            return self.send(503, {"error": str(exc) or "Codex 共享后台不可用"})
         raise exc
 
     def side(self):
         return {"quota": self.server.quota.snapshot(), "health": self.server.health.snapshot(),
-                "links": self.server.links, "folds": self.server.folds}
+                "links": self.server.links, "folds": self.server.folds, "runtime": self.server.runtime}
 
     def do_GET(self):
         try:
@@ -165,25 +159,28 @@ class Handler(BaseHTTPRequestHandler):
                     self.wfile.write(("id: %d\ndata: %s\n\n" % (seq, json.dumps(event, ensure_ascii=False))).encode())
                     since = seq
                 self.wfile.flush()
-        except (BrokenPipeError, ConnectionResetError):
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             pass
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default=str(ROOT / "config.json"))
     parser.add_argument("--port", type=int)
-    args = parser.parse_args()
-    config = json.loads(Path(args.config).read_text(encoding="utf-8"))
+    args = parser.parse_args(argv)
+    config = load_config(args.config)
     codex = find_codex(config.get("codex_bin"))
-    # The npm wrapper runs through node; keep its directory on PATH for child processes.
-    os.environ["PATH"] = os.path.dirname(codex) + os.pathsep + os.environ.get("PATH", "")
-    hub = Hub(DATA, codex)
+    # Keep the selected binary and its bundled utilities available to child processes.
+    os.environ.update(child_environment(codex, config.get("codex_home")))
+    data = Path(config.get("data_dir") or DATA)
+    hub = Hub(data, codex, config["app_server"], codex_home=config.get("codex_home"))
     quota_source = Path(config["quota_source"]) if config.get("quota_source") else None
-    quota = QuotaPoller(DATA, source_file=quota_source)
+    quota = QuotaPoller(data, source_file=quota_source)
     health = HealthPoller(config.get("health", []))
     server = Server(("127.0.0.1", args.port or config.get("port", 8764)), hub, quota, health,
-                    config.get("links", []), config.get("folds", []))
+                    config.get("links", []), config.get("folds", []),
+                    runtime={"home": str(Path.home()), "defaultCwd": str(ROOT),
+                             "platform": os.name, "launchKey": runtime_key(config, args.config)})
     hub.start()
 
     def shutdown(signum, frame):

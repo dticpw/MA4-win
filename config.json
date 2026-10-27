@@ -23,13 +23,11 @@
   ],
   "folds": [
     {
-      "name": "MA3 执行任务",
-      "cwd_prefix": "/home/dticpw/PG_linux/MA3/runs/"
-    },
-    {
-      "name": "MA4-RPGO3dPixel",
-      "cwd_prefix": "/mnt/e/PG/RPGO3dPixel",
+      "name": "RPGO3dPixel",
+      "cwd_prefix": "E:/PG/RPGO3dPixel",
       "include_active": true
     }
-  ]
+  ],
+  "app_server": "ws://127.0.0.1:8765",
+  "codex_home": null
 }
