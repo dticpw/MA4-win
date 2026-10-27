@@ -1,24 +1,27 @@
 """MA4 HTTP server: static page, JSON API and an SSE event stream (127.0.0.1 only)."""
 import argparse
+from functools import partial
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
+import shutil
 import signal
 import threading
 from urllib.parse import parse_qs, urlsplit
 
-from appserver import Disconnected, RpcError
+from appserver import AppServer, Disconnected, RpcError
+from runtime import load_config, find_codex, child_environment, runtime_key
+from activity import ActivityPoller
 from health import HealthPoller
 from hub import Hub
 from quota import QuotaPoller
-from runtime import child_environment, find_codex, load_config, runtime_key
 
 ROOT = Path(__file__).resolve().parent
 WEB = ROOT / "web"
 DATA = ROOT / ".ma4"
 STATIC = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js",
-          "/markdown.js": "markdown.js", "/paths.js": "paths.js", "/style.css": "style.css",
+          "/markdown.js": "markdown.js", "/style.css": "style.css", "/controllers.js": "controllers.js", "/paths.js": "paths.js",
           "/ma4-icon.svg": "../deploy/ma4-icon.svg", "/favicon.ico": "../deploy/ma4-icon.ico"}
 TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
          ".css": "text/css; charset=utf-8", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
@@ -27,10 +30,11 @@ TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=u
 class Server(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, hub, quota, health, links, folds=(), runtime=None):
+    def __init__(self, address, hub, quota, health, links, folds=(), activity=None, runtime=None):
         super().__init__(address, Handler)
         self.hub, self.quota, self.health, self.links = hub, quota, health, links
         self.folds = list(folds)
+        self.activity = activity
         self.runtime = runtime or {}
 
 
@@ -76,18 +80,18 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(400, {"error": str(exc)})
         if isinstance(exc, RpcError):
             if str(exc).startswith("thread ") and str(exc).endswith(" already has an active writer"):
-                return self.send(409, {
-                    "code": "thread_in_use",
+                return self.send(409, {"code": "thread_in_use",
                     "error": "会话正被另一个 Codex 后台占用。请先在原 CLI/App 中退出该会话，等待释放后重试；"
                              "如需与终端同时使用，请通过 MA4 的“在终端打开”连接共享后台。"})
             return self.send(502, {"error": "Codex：" + str(exc)})
         if isinstance(exc, (Disconnected, TimeoutError, OSError)):
-            return self.send(503, {"error": str(exc) or "Codex 共享后台不可用"})
+            return self.send(503, {"error": str(exc) or "Codex 守护进程不可用"})
         raise exc
 
     def side(self):
         return {"quota": self.server.quota.snapshot(), "health": self.server.health.snapshot(),
-                "links": self.server.links, "folds": self.server.folds, "runtime": self.server.runtime}
+                "links": self.server.links, "folds": self.server.folds, "runtime": self.server.runtime,
+                "activity": self.server.activity.snapshot() if self.server.activity else []}
 
     def do_GET(self):
         try:
@@ -125,8 +129,16 @@ class Handler(BaseHTTPRequestHandler):
             hub = self.server.hub
             path = urlsplit(self.path).path
             actions = {
+                "/api/tasks/remove": lambda: hub.controllers.invoke("remove", **data),
+                "/api/tasks/create": lambda: hub.controllers.invoke("create", **data),
+                "/api/tasks/update": lambda: hub.controllers.invoke("update", **data),
+                "/api/tasks/confirm": lambda: hub.controllers.invoke("confirm", **data),
+                "/api/tasks/resume": lambda: hub.controllers.invoke("resume", **data),
+                "/api/tasks/pause": lambda: hub.controllers.invoke("pause", **data),
+                "/api/tasks/handoff": lambda: hub.controllers.invoke("handoff", **data),
+                "/api/tasks/artifacts": lambda: hub.controllers.invoke("artifacts", **data),
                 "/api/open": lambda: hub.open(data["id"]),
-                "/api/send": lambda: hub.send(data["id"], data.get("text"), str(data["request_id"])),
+                "/api/send": lambda: hub.send(data["id"], data.get("text"), str(data["request_id"]), skills=data.get("skills")),
                 "/api/interrupt": lambda: hub.interrupt(data["id"]),
                 "/api/command": lambda: hub.command(data["id"], data["name"], data.get("arg")),
                 "/api/new": lambda: hub.new_thread(data.get("cwd"), data.get("text")),
@@ -134,6 +146,7 @@ class Handler(BaseHTTPRequestHandler):
                 "/api/pin": lambda: hub.pin(data["id"], bool(data.get("pinned"))),
                 "/api/approval": lambda: hub.decide(data["key"], data.get("decision")),
                 "/api/terminal": lambda: hub.open_terminal(data["id"]),
+                "/api/file/open": lambda: hub.open_file(data["id"], data["path"]),
             }
             if path not in actions:
                 return self.send(404, {"error": "not found"})
@@ -170,17 +183,20 @@ def main(argv=None):
     args = parser.parse_args(argv)
     config = load_config(args.config)
     codex = find_codex(config.get("codex_bin"))
-    # Keep the selected binary and its bundled utilities available to child processes.
-    os.environ.update(child_environment(codex, config.get("codex_home")))
-    data = Path(config.get("data_dir") or DATA)
-    hub = Hub(data, codex, config["app_server"], codex_home=config.get("codex_home"))
+    # The npm wrapper runs through node; keep its directory on PATH for child processes.
+    os.environ["PATH"] = child_environment(codex)["PATH"]
+    data = Path(config["data_dir"])
+    hub = Hub(data, codex, config["app_server"], connect=partial(AppServer, codex_bin=codex),
+              auto_start_daemon=config.get("auto_start_daemon", True), codex_home=config.get("codex_home"))
     quota_source = Path(config["quota_source"]) if config.get("quota_source") else None
     quota = QuotaPoller(data, source_file=quota_source)
     health = HealthPoller(config.get("health", []))
+    activity = ActivityPoller(config.get("activity"))
     server = Server(("127.0.0.1", args.port or config.get("port", 8764)), hub, quota, health,
-                    config.get("links", []), config.get("folds", []),
-                    runtime={"home": str(Path.home()), "defaultCwd": str(ROOT),
-                             "platform": os.name, "launchKey": runtime_key(config, args.config)})
+                    config.get("links", []), config.get("folds", []), activity,
+                    runtime={"home": str(Path.home()), "defaultCwd": config["default_cwd"],
+                             "platform": "windows" if os.name == "nt" else "linux",
+                             "launchKey": runtime_key(config, args.config)})
     hub.start()
 
     def shutdown(signum, frame):
@@ -195,6 +211,7 @@ def main(argv=None):
         hub.close()
         quota.close()
         health.close()
+        activity.close()
         server.server_close()
 
 

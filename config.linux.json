@@ -1,0 +1,19 @@
+{
+  "app_server": "unix://",
+  "data_dir": "/home/dticpw/PG_linux/MA4/.ma4",
+  "activity": {
+    "credential_cli": "/mnt/c/Users/DTICPW/agent-workflows/skills/credential-vault/scripts/credential_vault.py",
+    "credential_file": "/mnt/e/PG/keys/credentials.md"
+  },
+  "folds": [
+    {
+      "name": "MA3 · 旧执行会话",
+      "cwd_prefix": "/home/dticpw/PG_linux/MA3/runs/"
+    },
+    {
+      "name": "RPGO3dPixel · 旧普通会话",
+      "cwd_prefix": "/mnt/e/PG/RPGO3dPixel",
+      "include_active": true
+    }
+  ]
+}

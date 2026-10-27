@@ -1,5 +1,6 @@
-import { isWithin, shortPath as displayPath } from "/paths.js";
+import { isWithin, shortPath as compactPath } from "/paths.js";
 import { renderMarkdown, escapeHtml } from "/markdown.js";
+import { createControllers, dynamicToolHtml, userMessageHtml } from "/controllers.js";
 
 const $ = (id) => document.getElementById(id);
 const state = {
@@ -8,22 +9,28 @@ const state = {
   daemon: {},
   side: {},
   current: null,      // selected thread id
+  openedThread: null, // metadata from /api/open, independent of list/SSE delivery order
   turn: null,         // in-progress turn id of the selected thread
   tokens: null,
   older: null,        // cursor for older history
   drafts: {},
+  skillDrafts: {},   // thread id -> attachments explicitly chosen for this draft
   seq: 0,
   skills: {},        // cwd -> skills
   override: null,    // {model, effort} chosen with /model for the selected thread
   filter: null,      // "waiting" | "running" | "unread" from the top counters
   flash: new Set(),  // thread ids whose status just changed
   counts: {},
+  sidebarView: "tasks",
   openFolds: new Set(), // fold groups the user expanded
   quotaSignature: null, // last rendered quota figures
 };
 
+const controllers = createControllers({ api, openThread, toast, refresh: loadState, current: () => state.current, home: () => state.side.runtime?.home || "" });
+
 // ---------- helpers ----------
-const shortPath = (p) => displayPath(p, state.side.runtime?.home);
+const shortPath = (p) => compactPath(p, state.side.runtime?.home || "");
+const defaultCwd = () => state.side.runtime?.defaultCwd || "";
 const title = (t) => t.name || t.preview || t.id.slice(0, 8);
 
 function ago(seconds) {
@@ -154,7 +161,7 @@ function threadRow(t) {
   const shown = ["running", "approval", "input", "unread", "error"].includes(key) ? label : "";
   const since = t.run && t.run.startedAt ? ` data-since="${t.run.startedAt}"` : "";
   const classes = ["thread", t.id === state.current ? "selected" : "", state.flash.has(t.id) ? "flash" : ""].join(" ");
-  return `<li class="${classes}" data-id="${t.id}" title="${label}">
+  return `<li class="${classes}" data-id="${t.id}" title="${label}" role="button" tabindex="0" aria-label="${escapeHtml(title(t))}，${label}">
     ${avatar(t)}
     <div class="thread-main">
       <div class="thread-title">${t.pinned ? "★ " : ""}${escapeHtml(title(t))}</div>
@@ -168,45 +175,34 @@ function threadRow(t) {
 }
 
 function renderThreads() {
-  const list = $("thread-list");
-  const searching = Boolean($("search").value.trim());
-  const folded = new Map();
-  let lastGroup = null;
-  const html = [];
-  for (const t of sortedThreads()) {
-    const fold = searching ? null : foldOf(t);
-    if (fold) {
-      if (!folded.has(fold.name)) folded.set(fold.name, []);
-      folded.get(fold.name).push(t);
-      continue;
-    }
-    const group = t.status === "approval" || t.status === "input" ? 0
-      : t.status === "running" ? 1 : t.unread ? 2 : t.pinned ? 3 : 4;
-    if (group !== lastGroup) {
-      html.push(`<li class="group">${GROUPS[group]}</li>`);
-      lastGroup = group;
-    }
-    html.push(threadRow(t));
+  const q = $("search").value.trim().toLowerCase();
+  const focused = document.activeElement;
+  const focusKey = $("thread-list").contains(focused) && ["data-id", "data-project", "data-task", "data-task-expand"].find((a) => focused.hasAttribute(a));
+  const focusValue = focusKey && focused.getAttribute(focusKey);
+  $("thread-list").innerHTML = controllers.tree(sortedThreads(), state.filter, q, threadRow, state.side.folds || [], state.sidebarView);
+  const counts = controllers.counts(state.threads);
+  for (const tab of document.querySelectorAll("[data-sidebar-view]")) {
+    const mode = tab.dataset.sidebarView, selected = mode === state.sidebarView;
+    tab.setAttribute("aria-selected", String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    tab.querySelector("span").textContent = counts[mode];
   }
-  for (const [name, members] of folded) {
-    const open = state.openFolds.has(name);
-    html.push(`<li class="fold${open ? " open" : ""}" data-fold="${escapeHtml(name)}" title="${open ? "收起" : "展开"}">
-      <span class="fold-arrow">›</span><span class="fold-name">${escapeHtml(name)}</span>${foldBadges(members)}<span class="fold-count">${members.length}</span>
-    </li>`);
-    if (open) html.push(...members.map(threadRow));
-  }
-  list.innerHTML = html.join("") || `<li class="group">${state.filter ? "这一类现在没有会话" : "没有会话"}</li>`;
+  $("session-panel").setAttribute("aria-labelledby", "tab-" + state.sidebarView);
+  $("search").placeholder = state.sidebarView === "tasks" ? "搜索中控任务 / 项目" : "搜索普通会话 / 目录";
+  if (focusKey) $("thread-list").querySelector(`[${focusKey}="${CSS.escape(focusValue)}"]`)?.focus({ preventScroll: true });
   state.flash.clear();
   $("filter-bar").hidden = !state.filter;
   $("filter-label").textContent = FILTERS[state.filter]?.label || "";
   renderCounters();
   renderHeader();
+  controllers.renderPanel();
   if (!state.current) renderWelcome();
 }
 
 function renderCounters() {
   const waiting = state.threads.filter((t) => t.status === "approval" || t.status === "input").length
-    + state.approvals.filter((a) => !state.threads.some((t) => t.id === a.threadId && t.status === "approval")).length;
+    + state.approvals.filter((a) => !state.threads.some((t) => t.id === a.threadId && t.status === "approval")).length
+    + controllers.attentionCount(state.threads);
   const running = state.threads.filter((t) => t.status === "running").length;
   const unread = state.threads.filter((t) => t.unread).length;
   for (const [key, value] of Object.entries({ waiting, running, unread })) {
@@ -274,11 +270,20 @@ function goHome() {
 }
 
 // ---------- conversation ----------
-const currentThread = () => state.threads.find((t) => t.id === state.current);
+const currentThread = () => state.threads.find((t) => t.id === state.current)
+  || (state.openedThread?.id === state.current ? state.openedThread : null);
 
 function renderHeader() {
   const t = currentThread();
-  if (!t) return;
+  $("rename").disabled = $("pin").disabled = !t;
+  if (!t) {
+    $("rename").textContent = "读取会话中…";
+    $("chat-meta").textContent = "";
+    $("interrupt").hidden = $("live-status").hidden = true;
+    $("send").textContent = "发送";
+    $("composer-hint").textContent = "会话信息正在读取";
+    return;
+  }
   $("rename").textContent = title(t);
   $("chat-avatar").outerHTML = avatar(t, true).replace('class="avatar big"', 'id="chat-avatar" class="avatar big"');
   const chips = [];
@@ -302,7 +307,7 @@ function renderHeader() {
   $("interrupt").hidden = !running;
   $("send").textContent = running ? "插话" : "发送";
   $("composer-hint").textContent = t.status === "offline"
-    ? "当前仅查看历史；发送时会尝试接入，其他后台占用时需先释放" : running ? "Agent 正在工作，消息会插入当前回合" : "";
+    ? "这个会话未载入，发送时会先载入（不会重复启动）" : running ? "Agent 正在工作，消息会插入当前回合" : "";
   const live = $("live-status");
   live.hidden = !running;
   live.textContent = liveText(t);
@@ -330,7 +335,7 @@ function itemHtml(item) {
   const id = escapeHtml(item.id || "");
   switch (item.type) {
     case "userMessage":
-      return `<div class="msg user" data-item="${id}"><div class="bubble">${escapeHtml(item.text || "").replace(/\n/g, "<br>")}</div></div>`;
+      return userMessageHtml(item);
     case "agentMessage":
       return `<div class="msg agent" data-item="${id}"><div class="md">${renderMarkdown(item.text || "")}</div></div>`;
     case "reasoning":
@@ -346,8 +351,9 @@ function itemHtml(item) {
       const diffs = (item.changes || []).map((c) => `# ${c.path}\n${c.diff || ""}`).join("\n\n");
       return `<details class="tool" data-item="${id}"><summary><span class="tool-kind">改文件</span>${escapeHtml(paths)}</summary><pre class="diff">${escapeHtml(diffs)}</pre></details>`;
     }
-    case "mcpToolCall":
     case "dynamicToolCall":
+      return dynamicToolHtml(item);
+    case "mcpToolCall":
     case "collabAgentToolCall":
     case "subAgentActivity":
       return `<div class="tool line" data-item="${id}"><span class="tool-kind">工具</span>${escapeHtml(item.tool || item.type)}${item.error ? ` · <span class="failed">${escapeHtml(item.error)}</span>` : ""}</div>`;
@@ -394,6 +400,12 @@ function scrollBottom() {
 async function openThread(id) {
   if (state.current) state.drafts[state.current] = $("input").value;
   state.current = id;
+  palette.open = false; palette.request++;
+  renderPalette();
+  renderSkillSelection();
+  state.openedThread = state.threads.find((t) => t.id === id) || null;
+  state.sidebarView = controllers.taskFor(id) ? "tasks" : "sessions";
+  try { localStorage.setItem("ma4-sidebar-view", state.sidebarView); } catch { /* optional preference */ }
   window.history.replaceState(null, "", "#" + id);
   state.turn = null;
   state.tokens = null;
@@ -407,6 +419,7 @@ async function openThread(id) {
   try {
     const [opened, history] = await Promise.all([api("/api/open", { id }), api(`/api/history?id=${id}`)]);
     if (state.current !== id) return;
+    state.openedThread = opened.thread || state.openedThread;
     state.turn = opened.turn;
     state.tokens = opened.tokens;
     state.override = opened.override;
@@ -416,6 +429,7 @@ async function openThread(id) {
     renderHeader();
     scrollBottom();
   } catch (error) {
+    if (state.current !== id) return;
     $("turns").innerHTML = `<div class="loading failed">${escapeHtml(error.message)}</div>`;
   }
 }
@@ -475,11 +489,9 @@ function appendDelta(itemId, delta) {
 
 async function send(event) {
   event.preventDefault();
-  if (palette.open) {
-    if (event.submitter !== $("send")) return;
-    palette.open = false;
-    renderPalette();
-  }
+  if ($("send").disabled || $("input").disabled) return;
+  palette.open = false; palette.request++; renderPalette();
+  const originalText = $("input").value;
   let text = $("input").value;
   if (!text.trim() || !state.current) return;
   if (text.startsWith("//")) {
@@ -489,22 +501,40 @@ async function send(event) {
     return;
   }
   const id = state.current;
+  const selectedSkills = state.skillDrafts[id] || [];
   const requestId = crypto.randomUUID();
+  const pendingId = "pending-" + requestId;
   $("send").disabled = true;
-  $("turns").insertAdjacentHTML("beforeend",
-    `<div class="msg user pending fresh"><div class="bubble">${escapeHtml(text).replace(/\n/g, "<br>")}</div></div>`);
+  $("send").dataset.pending = "true";
+  $("turns").insertAdjacentHTML("beforeend", userMessageHtml({ id: pendingId, text,
+    attachments: selectedSkills.map((s) => ({ type: "skill", ...s })) }));
+  const pending = document.querySelector(`[data-item="${pendingId}"]`);
+  pending.classList.add("pending", "fresh");
+  pending.querySelector(".message-source").textContent = "你的消息 · 发送中";
   scrollBottom();
   try {
-    const result = await api("/api/send", { id, text, request_id: requestId });
+    const result = await api("/api/send", { id, text, skills: selectedSkills, request_id: requestId });
     if (state.current === id && result.turnId) state.turn = result.turnId;
-    $("input").value = "";
-    state.drafts[id] = "";
+    if (state.current === id && $("input").value === originalText) {
+      $("input").value = ""; state.drafts[id] = "";
+    } else if (state.current !== id && state.drafts[id] === originalText) state.drafts[id] = "";
+    if (state.skillDrafts[id] === selectedSkills) state.skillDrafts[id] = [];
+    renderSkillSelection();
   } catch (error) {
-    document.querySelector(".msg.user.pending")?.remove();
+    document.querySelector(`[data-item="${pendingId}"]`)?.remove();
     toast("发送失败：" + error.message, true);
   } finally {
+    $("send").dataset.pending = "false";
     $("send").disabled = false;
+    controllers.renderPanel();
   }
+}
+
+function renderSkillSelection() {
+  const skills = state.skillDrafts[state.current] || [];
+  const box = $("composer-skills");
+  box.hidden = !skills.length;
+  box.innerHTML = '<span>本条附加：</span>' + skills.map((s) => `<button type="button" class="ghost small" data-remove-skill="${escapeHtml(s.path)}" aria-label="移除 Skill ${escapeHtml(s.name)}">${escapeHtml(s.name)} ×</button>`).join("");
 }
 
 // ---------- slash commands & $skills ----------
@@ -514,7 +544,7 @@ const COMMANDS = [
   { name: "model", args: "[模型] [思考深度]", text: "查看或切换模型与思考深度（下一轮起）" },
   { name: "review", args: "[分支]", text: "审查未提交的改动，或与某分支的差异" },
   { name: "stop", args: "", text: "中断当前回合" },
-  { name: "new", args: "[目录]", text: "新建会话（默认同目录）" },
+  { name: "new", args: "[目录]", text: "新建会话（默认 ~/codex）" },
   { name: "status", args: "", text: "显示会话信息" },
   { name: "skills", args: "", text: "列出可用 Skill（输入 $ 也能选）" },
   { name: "help", args: "", text: "列出所有命令" },
@@ -535,6 +565,10 @@ async function listSkills() {
 async function runCommand(line) {
   const [, name, arg = ""] = line.match(/^\/(\S+)\s*([\s\S]*)$/);
   const t = currentThread();
+  if (!t) {
+    toast("会话信息尚未载入，请稍后重试；若读取失败，请重新打开该会话。", true);
+    return;
+  }
   const clear = () => { $("input").value = ""; state.drafts[t.id] = ""; };
   const known = COMMANDS.find((c) => c.name === name);
   if (!known) {
@@ -545,6 +579,8 @@ async function runCommand(line) {
     if (name === "help") {
       note("可用命令：<br>" + COMMANDS.map((c) => `<code>/${c.name}${c.args ? " " + c.args : ""}</code> ${c.text}`).join("<br>")
         + "<br>以 <code>//</code> 开头会把 / 当普通文字发送。");
+    } else if (name === "rename" && !arg.trim()) {
+      if (!await renameCurrentThread()) return;
     } else if (name === "status") {
       const tokens = state.tokens?.used ? `${kTokens(state.tokens.used)} / ${kTokens(state.tokens.window || 0)}` : "本页还没收到用量";
       note([`会话：${escapeHtml(title(t))}（<code>${t.id}</code>）`, `目录：${escapeHtml(t.cwd)}`,
@@ -554,11 +590,11 @@ async function runCommand(line) {
         `上下文：${tokens}`].filter(Boolean).join("<br>"));
     } else if (name === "skills") {
       const skills = await listSkills();
-      note(`这个目录可用的 Skill（发送时写 <code>$名称</code> 会作为 Skill 调用）：<br>`
+      note(`这个目录可用的 Skill。点「＋ Skill 附件」或在 <code>$</code> 菜单中主动选择才会附加；只输入或粘贴名称不会自动附加：<br>`
         + skills.map((k) => `<code>$${escapeHtml(k.name)}</code> ${escapeHtml(k.description.slice(0, 60))}`).join("<br>"));
     } else if (name === "new") {
       $("new-error").textContent = "";
-      $("new-cwd").value = arg.trim() || t.cwd;
+      $("new-cwd").value = arg.trim() || defaultCwd();
       $("new-dialog").showModal();
     } else if (name === "model" && !arg.trim()) {
       const { models } = await api("/api/models");
@@ -577,28 +613,45 @@ async function runCommand(line) {
   }
 }
 
-// Popup above the composer: "/" at the start lists commands, "$word" lists skills.
-const palette = { open: false, items: [], index: 0, start: 0 };
+async function renameCurrentThread() {
+  const t = currentThread();
+  if (!t) return false;
+  const name = prompt("会话名称", title(t));
+  if (!name?.trim()) return false;
+  await api("/api/rename", { id: t.id, name });
+  return true;
+}
 
-async function updatePalette() {
+// Popup above the composer: "/" at the start lists commands, "$word" lists skills.
+const palette = { open: false, items: [], index: 0, start: 0, request: 0, origin: null };
+
+async function updatePalette(forceSkills = false) {
   const input = $("input");
+  if (!state.current || input.disabled) return;
+  const request = ++palette.request;
+  palette.open = false; renderPalette();
+  const origin = { id: state.current, value: input.value, caret: input.selectionStart };
   const before = input.value.slice(0, input.selectionStart);
-  let items = [];
+  let items = [], start = input.selectionStart;
   const command = before.match(/^\/(\S*)$/);
   const skill = before.match(/(?:^|\s)\$([\w:-]*)$/);
-  if (command) {
-    palette.start = 0;
+  if (command && !forceSkills) {
+    start = 0;
     items = COMMANDS.filter((c) => c.name.startsWith(command[1]))
       .map((c) => ({ insert: `/${c.name}${c.args ? " " : ""}`, label: `/${c.name}`, hint: `${c.args} ${c.text}`.trim() }));
-  } else if (skill) {
-    palette.start = before.length - skill[1].length - 1;
-    const q = skill[1].toLowerCase();
+  } else if (skill || forceSkills) {
+    start = skill && !forceSkills ? before.length - skill[1].length - 1 : input.selectionStart;
+    const q = skill && !forceSkills ? skill[1].toLowerCase() : "";
     items = (await listSkills().catch(() => []))
       .filter((k) => k.name.toLowerCase().includes(q))
-      .map((k) => ({ insert: `$${k.name} `, label: `$${k.name}`, hint: k.description.slice(0, 50) }));
+      .map((k) => ({ insert: "", skill: { name: k.name, path: k.path }, label: k.name, hint: k.description.slice(0, 50) }));
   }
-  palette.items = items.slice(0, 12);
-  palette.index = 0;
+  if (request !== palette.request || state.current !== origin.id || input.value !== origin.value || input.selectionStart !== origin.caret) return;
+  palette.start = start; palette.origin = origin;
+  palette.items = forceSkills ? items : items.slice(0, 12);
+  // Typing/pasting a name is not a selection. Enter sends unless the user
+  // deliberately highlights a skill with an arrow key (or clicks / tabs).
+  palette.index = items[0]?.skill ? -1 : 0;
   palette.open = palette.items.length > 0;
   renderPalette();
 }
@@ -606,40 +659,58 @@ async function updatePalette() {
 function renderPalette() {
   const box = $("palette");
   box.hidden = !palette.open;
-  box.innerHTML = palette.items.map((item, i) =>
-    `<li class="${i === palette.index ? "active" : ""}" data-index="${i}"><b>${escapeHtml(item.label)}</b><span>${escapeHtml(item.hint)}</span></li>`).join("");
+  $("choose-skill").setAttribute("aria-expanded", String(palette.open && Boolean(palette.items[0]?.skill)));
+  $("input").setAttribute("aria-expanded", String(palette.open));
+  if (palette.open && palette.index >= 0) $("input").setAttribute("aria-activedescendant", `palette-option-${palette.index}`);
+  else $("input").removeAttribute("aria-activedescendant");
+  box.innerHTML = (palette.items[0]?.skill ? '<li class="palette-help" role="presentation">点击或 ↓ 后 Enter 选择 · 未选择时 Enter 发送原文</li>' : "") + palette.items.map((item, i) =>
+    `<li id="palette-option-${i}" role="option" aria-selected="${i === palette.index}" class="${i === palette.index ? "active" : ""}" data-index="${i}"><b>${escapeHtml(item.label)}</b><span>${escapeHtml(item.hint)}</span></li>`).join("");
   box.querySelector(".active")?.scrollIntoView({ block: "nearest" });
 }
 
 function choosePalette(i) {
   const item = palette.items[i];
   const input = $("input");
+  if (!item || palette.origin?.id !== state.current || palette.origin?.value !== input.value || palette.origin?.caret !== input.selectionStart) return;
+  if (item.skill) {
+    const selected = state.skillDrafts[state.current] || [];
+    if (!selected.some((s) => s.path === item.skill.path)) {
+      if (selected.length >= 20) return toast("每条消息最多附加 20 个 Skill", true);
+      state.skillDrafts[state.current] = [...selected, item.skill];
+    }
+    renderSkillSelection();
+  }
   const after = input.value.slice(input.selectionStart);
   input.value = input.value.slice(0, palette.start) + item.insert + after;
   const caret = palette.start + item.insert.length;
   input.setSelectionRange(caret, caret);
-  palette.open = false;
+  palette.open = false; palette.request++;
   renderPalette();
   input.focus();
 }
 
 function paletteKeys(e) {
+  if (e.isComposing || (["Enter", "Tab"].includes(e.key) && e.shiftKey)) return false;
+  if (e.key === "Escape") {
+    palette.open = false; palette.request++; renderPalette();
+    return false;
+  }
   if (!palette.open) return false;
   if (e.key === "ArrowDown" || e.key === "ArrowUp") {
     const step = e.key === "ArrowDown" ? 1 : -1;
-    palette.index = (palette.index + step + palette.items.length) % palette.items.length;
+    palette.index = palette.index < 0 ? (step > 0 ? 0 : palette.items.length - 1)
+      : (palette.index + step + palette.items.length) % palette.items.length;
     renderPalette();
-  } else if (e.key === "Enter" && !e.isComposing
+  } else if (e.key === "Enter" && palette.index < 0) {
+    return false;
+  } else if (e.key === "Enter" && !e.isComposing && !palette.items[palette.index]?.skill
       && palette.items[palette.index].insert.trim() === $("input").value.trim()) {
     // Already fully typed (e.g. "/compact"): run it instead of re-inserting.
     palette.open = false;
     renderPalette();
     $("composer").requestSubmit();
   } else if (e.key === "Tab" || (e.key === "Enter" && !e.isComposing)) {
-    choosePalette(palette.index);
-  } else if (e.key === "Escape") {
-    palette.open = false;
-    renderPalette();
+    choosePalette(Math.max(0, palette.index));
   } else {
     return false;
   }
@@ -690,6 +761,51 @@ function renderSide() {
     renderQuota(q, families);
   }
   renderSites();
+  renderActivity();
+}
+
+let activitySignature = null;
+function activityTime(seconds) {
+  return seconds ? new Date(seconds * 1000).toLocaleTimeString("zh-CN", { hour12: false }) : "";
+}
+
+function renderActivity() {
+  const rows = state.side.activity || [];
+  $("activity-card").hidden = !rows.length;
+  const signature = JSON.stringify(rows);
+  if (signature !== activitySignature) {
+    activitySignature = signature;
+    const focused = document.activeElement?.dataset.activity === "chat";
+    $("service-activity").innerHTML = rows.map((row) => {
+      const ready = !row.stale && Number.isInteger(row.count) && row.count >= 0;
+      const number = ready ? row.count : "—";
+      const detail = row.error || (row.fetched_at ? row.stale ? "数据已过期" : `${activityTime(row.fetched_at)} 更新` : "查询中…");
+      const content = `<span><span class="activity-name">${escapeHtml(row.label)}</span><span class="activity-metric">${escapeHtml(row.metric)}</span></span>
+        <span class="activity-value">${number}${row.key === "chat" ? '<span class="activity-arrow" aria-hidden="true">›</span>' : ""}</span>`;
+      const summary = row.key === "chat"
+        ? `<button class="activity-summary" data-activity="chat" aria-haspopup="dialog" ${ready ? "" : "disabled"} aria-label="Chat / 代理，近 5 分钟活跃 IP ${ready ? number + ' 个，查看详情' : '未知'}">${content}</button>`
+        : `<div class="activity-summary">${content}</div>`;
+      return `<div class="activity-service${ready ? "" : " unavailable"}">${summary}<p class="activity-updated">${escapeHtml(detail)}</p></div>`;
+    }).join("");
+    if (focused) $("service-activity").querySelector("[data-activity='chat']")?.focus({ preventScroll: true });
+    if ($("activity-dialog").open) renderActivityDetails();
+  }
+}
+
+function renderActivityDetails() {
+  const row = (state.side.activity || []).find((r) => r.key === "chat");
+  const ready = row && !row.stale && Number.isInteger(row.count);
+  $("activity-detail-status").textContent = ready
+    ? `${row.count} 个活跃 IP · ${activityTime(row.fetched_at)} 更新${row.truncated ? ' · 仅列出最近 200 个' : ''}`
+    : "查询失败或数据已过期，暂无法确认。";
+  const container = $("activity-visitors"), scroll = container.scrollTop;
+  container.innerHTML = !ready ? "" : (row.visitors || []).map((v) => {
+    const parts = [...new Set([v.country, v.region, v.city].filter((s) => s && s !== "XX"))];
+    if (!v.city) parts.push("城市未记录");
+    return `<article class="activity-visitor"><strong>${escapeHtml(v.ip)}</strong><span>${escapeHtml(parts.join(" · "))}</span>
+      <small>最后调用 ${activityTime(v.last_seen)} · ${v.requests} 次调用</small></article>`;
+  }).join("") || '<p class="hint">最近 5 分钟没有调用记录。</p>';
+  container.scrollTop = scroll;
 }
 
 function renderQuota(q, families) {
@@ -722,7 +838,7 @@ function renderDaemon() {
   const el = $("daemon");
   const ok = state.daemon.connected;
   el.className = "daemon " + (ok ? "ok" : "bad");
-  el.textContent = ok ? "共享后台已连接" : "共享后台未连接";
+  el.textContent = ok ? "守护进程已连接" : "守护进程未连接";
   el.title = state.daemon.error || state.daemon.version || "";
 }
 
@@ -746,6 +862,7 @@ function setupNotifyToggle() {
 function applyThreads(threads) {
   const before = new Map(state.threads.map((t) => [t.id, t]));
   state.threads = threads;
+  state.openedThread = threads.find((t) => t.id === state.current) || state.openedThread;
   for (const t of threads) {
     const old = before.get(t.id);
     if (!old) continue;
@@ -762,8 +879,15 @@ function applyThreads(threads) {
 // ---------- events ----------
 function handle(event) {
   switch (event.kind) {
+    case "controllers":
+      controllers.setData(event.controllers);
+      renderThreads();
+      break;
     case "threads":
       applyThreads(event.threads);
+      break;
+    case "history":
+      if (event.threadId === state.current) openThread(event.threadId);
       break;
     case "approvals":
       state.approvals = event.approvals;
@@ -809,11 +933,13 @@ function handle(event) {
 
 async function loadState() {
   const data = await api("/api/state");
+  controllers.setData(data.controllers);
   state.seq = data.seq;
   state.approvals = data.approvals;
   state.daemon = data.daemon;
   state.side = data.side;
   state.threads = data.threads;
+  state.openedThread = data.threads.find((t) => t.id === state.current) || state.openedThread;
   renderThreads();
   renderApprovals();
   renderDaemon();
@@ -859,6 +985,21 @@ function savedTheme() {
 
 // ---------- wiring ----------
 function wire() {
+  controllers.wire();
+  try { if (localStorage.getItem("ma4-sidebar-view") === "sessions") state.sidebarView = "sessions"; } catch { /* first visit */ }
+  $("session-tabs").addEventListener("click", (e) => {
+    const tab = e.target.closest("[data-sidebar-view]");
+    if (!tab) return;
+    state.sidebarView = tab.dataset.sidebarView;
+    try { localStorage.setItem("ma4-sidebar-view", state.sidebarView); } catch { /* optional preference */ }
+    renderThreads();
+  });
+  $("session-tabs").addEventListener("keydown", (e) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    e.preventDefault();
+    const mode = e.key === "Home" ? "tasks" : e.key === "End" ? "sessions" : state.sidebarView === "tasks" ? "sessions" : "tasks";
+    $("tab-" + mode).click(); $("tab-" + mode).focus();
+  });
   applyTheme(savedTheme());
   $("theme-toggle").addEventListener("click", () => {
     const current = document.documentElement.dataset.theme || "auto";
@@ -893,12 +1034,36 @@ function wire() {
     const row = e.target.closest(".thread");
     if (row) openThread(row.dataset.id);
   });
+  $("thread-list").addEventListener("keydown", (e) => {
+    const row = e.target.closest(".thread");
+    if (row && ["Enter", " "].includes(e.key)) { e.preventDefault(); openThread(row.dataset.id); }
+  });
   $("composer").addEventListener("submit", send);
   $("input").addEventListener("input", () => updatePalette());
-  $("input").addEventListener("blur", () => setTimeout(() => { palette.open = false; renderPalette(); }, 150));
+  $("choose-skill").addEventListener("click", () => {
+    if ($("input").disabled) return;
+    $("input").focus();
+    if (palette.open && palette.items[0]?.skill) {
+      palette.open = false; palette.request++; renderPalette();
+    } else updatePalette(true);
+  });
+  $("composer-skills").addEventListener("click", (e) => {
+    const button = e.target.closest("[data-remove-skill]");
+    if (!button) return;
+    state.skillDrafts[state.current] = (state.skillDrafts[state.current] || []).filter((s) => s.path !== button.dataset.removeSkill);
+    renderSkillSelection();
+    $("input").focus();
+  });
+  $("composer").addEventListener("focusout", () => setTimeout(() => {
+    if (document.activeElement === $("input") || document.activeElement === $("choose-skill")) return;
+    palette.open = false; palette.request++; renderPalette();
+  }, 150));
   $("palette").addEventListener("mousedown", (e) => {
-    const row = e.target.closest("li");
-    if (row) { e.preventDefault(); choosePalette(Number(row.dataset.index)); }
+    if (e.target.closest("[data-index]")) e.preventDefault();
+  });
+  $("palette").addEventListener("click", (e) => {
+    const row = e.target.closest("[data-index]");
+    if (row) choosePalette(Number(row.dataset.index));
   });
   $("input").addEventListener("keydown", (e) => {
     if (paletteKeys(e)) return;
@@ -908,13 +1073,10 @@ function wire() {
     }
   });
   $("older").addEventListener("click", () => loadOlder().catch((e) => toast(e.message, true)));
-  $("rename").addEventListener("click", async () => {
-    const t = currentThread();
-    const name = prompt("会话名称", title(t));
-    if (name && name.trim()) await api("/api/rename", { id: t.id, name }).catch((e) => toast(e.message, true));
-  });
+  $("rename").addEventListener("click", () => renameCurrentThread().catch((e) => toast(e.message, true)));
   $("pin").addEventListener("click", () => {
     const t = currentThread();
+    if (!t) return;
     api("/api/pin", { id: t.id, pinned: !t.pinned }).catch((e) => toast(e.message, true));
   });
   $("terminal").addEventListener("click", () =>
@@ -932,6 +1094,15 @@ function wire() {
     if (open && open.dataset.open) openThread(open.dataset.open);
   });
   $("messages").addEventListener("click", (e) => {
+    const file = e.target.closest(".file-ref[data-file-path]");
+    if (file) {
+      file.disabled = true;
+      api("/api/file/open", { id: state.current, path: file.dataset.filePath })
+        .then(() => toast("已交给系统默认应用打开"))
+        .catch((err) => toast("打开失败：" + err.message, true))
+        .finally(() => { file.disabled = false; });
+      return;
+    }
     const copy = e.target.closest(".copy");
     if (!copy) return;
     navigator.clipboard.writeText(copy.nextElementSibling.textContent)
@@ -940,7 +1111,7 @@ function wire() {
   });
   $("new-thread").addEventListener("click", () => {
     $("new-error").textContent = "";
-    $("new-cwd").value = currentThread()?.cwd || state.side.runtime?.defaultCwd || "";
+    $("new-cwd").value = defaultCwd();
     $("new-dialog").showModal();
   });
   $("new-submit").addEventListener("click", async () => {
@@ -959,7 +1130,15 @@ function wire() {
       $("new-submit").disabled = false;
     }
   });
-  setInterval(() => api("/api/side").then((side) => { state.side = side; renderSide(); }).catch(() => {}), 60000);
+  $("service-activity").addEventListener("click", (event) => {
+    if (!event.target.closest("[data-activity='chat']")) return;
+    renderActivityDetails();
+    $("activity-dialog").showModal();
+  });
+  setInterval(() => api("/api/side").then((side) => { state.side = side; renderSide(); }).catch(() => {
+    for (const row of state.side.activity || []) { row.stale = true; row.error = "MA4 连接中断，暂无法确认"; }
+    renderActivity();
+  }), 15000);
   setInterval(renderThreads, 60000); // keep "n 分钟前" fresh
   setInterval(tick, 1000);
 }

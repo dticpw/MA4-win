@@ -1,0 +1,383 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="description" content="以一张连贯架构大图理解 MA4：网页消息、HTTP/SSE、Hub、Codex 通信、中控扩展与数据归属。离线 SVG，可缩放与导出。"><title>看懂 MA4 · 架构大图与消息旅程</title><style>
+:root{--bg:#f0f2f9;--ink:#20283f;--muted:#52617c;--line:#d6dceb;--blue:#4254cb;--amber:#8b561b}*{box-sizing:border-box}html{scroll-padding-top:100px}body{margin:0;color:var(--ink);background:radial-gradient(ellipse at 8% 0%,#dfe5ff 0,transparent 25%),var(--bg);font:16px/1.8 system-ui,-apple-system,"Noto Sans CJK SC","Microsoft YaHei",sans-serif}a{color:var(--blue);text-underline-offset:4px}button{font:inherit;cursor:pointer;color:inherit}button:disabled{opacity:.45;cursor:default}a:focus-visible,button:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #4254cb;outline-offset:3px}[hidden]{display:none!important}h1,h2,h3{line-height:1.35;margin:0 0 16px}h1{font-size:clamp(32px,4.4vw,57px);letter-spacing:-.04em}h2{font-size:27px}h3{font-size:20px}p{margin:0 0 16px}li+li{margin-top:8px}code{font: .9em/1.6 ui-monospace,Consolas,monospace;background:#28375d08;padding:2px 4px;border-radius:4px;overflow-wrap:anywhere}main{max-width:1480px;margin:auto;padding:0 32px 60px;min-width:0}.skip{position:fixed;top:8px;left:15px;z-index:100;background:white;padding:10px;transform:translateY(-200%)}.skip:focus{transform:none}.topbar{position:sticky;top:0;z-index:20;background:#f4f5fbf5;border-bottom:1px solid var(--line)}.topbar-inner{max-width:1480px;margin:auto;padding:10px 32px;display:flex;gap:20px;align-items:center;justify-content:space-between}.brand{font-weight:700;text-decoration:none;color:var(--ink)}.top-links{display:flex;gap:20px;font-size:13px}.btn,.print-btn{border:1px solid #bac5de;border-radius:8px;background:white;padding:8px 14px;font-size:13px;min-height:40px}.primary,[aria-pressed=true]{background:var(--blue);color:white}.hero{padding:45px 0 28px;max-width:1040px}.eyebrow{font:600 12px ui-monospace,monospace;letter-spacing:.13em;color:var(--blue)}.lead{font-size:19px;max-width:900px;color:#46516e}.meta{font-size:12px;color:var(--muted);margin-top:18px}.reading-order{border-top:1px solid var(--line);padding:16px 0 24px;font-size:14px}.map-shell{border:1px solid #c5d0e4;border-radius:18px;background:white;min-width:0}.map-tools{position:sticky;top:61px;z-index:15;background:#f6f8fff7;padding:13px 16px;border-bottom:1px solid var(--line);border-radius:18px 18px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px}.map-nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}.map-nav button{font-size:12px;padding:7px 10px}.zoom-status{font:12px ui-monospace,monospace;width:47px;text-align:center}.map-help{padding:10px 17px;margin:0;font-size:12px;color:var(--muted)}.map-viewport{overflow-x:auto;overflow-y:hidden;width:100%;overscroll-behavior-x:contain;background:white;border-radius:0 0 18px 18px}.map-viewport>svg{display:block;width:100%;min-width:1080px;height:auto;max-width:none}.message-controls{padding:18px 20px;background:#f7f8fd;border-top:1px solid var(--line);border-radius:0 0 18px 18px}.message-buttons{display:flex;gap:5px;flex-wrap:wrap;width:100%;align-items:center;border-top:1px solid var(--line);padding-top:9px}.message-buttons .btn{padding:5px 9px;min-height:34px;font-size:12px}.message-buttons #message-position{font-size:12px;color:var(--muted);margin-left:6px}.message-controls p{font-size:14px;margin:10px 0 0}.section-intro{margin:40px 0 20px}.terms{display:grid;grid-template-columns:1fr 1fr;gap:12px}.terms details,.reading{background:#ffffffc9;border:1px solid var(--line);border-radius:12px;padding:14px 20px}.terms summary,.reading>summary{cursor:pointer;font-weight:650}.terms p{font-size:14px;margin:14px 0 4px}.reading{margin:12px 0}.reading>.chapter{margin:24px 0 10px}.chapter-head{display:flex;gap:16px;margin-bottom:20px}.chapter-number{font-size:12px;color:var(--blue);white-space:nowrap;padding-top:8px}.chapter-head p{color:var(--muted)}.two-columns,.two-channels{display:grid;grid-template-columns:1fr 1fr;gap:18px}.surface{background:white;border:1px solid var(--line);border-radius:14px}.role,.tool-card,.storage{padding:24px}.role-tag{font-size:12px;color:var(--blue)}.program .role-tag{color:var(--amber)}.role-foot,.technical,.source-note{font-size:13px;color:var(--muted)}.callout{border-left:3px solid var(--blue);padding:8px 20px;margin:22px 0}.callout.amber{border-color:#bd8a43}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;font-size:14px;text-align:left}th,td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#eef1f8}.tool-row,.ownership,.boundary{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.tool-index{font-size:12px;color:var(--blue)}.rpc-chain{display:flex;gap:8px;margin:20px 0;align-items:center}.rpc-chain span{flex:1;padding:12px;background:#edf0f9;border-radius:9px;font-size:13px}.rpc-chain code{display:block}.flow-top{padding:16px}.step-nav{display:flex;gap:6px;flex-wrap:wrap}.step-nav button{width:36px;height:36px;border:1px solid #bdc9e3;border-radius:7px;background:white}.step-nav [aria-current=step]{background:var(--blue);color:white}.flow-body{display:grid;grid-template-columns:220px 1fr}.actors{padding:20px;border-right:1px solid var(--line)}.actor{padding:9px;border-radius:8px;margin-bottom:6px;color:var(--muted);font-size:12px}.actor b{display:block;font-size:14px}.actor.active{background:#edf0ff;color:var(--blue)}.actor.program.active{background:#fff2df;color:var(--amber)}.flow-list{padding:20px 30px 20px 40px;margin:0}.has-js .flow-list{list-style:none;padding:25px;min-height:280px}.flow-controls{display:flex;flex-wrap:wrap;gap:8px;padding:16px;border-top:1px solid var(--line)}.flow-counter{margin-left:auto;font-size:12px}.plain{background:none;border:0;color:var(--blue);text-decoration:underline}.interactive{display:none}.has-js .interactive{display:flex}.flow-stage{font-size:12px;color:var(--blue)}.storage code{display:block;margin-top:12px}.boundary{margin-top:22px}.boundary-number{font-size:12px;color:var(--blue)}.sources{margin-top:38px}.source-links{display:flex;flex-wrap:wrap;gap:8px}.source-links a{border:1px solid var(--line);padding:6px 10px;border-radius:7px;font-size:12px;background:white}.sources p,.footer{font-size:13px;color:var(--muted)}.footer{margin-top:25px}.print-atlas{display:none}#architecture{scroll-margin-top:75px}.source-table td:first-child{white-space:nowrap}.no-script{background:#fff2df;padding:14px;border-radius:8px}
+@media(max-width:1000px){.top-links{display:none}.map-tools{top:61px}.map-nav{margin-left:0;width:100%}.tool-row,.ownership{grid-template-columns:1fr}.source-table td:first-child{white-space:normal}}
+@media(max-width:600px){main{padding:0 14px 35px}.topbar-inner{padding:10px 14px;gap:8px}.brand{font-size:14px}.print-btn{padding:7px;font-size:12px}.hero{padding:30px 0 12px}.lead{font-size:16px}.reading-order{font-size:13px}.map-tools{padding:10px 8px;gap:6px}.map-tools .btn{padding:7px 9px}.map-nav{gap:5px}.map-nav button{font-size:11px;padding:6px 7px}.message-buttons{gap:4px}.message-buttons .btn{padding:4px 6px;min-width:29px}.message-buttons #message-position{display:none}.terms,.two-columns,.two-channels,.boundary{grid-template-columns:1fr}.terms details,.reading{padding:13px 15px}.chapter-head{gap:8px}.chapter-head h2{font-size:23px}.role,.tool-card,.storage{padding:20px}.flow-body{display:block}.actors{display:grid;grid-template-columns:1fr 1fr;border-right:0;border-bottom:1px solid var(--line);padding:10px}.actor{margin:0}.has-js .flow-list{padding:20px;min-height:360px}.rpc-chain{flex-direction:column;align-items:stretch}.rpc-chain i{text-align:center;transform:rotate(90deg)}.table-wrap table{min-width:600px}.source-table{min-width:0!important}.source-table th,.source-table td{padding:10px 8px;overflow-wrap:anywhere}.chapter-number{display:none}.source-links a{overflow-wrap:anywhere}.zoom-status{width:42px}}
+@media print{.edge,.return{marker-end:url(#print-arrow)}path[marker-start]{marker-start:url(#print-arrow)}@page{size:A4 landscape;margin:12mm}body{background:white;font-size:10pt;print-color-adjust:exact;-webkit-print-color-adjust:exact}main{max-width:none;padding:0}.topbar,.skip,.map-shell,.interactive,.reading-order,.section-intro,#glossary,.footer{display:none!important}.hero{padding:0;margin:0 0 8mm;max-width:none}.hero h1{font-size:25pt;margin:0 0 3mm}.hero .lead{font-size:11pt;margin:0}.meta{margin-top:3mm}.print-atlas{display:block}.atlas-page{break-before:page}.atlas-page:first-of-type{break-before:auto}.atlas-page svg{display:block;width:100%;height:auto}.atlas-caption{font-size:10pt;margin:0 0 3mm}.reading{break-inside:auto;padding:4mm;border:0}.reading>summary{font-size:15pt}.reading>.chapter{display:block!important}.flow-body{display:block}.actors,.rpc-chain{display:none}.flow-list,.has-js .flow-list{list-style:decimal;min-height:0;padding:5mm 10mm}.flow-list li[hidden]{display:list-item!important}.flow-list li{break-inside:avoid;margin-bottom:6mm}.table-wrap{overflow:visible}.table-wrap table{min-width:0}.sources{break-before:page}.source-links{display:none}.chapter-head{break-after:avoid}.role,.tool-card,.storage{break-inside:avoid}.chapter{margin-bottom:5mm}}
+</style></head><body><a class="skip" href="#content">跳到正文</a><header class="topbar"><div class="topbar-inner"><a class="brand" href="#top">MA4 / 架构图解</a><nav class="top-links" aria-label="章节"><a href="#architecture">架构大图</a><a href="#glossary">术语与机制</a><a href="#reading">中控补充</a><a href="#sources">源码索引</a></nav><button class="print-btn interactive" id="print-page" type="button">打印 / 存为 PDF</button></div></header><main id="content"><div class="hero" id="top"><p class="eyebrow">MA4 / ARCHITECTURE, EXPLAINED</p><h1>先看组成，再跟着一条消息走。</h1><p class="lead">MA4 是本机 Codex 会话的网页工作台。把网页、Python 后台、本地 Codex 与外部模型分开，才能看清谁在接请求、谁在运行、谁在保存数据；中控是建立在这套会话能力之上的任务协作扩展。</p><p class="meta">源码版本 9a61c19 · 核对日期 2026-10-22 · 单文件离线阅读 · 图内交互只改变显示，不连接 MA4</p></div><p class="reading-order">阅读顺序：<strong>顶层边界 → 普通消息 01–08 → A–E 模块展开 → 中控扩展 → 数据归属</strong>。蓝色沿主链，琥珀色看中控，绿色看存储；字母编号贯穿整张图。</p>
+<section id="architecture" aria-label="可缩放架构大图"><noscript><p class="no-script">全部架构和补充正文可离线阅读。JavaScript 关闭时可横向滚动图像，使用浏览器缩放和打印；导出与逐步高亮需启用 JavaScript。</p></noscript><div class="map-shell"><div class="map-tools interactive"><button class="btn" id="zoom-out" aria-label="缩小架构图" type="button">−</button><output class="zoom-status" id="zoom-status" aria-live="polite">100%</output><button class="btn" id="zoom-in" aria-label="放大架构图" type="button">＋</button><button class="btn" id="zoom-fit" type="button">合适宽度</button><button class="btn" id="export-svg" type="button">导出整张 SVG</button><nav class="map-nav" aria-label="图内定位"><button class="btn" data-map-target="map-boundary">边界</button><button class="btn" data-map-target="map-message">消息 01–08</button><button class="btn" data-map-target="map-modules">模块 A–E</button><button class="btn" data-map-target="map-controller">中控</button><button class="btn" data-map-target="map-storage">存储</button></nav><div class="message-buttons interactive" aria-label="普通消息逐步演示"><button class="btn step-arrow" type="button" id="message-prev" aria-label="普通消息上一步" title="上一步" disabled>←</button><button class="btn" type="button" data-message-step="1" aria-pressed="false" aria-label="高亮普通消息第 1 步">01</button><button class="btn" type="button" data-message-step="2" aria-pressed="false" aria-label="高亮普通消息第 2 步">02</button><button class="btn" type="button" data-message-step="3" aria-pressed="false" aria-label="高亮普通消息第 3 步">03</button><button class="btn" type="button" data-message-step="4" aria-pressed="false" aria-label="高亮普通消息第 4 步">04</button><button class="btn" type="button" data-message-step="5" aria-pressed="false" aria-label="高亮普通消息第 5 步">05</button><button class="btn" type="button" data-message-step="6" aria-pressed="false" aria-label="高亮普通消息第 6 步">06</button><button class="btn" type="button" data-message-step="7" aria-pressed="false" aria-label="高亮普通消息第 7 步">07</button><button class="btn" type="button" data-message-step="8" aria-pressed="false" aria-label="高亮普通消息第 8 步">08</button><button class="btn step-arrow" type="button" id="message-next" aria-label="普通消息下一步" title="下一步">→</button><span id="message-position" role="status">消息步骤</span></div></div><p class="map-help">放大后文字仍清晰。手机可在图内左右滑动；键盘 Tab 聚焦图区后用左右键平移。合适宽度保留最小可读宽度。</p><div class="map-viewport" id="map-viewport" tabindex="0" role="region" aria-label="完整架构图，可横向滚动"><svg id="architecture-svg" xmlns="http://www.w3.org/2000/svg" width="1600" height="3670" viewBox="0 0 1600 3670" role="img" aria-labelledby="svg-title svg-desc">
+<title id="svg-title">MA4 连贯架构大图：边界、普通消息、内部模块、中控扩展与数据归属</title>
+<desc id="svg-desc">从上到下阅读。A 网页界面，B HTTP 服务，C 会话事件枢纽，D 本地 Codex 通信客户端，E 中控管理程序。蓝色表示普通会话底座，琥珀色表示中控扩展，绿色表示存储，紫色表示独立的 Codex 运行环境。编号 1 至 8 串起普通消息往返。所有箭头和文字可脱离页面独立阅读。</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 Z" fill="#647495"/></marker><marker id="back" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 Z" fill="#647495"/></marker></defs>
+<style>
+text{font-family:system-ui,-apple-system,"Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#20283f} .title{font-size:35px;font-weight:720}.section{font-size:27px;font-weight:700}.heading{font-size:23px;font-weight:680}.node-title{font-size:21px;font-weight:650}.body{font-size:19px}.small{font-size:17px;fill:#52617c}.tiny{font-size:16px;fill:#52617c}.code{font:17px ui-monospace,Consolas,monospace;fill:#465475}.box{fill:#fff;stroke:#ced6e6;stroke-width:1.5}.panel{fill:#f7f9fe;stroke:#b7c6e4;stroke-width:1.8}.node{fill:#fff;stroke:#c0cce4;stroke-width:1.5}.amber{fill:#fff6e7;stroke:#cfa971}.mint{fill:#eff8f4;stroke:#95bcad}.purple{fill:#f3effa;stroke:#b8a4d5}.boundary{fill:#f5f7fc;stroke:#a5b4cf;stroke-width:1.5;stroke-dasharray:8 6}.edge{fill:none;stroke:#647495;stroke-width:2}.return{fill:none;stroke:#647495;stroke-width:2;stroke-dasharray:7 5}.guide{stroke:#c6cfdf;stroke-width:1.5;stroke-dasharray:5 6}.step-bg{fill:#eef2ff;fill-opacity:.8;stroke:#d0d8ef;stroke-width:1}.step.active .step-bg{fill:#fff0cc;stroke:#a65e0b;stroke-width:3}.step.active text{fill:#5c390e}.step-no{font-size:20px;font-weight:750;fill:#4254cb}.bar{fill:#4254cb}.note{fill:#fffaf1;stroke:#d6b988;stroke-width:1.2}
+</style><g id="map-content"><rect width="1600" height="3670" fill="#fff"/>
+
+<text x="60" y="65" class="title"><tspan x="60" dy="0">MA4 · 从网页消息到任务协作</tspan></text>
+<text x="60" y="100" class="small"><tspan x="60" dy="0">代码 9a61c19 · 阅读核对 2026-10-22 · A—D 为会话底座，E 为中控扩展；实线为调用，虚线为事件/返回</tspan></text>
+<g id="map-boundary">
+<text x="60" y="153" class="section"><tspan x="60" dy="0">01 先看边界：四个位置，各自做一件事</tspan></text>
+<text x="60" y="187" class="small"><tspan x="60" dy="0">MA4 管理与展示会话；本地 Codex 运行会话和工具；外部模型服务生成内容。</tspan></text>
+</g>
+<rect x="40" y="210" width="1215" height="375" rx="16" class="boundary"/>
+<text x="60" y="238" class="small"><tspan x="60" dy="0">本机 · 浏览器与两个独立后台进程</tspan></text>
+<rect x="60" y="265" width="265" height="166" rx="12" class="node blue"/>
+<text x="78" y="296" class="node-title"><tspan x="78" dy="0">用户浏览器</tspan></text>
+<text x="78" y="326" class="body"><tspan x="78" dy="0">A 网页 UI</tspan><tspan x="78" dy="27">输入、查看、选择会话</tspan><tspan x="78" dy="27">网页本身不运行模型</tspan></text>
+<rect x="435" y="265" width="370" height="166" rx="12" class="node blue"/>
+<text x="453" y="296" class="node-title"><tspan x="453" dy="0">本机 MA4 服务</tspan></text>
+<text x="453" y="326" class="body"><tspan x="453" dy="0">B 接口 → C 会话枢纽 → D 通信</tspan><tspan x="453" dy="27">E 中控管理（有任务时参与）</tspan><tspan x="453" dy="27">Python · 本机启动入口 · :8764</tspan></text>
+<rect x="915" y="265" width="315" height="166" rx="12" class="node purple"/>
+<text x="933" y="296" class="node-title"><tspan x="933" dy="0">共享 Codex app-server</tspan></text>
+<text x="933" y="326" class="body"><tspan x="933" dy="0">独立的本地守护进程</tspan><tspan x="933" dy="27">会话、回合、工具运行与记录</tspan><tspan x="933" dy="27">不是 MA4 的 appserver.py</tspan></text>
+<rect x="1325" y="265" width="220" height="166" rx="12" class="node purple"/>
+<text x="1343" y="296" class="node-title"><tspan x="1343" dy="0">外部模型服务</tspan></text>
+<text x="1343" y="326" class="body"><tspan x="1343" dy="0">处理模型输入</tspan><tspan x="1343" dy="27">返回生成内容</tspan><tspan x="1343" dy="27">网络边界之外</tspan></text>
+<path d="M325 315 H435" class="edge" marker-end="url(#arrow)"/>
+<text x="337" y="302" class="tiny"><tspan x="337" dy="0">HTTP 提交</tspan></text>
+<path d="M435 384 H325" class="return" marker-end="url(#arrow)"/>
+<text x="337" y="373" class="tiny"><tspan x="337" dy="0">SSE 推送</tspan></text>
+<path d="M805 315 H915" class="edge" marker-end="url(#arrow)"/>
+<text x="816" y="302" class="tiny"><tspan x="816" dy="0">RPC 请求</tspan></text>
+<path d="M915 384 H805" class="return" marker-end="url(#arrow)"/>
+<text x="816" y="373" class="tiny"><tspan x="816" dy="0">响应 / 通知</tspan></text>
+<path d="M1230 315 H1325" class="edge" marker-end="url(#arrow)"/>
+<text x="1237" y="302" class="tiny"><tspan x="1237" dy="0">模型输入</tspan></text>
+<path d="M1325 384 H1230" class="return" marker-end="url(#arrow)"/>
+<text x="1237" y="373" class="tiny"><tspan x="1237" dy="0">生成片段</tspan></text>
+<text x="60" y="468" class="body"><tspan x="60" dy="0">浏览器 → MA4：HTTP POST / JSON 发操作；MA4 → 浏览器：SSE（服务端事件流）在独立的长连接中推送状态与文本片段。</tspan><tspan x="60" dy="33">MA4 的 D ⇄ Codex：Linux Unix socket / Windows proxy 字节管道承载 WebSocket，消息格式为 JSON-RPC。</tspan><tspan x="60" dy="33">Codex ⇄ 模型提供方：网络模型 API；具体端点与传输随 Codex 配置，本仓库未实现这段通信，本次未连接验证。</tspan></text>
+<text x="60" y="565" class="small"><tspan x="60" dy="0">其他客户端：本项目环境的终端 codex / codex resume 也可接入同一守护进程与会话；不代表所有客户端都共享它。</tspan></text>
+<rect x="60" y="610" width="1480" height="57" rx="16" class="note"/>
+<text x="80" y="647" class="body"><tspan x="80" dy="0">三个名称先分开：appserver.py 是 MA4 内的客户端文件；Codex app-server 是本机后台；云端模型服务在本机之外。</tspan></text>
+<g id="map-message">
+<text x="60" y="735" class="section"><tspan x="60" dy="0">02 跟着一条普通消息往返</tspan></text>
+<text x="60" y="769" class="small"><tspan x="60" dy="0">前提：已打开一个空闲的普通会话。网页已通过 /api/state 取状态，并用 EventSource 建立 /api/events 订阅。</tspan></text>
+</g>
+<text x="110" y="827" class="node-title"><tspan x="110" dy="0">A 网页</tspan></text>
+<path d="M185 845 V1450" class="guide"/>
+<text x="425" y="827" class="node-title"><tspan x="425" dy="0">B HTTP 接口</tspan></text>
+<path d="M500 845 V1450" class="guide"/>
+<text x="725" y="827" class="node-title"><tspan x="725" dy="0">C 枢纽 + D 通信</tspan></text>
+<path d="M800 845 V1450" class="guide"/>
+<text x="1045" y="827" class="node-title"><tspan x="1045" dy="0">本地 Codex</tspan></text>
+<path d="M1120 845 V1450" class="guide"/>
+<text x="1340" y="827" class="node-title"><tspan x="1340" dy="0">外部模型</tspan></text>
+<path d="M1415 845 V1450" class="guide"/>
+<g class="step" id="message-1">
+<rect x="60" y="845" width="1480" height="66" rx="9" class="step-bg"/>
+<text x="78" y="883" class="step-no"><tspan x="78" dy="0">01</tspan></text>
+<path d="M185 901 H500" class="edge" marker-end="url(#arrow)"/>
+<text x="145" y="870" class="body"><tspan x="145" dy="0">浏览器 → B：POST /api/send</tspan></text>
+<text x="145" y="893" class="tiny"><tspan x="145" dy="0">JSON：会话 id、text、request_id、可选 skills</tspan></text>
+</g>
+<g class="step" id="message-2">
+<rect x="60" y="915" width="1480" height="66" rx="9" class="step-bg"/>
+<text x="78" y="953" class="step-no"><tspan x="78" dy="0">02</tspan></text>
+<path d="M500 971 H800" class="edge" marker-end="url(#arrow)"/>
+<text x="145" y="940" class="body"><tspan x="145" dy="0">B → C：hub.send → send_raw</tspan></text>
+<text x="145" y="963" class="tiny"><tspan x="145" dy="0">校验、查重、订阅会话；确认当前没有运行回合</tspan></text>
+</g>
+<g class="step" id="message-3">
+<rect x="60" y="985" width="1480" height="66" rx="9" class="step-bg"/>
+<text x="78" y="1023" class="step-no"><tspan x="78" dy="0">03</tspan></text>
+<path d="M800 1041 H1120" class="edge" marker-end="url(#arrow)"/>
+<text x="145" y="1010" class="body"><tspan x="145" dy="0">C 经 D → Codex：turn/start</tspan></text>
+<text x="145" y="1033" class="tiny"><tspan x="145" dy="0">JSON-RPC：threadId、input、clientUserMessageId</tspan></text>
+</g>
+<g class="step" id="message-4">
+<rect x="60" y="1055" width="1480" height="66" rx="9" class="step-bg"/>
+<text x="78" y="1093" class="step-no"><tspan x="78" dy="0">04</tspan></text>
+<path d="M1120 1111 H185" class="return" marker-end="url(#arrow)"/>
+<text x="145" y="1080" class="body"><tspan x="145" dy="0">Codex → D → C：turn/start 响应含 turn；Hub 提取 turn.id，整理为 { mode: start, turnId }</tspan></text>
+<text x="145" y="1103" class="tiny"><tspan x="145" dy="0">B → 浏览器：HTTP 返回这组 MA4 字段；这是受理结果，不是完整回答，也不是整个任务完成</tspan></text>
+</g>
+<g class="step" id="message-5">
+<rect x="60" y="1125" width="1480" height="66" rx="9" class="step-bg"/>
+<text x="78" y="1163" class="step-no"><tspan x="78" dy="0">05</tspan></text>
+<path d="M1120 1181 H1415" class="edge" marker-end="url(#arrow)" marker-start="url(#back)"/>
+<text x="145" y="1150" class="body"><tspan x="145" dy="0">Codex ⇄ 模型：生成过程</tspan></text>
+<text x="145" y="1173" class="tiny"><tspan x="145" dy="0">可反复调用模型与本地工具，不是一跳就完成</tspan></text>
+</g>
+<g class="step" id="message-6">
+<rect x="60" y="1195" width="1480" height="66" rx="9" class="step-bg"/>
+<text x="78" y="1233" class="step-no"><tspan x="78" dy="0">06</tspan></text>
+<path d="M1120 1251 H800" class="return" marker-end="url(#arrow)"/>
+<text x="145" y="1220" class="body"><tspan x="145" dy="0">Codex → D → C：增量通知</tspan></text>
+<text x="145" y="1243" class="tiny"><tspan x="145" dy="0">item/agentMessage/delta · 一次是一段文本</tspan></text>
+</g>
+<g class="step" id="message-7">
+<rect x="60" y="1265" width="1480" height="66" rx="9" class="step-bg"/>
+<text x="78" y="1303" class="step-no"><tspan x="78" dy="0">07</tspan></text>
+<path d="M800 1321 H500" class="return" marker-end="url(#arrow)"/>
+<text x="145" y="1290" class="body"><tspan x="145" dy="0">C → B：发布网页事件</tspan></text>
+<text x="145" y="1313" class="tiny"><tspan x="145" dy="0">emit(&quot;delta&quot;) → 带序号的内存缓冲 → stream</tspan></text>
+</g>
+<g class="step" id="message-8">
+<rect x="60" y="1335" width="1480" height="66" rx="9" class="step-bg"/>
+<text x="78" y="1373" class="step-no"><tspan x="78" dy="0">08</tspan></text>
+<path d="M500 1391 H185" class="return" marker-end="url(#arrow)"/>
+<text x="145" y="1360" class="body"><tspan x="145" dy="0">B → A：SSE 的 data 事件</tspan></text>
+<text x="145" y="1383" class="tiny"><tspan x="145" dy="0">handle → appendDelta → 累积文字并重绘 Markdown</tspan></text>
+</g>
+<rect x="60" y="1435" width="1480" height="83" rx="16" class="note"/>
+<text x="80" y="1467" class="body"><tspan x="80" dy="0">顺序是理解上的主线：HTTP 返回与事件推送在不同通道上，实际到达可交错；片段不保证每次一字。</tspan><tspan x="80" dy="29">结束时还会收到 item/completed、turn/completed，更新消息完整内容、运行状态与用时。普通消息不必经过 E 中控。</tspan></text>
+<g id="map-modules">
+<text x="60" y="1587" class="section"><tspan x="60" dy="0">03 展开本机内部：同一组字母，继续往下追</tspan></text>
+<text x="60" y="1621" class="small"><tspan x="60" dy="0">A 是浏览器代码；B、C、D、E 都在 MA4 的 Python 服务内。下面箭头是程序调用与事件流，不是新增网络服务。</tspan></text>
+</g>
+<g id="module-a">
+<rect x="60" y="1660" width="440" height="427" rx="16" class="panel blue"/>
+<text x="84" y="1699" class="heading"><tspan x="84" dy="0">A · 网页 UI</tspan></text>
+<text x="84" y="1730" class="small"><tspan x="84" dy="0">web/app.js · controllers.js · markdown.js</tspan></text>
+</g>
+<rect x="82" y="1752" width="396" height="115" rx="12" class="node blue"/>
+<text x="100" y="1783" class="node-title"><tspan x="100" dy="0">输入与操作</tspan></text>
+<text x="100" y="1813" class="body"><tspan x="100" dy="0">send / api：消息、附件、request_id</tspan><tspan x="100" dy="27">openThread：打开会话、分页读历史</tspan></text>
+<path d="M280 1867 V1892" class="edge" marker-end="url(#arrow)"/>
+<rect x="82" y="1892" width="396" height="105" rx="12" class="node blue"/>
+<text x="100" y="1923" class="node-title"><tspan x="100" dy="0">接事件并更新视图</tspan></text>
+<text x="100" y="1953" class="body"><tspan x="100" dy="0">connectEvents → handle</tspan><tspan x="100" dy="27">appendDelta；任务树 / 审批 / 侧栏</tspan></text>
+<text x="84" y="2036" class="small"><tspan x="84" dy="0">浏览器内存：当前选择、消息渲染与草稿</tspan><tspan x="84" dy="27">localStorage：主题、折叠、页签等偏好</tspan></text>
+<g id="module-b">
+<rect x="560" y="1660" width="440" height="427" rx="16" class="panel blue"/>
+<text x="584" y="1699" class="heading"><tspan x="584" dy="0">B · HTTP 与 SSE 入口</tspan></text>
+<text x="584" y="1730" class="small"><tspan x="584" dy="0">server.py · Server / Handler</tspan></text>
+</g>
+<rect x="582" y="1752" width="396" height="115" rx="12" class="node blue"/>
+<text x="600" y="1783" class="node-title"><tspan x="600" dy="0">接收网页请求</tspan></text>
+<text x="600" y="1813" class="body"><tspan x="600" dy="0">guard：检查 Host、Origin 与写请求头</tspan><tspan x="600" dy="27">do_GET / do_POST：按路径调用 Hub</tspan></text>
+<path d="M780 1867 V1892" class="edge" marker-end="url(#arrow)"/>
+<rect x="582" y="1892" width="396" height="105" rx="12" class="node blue"/>
+<text x="600" y="1923" class="node-title"><tspan x="600" dy="0">发送操作结果与事件</tspan></text>
+<text x="600" y="1953" class="body"><tspan x="600" dy="0">send：返回 JSON 或静态资源</tspan><tspan x="600" dy="27">stream：等待事件；SSE / 保活 / resync</tspan></text>
+<text x="584" y="2036" class="small"><tspan x="584" dy="0">ThreadingHTTPServer：并发处理连接</tspan><tspan x="584" dy="27">SSE 等待不占住其他消息请求</tspan></text>
+<g id="module-c">
+<rect x="1060" y="1660" width="480" height="427" rx="16" class="panel blue"/>
+<text x="1084" y="1699" class="heading"><tspan x="1084" dy="0">C · 会话 / 事件枢纽</tspan></text>
+<text x="1084" y="1730" class="small"><tspan x="1084" dy="0">hub.py · Hub</tspan></text>
+</g>
+<rect x="1082" y="1752" width="436" height="115" rx="12" class="node blue"/>
+<text x="1100" y="1783" class="node-title"><tspan x="1100" dy="0">统一操作会话</tspan></text>
+<text x="1100" y="1813" class="body"><tspan x="1100" dy="0">send_raw / subscribe / history / interrupt</tspan><tspan x="1100" dy="27">threads、live、approvals、sent 等内存状态</tspan></text>
+<path d="M1300 1867 V1892" class="edge" marker-end="url(#arrow)"/>
+<rect x="1082" y="1892" width="436" height="105" rx="12" class="node blue"/>
+<text x="1100" y="1923" class="node-title"><tspan x="1100" dy="0">把 Codex 事件译成网页事件</tspan></text>
+<text x="1100" y="1953" class="body"><tspan x="1100" dy="0">on_notification → normalize_item / emit</tspan><tspan x="1100" dy="27">序号 + 最近 500 条；Condition 唤醒 SSE</tspan></text>
+<text x="1084" y="2036" class="small"><tspan x="1084" dy="0">run / refresh：默认 3 秒查询会话列表</tspan><tspan x="1084" dy="27">on_request：审批，或将 ma4 工具转给 E</tspan></text>
+<path d="M500 1795 H560" class="edge" marker-end="url(#arrow)"/>
+<path d="M560 1933 H500" class="return" marker-end="url(#arrow)"/>
+<path d="M1000 1795 H1060" class="edge" marker-end="url(#arrow)"/>
+<path d="M1060 1933 H1000" class="return" marker-end="url(#arrow)"/>
+<path d="M1300 2087 V2117 H390 V2170" class="edge" marker-end="url(#arrow)"/>
+<text x="610" y="2109" class="small"><tspan x="610" dy="0">C 调用 D 发 RPC；D 的通知/请求回调交回 C</tspan></text>
+<path d="M1460 2087 V2170" class="edge" marker-end="url(#arrow)"/>
+<text x="1075" y="2152" class="small"><tspan x="1075" dy="0">C → E：仅关联任务事件 / ma4_* 工具</tspan></text>
+<g id="module-d">
+<rect x="60" y="2170" width="700" height="443" rx="16" class="panel blue"/>
+<text x="84" y="2209" class="heading"><tspan x="84" dy="0">D · 到本机 Codex 的通信客户端</tspan></text>
+<text x="84" y="2240" class="small"><tspan x="84" dy="0">appserver.py · AppServer / WebSocket</tspan></text>
+</g>
+<rect x="82" y="2262" width="304" height="142" rx="12" class="node blue"/>
+<text x="100" y="2293" class="node-title"><tspan x="100" dy="0">发送与等待响应</tspan></text>
+<text x="100" y="2323" class="body"><tspan x="100" dy="0">call：分配 RPC id</tspan><tspan x="100" dy="27">pending[id] 保存等待者</tspan><tspan x="100" dy="27">WebSocket.send_text</tspan></text>
+<rect x="416" y="2262" width="322" height="142" rx="12" class="node blue"/>
+<text x="434" y="2293" class="node-title"><tspan x="434" dy="0">独立读取 Python 线程</tspan></text>
+<text x="434" y="2323" class="body"><tspan x="434" dy="0">_read_loop：持续读消息</tspan><tspan x="434" dy="27">有 id 的响应 → 唤醒等待者</tspan><tspan x="434" dy="27">通知 / 请求 → Hub 回调</tspan></text>
+<path d="M416 2335 H386" class="return" marker-end="url(#arrow)"/>
+<rect x="82" y="2432" width="656" height="94" rx="12" class="node blue"/>
+<text x="100" y="2463" class="node-title"><tspan x="100" dy="0">一条连接承载三类 JSON-RPC 消息</tspan></text>
+<text x="100" y="2493" class="body"><tspan x="100" dy="0">请求 + 对应响应；无 id 的通知；Codex 发起的工具/审批请求</tspan></text>
+<text x="84" y="2560" class="small"><tspan x="84" dy="0">WebSocket → AF_UNIX 本机套接字 → 共享 Codex app-server</tspan><tspan x="84" dy="27">默认 ~/.codex/app-server-control/app-server-control.sock</tspan></text>
+<g id="module-e">
+<rect x="840" y="2170" width="700" height="443" rx="16" class="panel amber"/>
+<text x="864" y="2209" class="heading"><tspan x="864" dy="0">E · 中控管理程序（不是中控 AI）</tspan></text>
+<text x="864" y="2240" class="small"><tspan x="864" dy="0">controllers.py · Controllers</tspan></text>
+</g>
+<rect x="862" y="2262" width="656" height="95" rx="12" class="node amber"/>
+<text x="880" y="2293" class="node-title"><tspan x="880" dy="0">先入队，再由一条 Python 工作线程串行处理</tspan></text>
+<text x="880" y="2323" class="body"><tspan x="880" dy="0">invoke（操作）/ post（事件）/ request（工具）→ inbox → run</tspan></text>
+<path d="M1190 2357 V2383" class="edge" marker-end="url(#arrow)"/>
+<rect x="862" y="2383" width="656" height="111" rx="12" class="node amber"/>
+<text x="880" y="2414" class="node-title"><tspan x="880" dy="0">按当前任务状态决定能做什么</tspan></text>
+<text x="880" y="2444" class="body"><tspan x="880" dy="0">dispatch / can_launch / launch：授权、预算、写入冲突与排队</tspan><tspan x="880" dy="27">complete_worker / tick / send_host：保存报告、判断回传条件</tspan></text>
+<text x="864" y="2533" class="small"><tspan x="864" dy="0">需要会话操作时 E → C，继续复用 Hub 的普通会话能力。</tspan><tspan x="864" dy="27">publish：保存当前任务状态，并经 C.emit → B.SSE → A 更新页面。</tspan><tspan x="864" dy="27">读取线程只投递中控事件，不在回调里等待另一个 RPC 响应。</tspan></text>
+<g id="map-controller">
+<text x="60" y="2687" class="section"><tspan x="60" dy="0">04 中控扩展：目标与任务状态包在普通会话能力外面</tspan></text>
+<text x="60" y="2721" class="small"><tspan x="60" dy="0">中控 AI 与执行者都是独立 Codex 会话，各有上下文；controllers.py 是本机管理程序，没有模型推理能力。</tspan></text>
+</g>
+<rect x="60" y="2758" width="330" height="140" rx="12" class="node amber"/>
+<text x="78" y="2789" class="node-title"><tspan x="78" dy="0">用户确认目标和预算</tspan></text>
+<text x="78" y="2819" class="body"><tspan x="78" dy="0">讨论 → 草案（不自动执行）</tspan><tspan x="78" dy="27">确认目录 / 范围 / 修订号</tspan><tspan x="78" dy="27">启动后时长 → 固定截止时间</tspan></text>
+<rect x="445" y="2758" width="330" height="140" rx="12" class="node purple"/>
+<text x="463" y="2789" class="node-title"><tspan x="463" dy="0">中控 AI 判断与调用工具</tspan></text>
+<text x="463" y="2819" class="body"><tspan x="463" dy="0">理解目标、安排工作、独立验收</tspan><tspan x="463" dy="27">ma4_dispatch / ma4_control</tspan><tspan x="463" dy="27">ma4_artifacts</tspan></text>
+<rect x="830" y="2758" width="330" height="140" rx="12" class="node amber"/>
+<text x="848" y="2789" class="node-title"><tspan x="848" dy="0">E 程序排队与发送</tspan></text>
+<text x="848" y="2819" class="body"><tspan x="848" dy="0">dispatch → 排队 → launch</tspan><tspan x="848" dy="27">经 C / D 发 turn/start</tspan><tspan x="848" dy="27">执行者在自己的 cwd 工作</tspan></text>
+<rect x="1215" y="2758" width="325" height="140" rx="12" class="node amber"/>
+<text x="1233" y="2789" class="node-title"><tspan x="1233" dy="0">执行者返回报告</tspan></text>
+<text x="1233" y="2819" class="body"><tspan x="1233" dy="0">完成通知 → complete_worker</tspan><tspan x="1233" dy="27">提取摘要、状态与原会话 ID</tspan><tspan x="1233" dy="27">保存 pending（待回传报告）</tspan></text>
+<path d="M390 2816 H445" class="edge" marker-end="url(#arrow)"/>
+<path d="M775 2816 H830" class="edge" marker-end="url(#arrow)"/>
+<path d="M1160 2816 H1215" class="edge" marker-end="url(#arrow)"/>
+<path d="M1375 2898 V2923 H610 V2898" class="return" marker-end="url(#arrow)"/>
+<text x="705" y="2914" class="small"><tspan x="705" dy="0">E → 中控：空闲且允许自动推进时，每批最多 8 份；忙碌时保存等待</tspan></text>
+<rect x="60" y="2950" width="1480" height="95" rx="16" class="note"/>
+<text x="80" y="2982" class="body"><tspan x="80" dy="0">送达与验收分开：发送确认后移除对应 pending；结果不明先核对。报告附带在途写入快照，变化中的文件仍待验收。</tspan><tspan x="80" dy="31">目标达标需中控以 finish 提交 met / unmet 与证据；idle、报告“完成”都不等于验收通过。交接换中控会话，任务与执行者保留。</tspan></text>
+<rect x="60" y="3070" width="475" height="170" rx="12" class="node amber"/>
+<text x="78" y="3101" class="node-title"><tspan x="78" dy="0">时限到期：开始收尾</tspan></text>
+<text x="78" y="3131" class="body"><tspan x="78" dy="0">closing：停新增派工 / 排队启动 / 交接</tspan><tspan x="78" dy="27">给既有 turn 一次 steer 收尾提醒，等自然返回</tspan><tspan x="78" dy="27">本任务执行者返回后最多一次中控只读汇总</tspan><tspan x="78" dy="27">实际结束时间与消耗可能超过时限</tspan></text>
+<rect x="555" y="3070" width="475" height="170" rx="12" class="node amber"/>
+<text x="573" y="3101" class="node-title"><tspan x="573" dy="0">硬上限 / 手动立即停止</tspan></text>
+<text x="573" y="3131" class="body"><tspan x="573" dy="0">token 或估算金额上限、用户停止</tspan><tspan x="573" dy="27">请求 turn/interrupt；通知可能迟到</tspan><tspan x="573" dy="27">暂停或未启动任务，不因报告返回自动恢复</tspan><tspan x="573" dy="27">普通聊天也不会自行启动任务</tspan></text>
+<rect x="1050" y="3070" width="490" height="170" rx="12" class="node amber"/>
+<text x="1068" y="3101" class="node-title"><tspan x="1068" dy="0">调度约定的边界</tspan></text>
+<text x="1068" y="3131" class="body"><tspan x="1068" dy="0">跨任务按实际 cwd + write_scope 协调写入</tspan><tspan x="1068" dy="27">范围声明不是 OS 沙箱，也不拦截外部终端</tspan><tspan x="1068" dy="27">只读执行者用 Codex read-only 权限</tspan><tspan x="1068" dy="27">中控完全访问能力不扩大用户授权</tspan></text>
+<g id="map-storage">
+<text x="60" y="3288" class="section"><tspan x="60" dy="0">05 数据放在哪里；哪些是侧支查询</tspan></text>
+<text x="60" y="3322" class="small"><tspan x="60" dy="0">任务身份 ≠ 会话身份 ≠ 项目目录。同目录的普通会话不会自动成为中控成员。</tspan></text>
+</g>
+<rect x="60" y="3360" width="440" height="169" rx="12" class="node mint"/>
+<text x="78" y="3391" class="node-title"><tspan x="78" dy="0">MA4 保管管理数据</tspan></text>
+<text x="78" y="3421" class="body"><tspan x="78" dy="0">E → .ma4/controllers.json：当前任务、</tspan><tspan x="78" dy="27">关联、pending / outbox、预算与统计</tspan><tspan x="78" dy="27">C → .ma4/prefs.json：置顶、已读</tspan><tspan x="78" dy="27">原子替换当前状态；不复制完整聊天</tspan></text>
+<rect x="530" y="3360" width="440" height="169" rx="12" class="node mint"/>
+<text x="548" y="3391" class="node-title"><tspan x="548" dy="0">Codex 保管原生会话</tspan></text>
+<text x="548" y="3421" class="body"><tspan x="548" dy="0">thread：一条会话，可包含多个 turn</tspan><tspan x="548" dy="27">turn：一轮运行，可包含多个 item</tspan><tspan x="548" dy="27">item：消息、命令、文件改动等条目</tspan><tspan x="548" dy="27">会话记录由 Codex 保存；MA4 按需读取</tspan></text>
+<rect x="1000" y="3360" width="540" height="169" rx="12" class="node mint"/>
+<text x="1018" y="3391" class="node-title"><tspan x="1018" dy="0">各项目保管实际成果</tspan></text>
+<text x="1018" y="3421" class="body"><tspan x="1018" dy="0">工具在实际 cwd 读写正式源码、素材、证据</tspan><tspan x="1018" dy="27">中控任务临时区：.agent-tmp/ma4-&lt;task-id&gt;/</tspan><tspan x="1018" dy="27">会话交接不复制项目；必要临时材料先转正</tspan><tspan x="1018" dy="27">浏览器关闭后，后台正常运行的任务仍可继续</tspan></text>
+<rect x="60" y="3550" width="1480" height="90" rx="16" class="panel"/>
+<text x="80" y="3580" class="small"><tspan x="80" dy="0">侧支：额度 quota.py（300 秒，quota-cache.json） · 健康 health.py（300 秒） · 服务活动 activity.py（游戏 15 秒 / Chat 60 秒）。</tspan><tspan x="80" dy="30">各查询器 → 内存快照 → B 的 GET /api/side → A 侧栏（每 15 秒读取）；账户额度比例不是 E 的任务预算数据。</tspan></text>
+</g></svg></div><div class="message-controls"><p id="message-explanation" role="status">使用图上方固定工具栏的 01–08 或左右箭头连续查看；所有步骤始终保留在大图上。</p><p id="export-status" role="status">导出包含整张图，打印/PDF 将大图分成连续的六页，再附补充说明。</p></div></div></section><div class="print-atlas" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="print-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 Z" fill="#647495"/></marker></defs></svg><div class="atlas-page"><p class="atlas-caption">1 / 6 · 顶层边界</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 690"><use href="#map-content"/></svg></div><div class="atlas-page"><p class="atlas-caption">2 / 6 · 一条普通消息</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 700 1600 840"><use href="#map-content"/></svg></div><div class="atlas-page"><p class="atlas-caption">3 / 6 · 网页、接口与枢纽</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 1555 1600 560"><use href="#map-content"/></svg></div><div class="atlas-page"><p class="atlas-caption">4 / 6 · 通信客户端与中控管理</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2090 1600 550"><use href="#map-content"/></svg></div><div class="atlas-page"><p class="atlas-caption">5 / 6 · 中控扩展</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2655 1600 610"><use href="#map-content"/></svg></div><div class="atlas-page"><p class="atlas-caption">6 / 6 · 数据归属与侧支</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 3250 1600 420"><use href="#map-content"/></svg></div></div><section id="glossary"><h2 class="section-intro">读图时会遇到的几个词</h2><div class="terms">
+<details><summary>SSE：后台持续推给网页的一条事件流</summary><p>浏览器用 <code>EventSource</code> 发起 HTTP GET，后台保持响应连接，用 <code>text/event-stream</code> 连续写入事件。它是服务端到浏览器的单向推送；用户发消息仍走单独的 POST。Hub 为事件编号并保留最近 500 条；序号过旧时发 <code>resync</code>，网页重取状态。代码有重连与补状态路径，但这里不承诺事件永不丢失，也未实测断线恢复。</p></details>
+<details><summary>WebSocket 与 JSON-RPC：连接和消息格式</summary><p>WebSocket 是双向、持续的消息连接；本项目在 Linux 使用 Unix socket，在 Windows 使用 Codex proxy 字节管道，也支持显式本机 TCP，连接本机 Codex，不是浏览器直连模型。JSON-RPC 是连接里面的“调用约定”：<code>method</code> 是方法名，<code>params</code> 是参数，<code>id</code> 将请求与响应配对；通知没有请求 id。两者分别解决“怎样传”和“传的是什么”。</p></details>
+<details><summary>thread / turn / item：会话、回合、条目</summary><p><code>thread</code> 是可继续对话的一条 Codex 会话；<code>turn</code> 是一轮运行，从开始到完成，可经历多个模型调用与工具调用；<code>item</code> 是这一轮里的消息、命令或文件改动条目。任务另外有 task ID。图中的 Python <code>threading.Thread</code> 是进程内的执行线程，不是 AI 会话，也不意味着一个会话独占一个 Python 线程。</p></details>
+<details><summary>事件驱动与轮询：两者同时存在</summary><p>文字增量和完成通知到来后触发处理；中控不需要让模型循环问进度。但 Hub 默认每 3 秒刷新会话列表；Controllers 的队列空闲等待最多 0.5 秒，处理后调用 <code>tick</code>，并每 15 秒核对相关回合。侧栏也定时查询。SSE 的 20 秒保活是维持连接，不是每 20 秒才显示一批文字。</p></details>
+<details><summary>request_id 与 RPC id：管不同层的关联</summary><p>网页为发送生成 <code>request_id</code>，Hub 用内存中的 <code>sent</code> 缓存最近受理结果，并将它作为 <code>clientUserMessageId</code> 传入 Codex。通信层另分配 RPC <code>id</code> 来匹配请求/响应；它们不等于 thread ID 或 turn ID。中控还会把发送标记写进任务状态与消息，以便恢复核对。普通发送缓存不持久化，不能由此宣称跨重启“恰好一次”。</p></details>
+<details><summary>pending / outbox：待回传内容与待确认发送</summary><p><code>pending</code> 保存执行者已经结束但尚未交给中控的报告；<code>outbox</code> 保存一项已经准备发送、结果仍待确认的操作。它们在当前任务状态文件中，作用不同。报告送达无需等待所有目录停止写入；中控只能对稳定的文件作验收。暂停、断线、恢复核对或硬预算限制都可能让报告继续保留。</p></details>
+</div></section><section id="reading"><h2 class="section-intro">理解主链之后，再读中控</h2><p>以下保留原页的职责说明、原有能力对照与 12 步派工示例，已按当前实现更新。它们补充主图，不是普通消息的必经步骤。</p><details class="reading"><summary>一个中控会判断，一段程序管流程</summary>    <section class="chapter" id="roles">
+      <div class="chapter-head"><span class="chapter-number">补充</span><div><h2>一个中控会判断，一段程序管流程</h2><p>页面里的“中控会话”和代码里的 Controllers 各自承担不同职责。</p></div></div>
+      <div class="two-columns">
+        <article class="surface role"><span class="role-tag">AI · 中控会话</span><h3>对目标与验收负责</h3><p>收到消息后运行一轮模型，理解要求、分配工作，独立检查实际产物。</p><ul><li>决定先做什么、派给谁。</li><li>比较实际成果与完整目标。</li><li>决定返工、暂停、交接或结束。</li></ul><p class="role-foot">任务判断依赖模型能力与实际证据。</p></article>
+        <article class="surface role program"><span class="role-tag">程序 · controllers.py</span><h3>管理状态与推进条件</h3><p>接收事件并按规则处理，保存任务关系、预算、队列和结果。</p><ul><li>允许时启动执行会话，协调写入。</li><li>接收完成通知，把报告交回中控。</li><li>检查时限与用量，记录结束数字。</li></ul><p class="role-foot">运行在原有服务里，不需要模型代为轮询。</p></article>
+      </div>
+      <div class="callout amber"><p><strong>一轮回答结束后，任务仍然可以继续。</strong>中控派工后结束当前回合，程序等执行结果到达，再发起中控的下一轮。模型不用持续说“我再看看进度”。这叫<strong>事件驱动</strong>：完成通知、用量变化和用户操作会触发后续处理；程序仍有定时预算检查与每 15 秒的相关回合核对。</p></div>
+      <p class="source-note">Controllers 有自己的串行事件处理线程。WebSocket 读取线程只投递事件，不在回调里同步等待另一条 RPC，避免互相卡住。这里的“程序线程”和 Codex 的“会话 thread”是两个概念。</p>
+    </section></details>
+<details class="reading"><summary>新增功能，复用哪些原有能力</summary>    <section class="chapter" id="reuse">
+      <div class="chapter-head"><span class="chapter-number">补充</span><div><h2>新增功能，复用哪些原有能力</h2><p>核心变化集中在 controllers.py 和任务界面；原有组件增加连接点，继续承担各自职责。</p></div></div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="原有能力与中控用途对照表，可横向滚动"><table><thead><tr><th>原有能力</th><th>中控如何复用</th><th>代码连接点</th></tr></thead><tbody>
+        <tr><td>新建会话</td><td>创建中控和执行者；增加角色说明、权限和动态工具参数。</td><td><code>Hub.new_thread</code><br><code>thread/start</code></td></tr>
+        <tr><td>发送与插话</td><td>启动任务、发送具体派工要求、把报告交回中控。</td><td><code>Hub.send_raw</code><br><code>turn/start · turn/steer</code></td></tr>
+        <tr><td>订阅运行事件</td><td>由“显示已结束”扩展为“提取结果、更新统计、安排下一步”。</td><td><code>Hub.on_notification</code><br><code>Controllers.event</code></td></tr>
+        <tr><td>读取历史</td><td>完成事件缺少正文时读取对应回合；重连后核对是否已经发送或结束。</td><td><code>Hub.history</code><br><code>Controllers.reconcile</code></td></tr>
+        <tr><td>中断回合</td><td>用户立即停止或达到 token / 金额硬上限时请求中断；时限到期先进入收尾。</td><td><code>Hub.interrupt</code><br><code>turn/interrupt</code></td></tr>
+        <tr><td>网页事件流</td><td>任务树、状态和统计仍经原有 SSE 更新，无需再开一套连接。</td><td><code>Hub.emit</code><br><code>/api/events</code></td></tr>
+      </tbody></table></div>
+      <div class="callout"><p><strong>账户额度栏和任务预算使用不同数据。</strong><code>quota.py</code> 查询账户层面的额度；中控统计接收关联会话的 token 用量通知。任务预算不会读取侧栏百分比来决定是否停止。恢复时可有限读取相关原生日志尾部补累计值，无法归属到轮次的用量明确标注。</p></div>
+    </section></details>
+<details class="reading"><summary>从“打算派工”到真正发起任务</summary>    <section class="chapter" id="tools">
+      <div class="chapter-head"><span class="chapter-number">补充</span><div><h2>从“打算派工”到真正发起任务</h2><p>创建中控会话时，MA4 注册三个动态工具。模型发起调用后，本地程序执行相应动作并返回结果。</p></div></div>
+      <div class="tool-row">
+        <article class="surface tool-card"><div class="tool-index">TOOL / 01</div><h3>ma4_dispatch</h3><p>创建或复用执行会话，登记具体任务、读写权限和项目相对写入范围，加入队列。</p></article>
+        <article class="surface tool-card"><div class="tool-index">TOOL / 02</div><h3>ma4_control</h3><p>查看任务、交还等待、暂停、结束或交接。结束时提交达标/未达标结论与证据。</p></article>
+        <article class="surface tool-card"><div class="tool-index">TOOL / 03</div><h3>ma4_artifacts</h3><p>检查临时材料，登记保留理由，清理明确属于本任务且已无依赖的精确路径。</p></article>
+      </div>
+      <div class="rpc-chain" aria-label="工具调用链"><span>中控模型<code>调用工具</code></span><i aria-hidden="true">→</i><span>Codex<code>item/tool/call</code></span><i aria-hidden="true">→</i><span>通信客户端<code>appserver.py</code></span><i aria-hidden="true">→</i><span>Hub 转接<code>on_request</code></span><i aria-hidden="true">→</i><span>运行控制<code>tool_call</code></span></div>
+      <p>模型在聊天中写“我准备派工”，只是文字；调用 <code>ma4_dispatch</code> 才会让程序登记和安排执行。工具请求会带上会话身份，程序只接受本任务当前中控的调用。返回结果沿原连接送回模型。</p>
+      <p class="source-note">动态工具通过 <code>thread/start</code> 的 <code>dynamicTools</code> 注册。<a href="https://learn.chatgpt.com/docs/app-server#dynamic-tool-calls-experimental" target="_blank" rel="noopener noreferrer">OpenAI 官方说明</a>将此接口标为 experimental；升级 Codex 时需要核对协议兼容性。</p>
+    </section></details>
+<details class="reading"><summary>跟着一次派工，走完这条链路</summary>    <section class="chapter" id="workflow">
+      <div class="chapter-head"><span class="chapter-number">补充</span><div><h2>跟着一次派工，走完这条链路</h2><p>以“先做一段角色代表动作样板”为例。点击步骤只切换说明，不会连接 MA4 或启动任务。通信细节沿用上面的主链。</p></div></div>
+      <div class="surface workflow">
+        <div class="flow-top interactive"><div class="step-nav" id="step-nav" role="group" aria-label="选择派工流程步骤"></div></div>
+        <div class="flow-body">
+          <div class="actors" aria-label="当前参与者"><div class="actor" data-actor="user"><b>你</b><small>目标、授权与关键确认</small></div><div class="actor program" data-actor="program"><b>MA4 程序</b><small>控制运行与保存状态</small></div><div class="actor" data-actor="host"><b>中控会话</b><small>判断、派工与验收</small></div><div class="actor" data-actor="worker"><b>执行会话</b><small>完成具体工作</small></div><div class="actor files" data-actor="files"><b>项目文件与实际成果</b><small>源码、素材、运行证据</small></div></div>
+          <ol class="flow-list" id="flow-list" aria-label="完整派工流程">
+            <li data-actors="user program" data-short="创建任务"><span class="flow-stage">01 / 创建</span><h3>先填项目、名称和时限</h3><p>时限由你填写，单位 min，经费默认不限。初步想法可留空；填写后会作为第一条讨论消息发给中控。MA4 保存任务和预算，此时不启动自动执行。</p><p class="technical">创建空白中控不调用模型；填写想法或开始聊天会产生模型消耗，执行时限尚未开始。</p></li>
+            <li data-actors="program host" data-short="建立中控"><span class="flow-stage">02 / 配置</span><h3>程序建立中控会话</h3><p>通过 Hub 新建 Codex 会话，配置中控角色说明、完全访问与从不审批权限，以及三个动态工具，并把会话 ID 关联到任务。</p><p class="technical"><code>new_host → Hub.new_thread → thread/start</code><br>这是带有专门配置的 Codex 会话，仍由原有后台运行。</p></li>
+            <li data-actors="user program host" data-short="确认启动"><span class="flow-stage">03 / 讨论与启动</span><h3>商讨草案，确认后再执行</h3><p>你直接与中控讨论，由它整理目标、范围和验收草案。页面对照显示当前正式目标与新草案；你确认完整目标和预算并点击启动后，程序才开启自动推进。</p><p class="technical">草案和正式目标分开保存，普通讨论不恢复任务。创建时填写的启动后时长在首次启动时换算为固定截止时间；暂停、续接、交接和重启不顺延截止时间。消息区区分用户、自动通知与执行者回报，附带的任务信息可展开查看。</p></li>
+            <li data-actors="host program" data-short="调用派工"><span class="flow-stage">04 / 决策</span><h3>中控安排代表动作样板</h3><p>中控判断优先级后调用 <code>ma4_dispatch</code>，提供具体要求、读写权限和写入范围。程序返回“已排队”。</p><p class="technical">执行者不会自动拥有中控的完整上下文。它收到的是这次明确写出的任务，以及权限和材料说明。</p></li>
+            <li data-actors="host program" data-short="等待条件"><span class="flow-stage">05 / 排队</span><h3>中控结束本轮，程序接着管理</h3><p>中控结束当前回合。程序检查预算、项目写入冲突和运行状态，条件允许后再启动执行者。</p><p class="technical">等待由程序处理，模型不需要循环查询。省略 write_scope 时继承已确认目录的授权范围；显式空数组代表整个目录，须已有相应授权。明确不重叠的范围可以并行。</p></li>
+            <li data-actors="program worker" data-short="发送工作"><span class="flow-stage">06 / 执行入口</span><h3>具体任务发给执行会话</h3><p>程序经原有消息链路发送指令，附上读写范围、任务临时目录和交付要求。执行者开始一轮工作。</p><p class="technical"><code>launch → Hub.send_raw → turn/start</code><br>同一个执行会话可以在后续轮次继续使用。</p></li>
+            <li data-actors="worker files" data-short="制作成果"><span class="flow-stage">07 / 制作</span><h3>执行者完成修改与验证</h3><p>素材和源码直接进入所属项目，临时材料放在任务目录。执行者核对结果，最后报告成果路径、验证、失败项及材料去向。</p><p class="technical">主要制作和修改交给执行者。中控具备完全访问能力，但聚焦统筹和独立检查；必要的少量辅助修改需避开执行者正在修改的文件。</p></li>
+            <li data-actors="worker program" data-short="完成通知"><span class="flow-stage">08 / 事件</span><h3>Codex 通知这一轮结束</h3><p>完成事件经通信客户端到 Hub，再送入 Controllers 的事件队列。程序提取执行者最终报告，记录回合状态和收到的用量。</p><p class="technical">若事件没有完整回答，按需读取对应历史。长报告取前 2,000 字和后 1,000 字，另列失败信息与会话/轮次身份。</p></li>
+            <li data-actors="program host" data-short="回传报告"><span class="flow-stage">09 / 回传</span><h3>报告交回空闲的中控</h3><p>中控忙碌时报告先保存在 pending；空闲且任务状态、预算允许时，每批最多 8 份交给中控，并再次附上当前完整目标、预算和状态，开始新的验收回合。</p><p class="technical">发送确认后才清除对应报告；发送不明时保留标记并核对，不盲重发。报告附带当前写入路径快照；其他执行者写入不阻挡报告送达，但相关文件仍需暂缓验收。完整解释仍可回原会话读取。</p></li>
+            <li data-actors="host files" data-short="独立验收"><span class="flow-stage">10 / 验收</span><h3>中控检查真实效果</h3><p>对照完整目标读取实际素材、运行证据和必要的实机画面。执行者说“完成了”只是报告，不能自动算目标达标。</p><p class="technical">发现问题可以继续派工。代表样板通过也只是阶段成果；若任务要求用户确认方向，中控须在扩大制作前暂停等待确认。</p></li>
+            <li data-actors="host program" data-short="明确结束"><span class="flow-stage">11 / 结论</span><h3>结束需要明确工具动作</h3><p>可以结束时，中控调用 <code>ma4_control</code> 的 <code>finish</code>，提交 <code>met</code> 或 <code>unmet</code>、结论和实际证据。程序检查是否还有未完成的执行工作或未回传结果。</p><p class="technical">单轮结束、会话空闲、聊天中说“完成”，都不自动等于整个目标通过。</p></li>
+            <li data-actors="program user" data-short="记录收尾"><span class="flow-stage">12 / 收尾</span><h3>数字由程序继续补齐</h3><p>结束记录保存结论和证据。迟到的收尾用量继续更新，网页通过原有事件流看到统计，无需为补数字再开一次模型回合。</p><p class="technical">预算可能有在途消耗，不能精确截断。必要成果留项目，临时材料按已核实的归属和依赖收尾。</p><div class="flow-replay interactive"><button class="plain" id="show-rework" type="button">查看返工路径：回到第 04 步 →</button></div></li>
+          </ol>
+        </div>
+        <div class="flow-controls interactive"><button class="btn" id="previous-step" type="button">← 上一步</button><button class="btn primary" id="next-step" type="button">下一步 →</button><button class="plain" id="reset-steps" type="button">重看</button><span class="flow-counter" id="flow-counter" role="status">01 / 12</span></div>
+      </div>
+      <div class="callout"><p><strong>交接时改变的是当前中控会话，任务保持。</strong>新中控收到原目标、剩余预算和必要事实，继续接收原执行者的结果。旧中控的解释属于待核实材料，不能代替用户要求。</p></div>
+    </section></details>
+<details class="reading"><summary>谁保管任务，谁保管对话</summary>    <section class="chapter" id="storage">
+      <div class="chapter-head"><span class="chapter-number">补充</span><div><h2>谁保管任务，谁保管对话</h2><p>把任务、会话和文件分开理解，交接与服务重启的行为就容易看清。</p></div></div>
+      <div class="ownership">
+        <article class="surface storage"><small>MA4</small><h3>任务关系与当前状态</h3><p>目标、预算、当前及前任中控、执行者关联、待回传结果、统计和结束记录。</p><code>.ma4/controllers.json</code></article>
+        <article class="surface storage"><small>CODEX</small><h3>原生会话与对话</h3><p>中控和执行者各有一条会话；会话包含多轮运行，每轮又可包含多个工具调用。</p><code>thread → turn → item</code></article>
+        <article class="surface storage"><small>PROJECT</small><h3>实际工作成果</h3><p>源码、素材、游戏文件与必要证据直接保存在所属项目。临时材料按任务归属收尾。</p><code>项目正式文件 / 任务临时目录</code></article>
+      </div>
+      <p>MA4 原有的偏好文件仍保存置顶与已读状态，额度仍使用原有缓存。新增任务状态文件用原子替换保存当前记录，不复制完整原生对话，也不逐轮复制项目。</p>
+      <p>重连或重启后，程序把已保存的任务关系与 Codex 中的实际回合核对。发送结果不明时保留待核对状态，暂停自动推进；不会猜测成功或盲目重发。浏览器只是操作入口，关闭页面后，服务正常运行的中控任务仍可继续。</p>
+      <div class="boundary">
+        <div><span class="boundary-number">BOUNDARY / 01</span><h3>流程条件由程序检查</h3><p>预算、写入排队、结果关联、结束工具参数都可以按规则处理。图像是否好看、成果是否满足目标，仍需要模型与人的实际判断。</p></div>
+        <div><span class="boundary-number">BOUNDARY / 02</span><h3>写入范围属于协作约定</h3><p>同一任务可确认多个工作目录，共用目标和预算；每个执行者绑定实际目录，<code>write_scope</code> 相对此目录。程序跨所有任务检查实际路径冲突。目录授权不是操作系统沙箱，也不能拦截其他终端的写入。</p></div>
+        <div><span class="boundary-number">BOUNDARY / 03</span><h3>计量遵守观测边界</h3><p>缓存输入单列；并行回合用时之和不等于任务历时。通知可能迟到，恢复时缺失的数据明确标为未归属或约值。</p></div>
+      </div>
+    </section></details></section><section class="sources" id="sources"><h2>按图核对源码</h2><p>依据 <code>9a61c19d0f08c2b8b79729277c025873417f051d</code> 与 2026-10-22 本地源码阅读。上述运行源码在核对时无未提交改动；已有 README 改动保留。行号对应这份版本，后续可能移动。未读取会话运行数据或凭据，也未现场发送模型请求。</p><div class="table-wrap"><table class="source-table"><thead><tr><th>图中位置</th><th>源码位置 / 可搜索的函数名</th><th>核对内容</th></tr></thead><tbody>
+<tr><td>A 网页</td><td><a href="web/app.js">web/app.js</a> :104、475、489、879、933、948、1137</td><td>api / appendDelta / send / handle / loadState / connectEvents；HTTP 提交与 SSE 渲染、侧栏定时读取。</td></tr>
+<tr><td>B 接口</td><td><a href="server.py">server.py</a> :40、56、101、127、162、184</td><td>Server / guard / do_GET / do_POST / stream / main；HTTP 并发、路由与事件流。</td></tr>
+<tr><td>C 枢纽</td><td><a href="hub.py">hub.py</a> :178、213、220、230、298、417、490、513、603、708</td><td>Hub / emit / events_after / run / refresh / on_notification / on_request / subscribe / history / send_raw。</td></tr>
+<tr><td>D 通信</td><td><a href="appserver.py">appserver.py</a> :16、29、111、137、162、188</td><td>DEFAULT_SOCKET / WebSocket / AppServer / _read_loop / call / respond；连接、请求配对与回调。</td></tr>
+<tr><td>E 管理</td><td><a href="controllers.py">controllers.py</a> :277、324、351、481、494、694、765、798、934、982、1128、1192、1234</td><td>publish / post / run / begin_closing / close_at_boundary / do_confirm / do_pause / send_host / dispatch / can_launch / complete_worker / reconcile / tick。</td></tr>
+<tr><td>中控界面</td><td><a href="web/controllers.js">web/controllers.js</a> :87、114、167、217、307、384</td><td>createControllers / tree / renderPanel / showForm / operate；任务分组、草案与预算确认、回传状态。</td></tr>
+<tr><td>侧支 / 存储</td><td><a href="quota.py">quota.py</a> :65；<a href="health.py">health.py</a> :23；<a href="activity.py">activity.py</a> :81；hub.py :157</td><td>QuotaPoller / HealthPoller / ActivityPoller / Prefs；账户额度与任务预算来自不同数据。</td></tr>
+</tbody></table></div><div class="source-links"><a href="README.md">README · 当前状态</a><a href="DESIGN.md">DESIGN · 设计约定</a><a href="https://muq.koa-ol.com/e/ma4/" target="_blank" rel="noopener noreferrer">muQ · 原有馆藏 ↗</a></div><p>历史对照保留：加入中控前 <code>3ce173f</code>，中控第一版 <code>5036982</code>，统计与回传优化 <code>6a6f09a</code>；它们不是本页当前版本。外部官方资料与馆藏仅供延伸，离线阅读不需要加载。</p></section><footer class="footer">MA4 · 原生 SVG + HTML/CSS/JavaScript · 无远程字体、渲染器或运行依赖 · <a href="#top">回到页首 ↑</a></footer></main><script>(()=>{'use strict';document.documentElement.classList.add('has-js');
+const svg=document.getElementById('architecture-svg'), view=document.getElementById('map-viewport'), zoomText=document.getElementById('zoom-status');let scale=1,fitMode=true;
+function fitScale(){return Math.max(1080,view.clientWidth)/1600;}
+function applyZoom(next){scale=Math.max(.5,Math.min(2,next));svg.style.width=(1600*scale)+'px';svg.style.minWidth='0';zoomText.textContent=Math.round(scale*100)+'%';document.getElementById('zoom-out').disabled=scale<=.5;document.getElementById('zoom-in').disabled=scale>=2;}
+function fit(){fitMode=true;applyZoom(fitScale());view.scrollLeft=0;}
+document.getElementById('zoom-out').onclick=()=>{fitMode=false;applyZoom(scale-.15);};document.getElementById('zoom-in').onclick=()=>{fitMode=false;applyZoom(scale+.15);};document.getElementById('zoom-fit').onclick=fit;
+window.addEventListener('resize',()=>{if(fitMode)fit();});fit();
+function locate(id){const n=document.getElementById(id);if(!n)return;const b=n.getBBox(),tools=document.querySelector('.map-tools');view.scrollLeft=Math.max(0,b.x*scale-20);window.scrollTo({top:window.scrollY+svg.getBoundingClientRect().top+b.y*scale-document.querySelector('.topbar').offsetHeight-tools.offsetHeight-20,behavior:'instant'});}
+document.querySelectorAll('[data-map-target]').forEach(b=>b.onclick=()=>locate(b.dataset.mapTarget));
+view.addEventListener('keydown',ev=>{if(ev.key==='ArrowRight'||ev.key==='ArrowLeft'){ev.preventDefault();view.scrollLeft+=ev.key==='ArrowRight'?160:-160;}});
+const descriptions=['输入框将会话身份、正文、发送标识和主动选择的附件提交给 HTTP 接口。','HTTP 入口交给 Hub；普通会话直接使用 send_raw，订阅并核对是否空闲。','Hub 经通信客户端发 turn/start；JSON-RPC id 用来匹配这次调用的响应。','Codex 返回含 turn 的响应；Hub 提取 turn.id，整理出 mode 与 turnId，再由 HTTP 返回网页。','本地 Codex 与外部模型交互，也会按需要运行工具；MA4 不实现模型生成。','Codex 推来文本片段，D 读取并把通知交给 C；片段长度没有“一字”保证。','Hub 转成网页事件、编号并暂存在内存，唤醒等待中的 SSE 处理器。','浏览器收到 SSE 事件，按 itemId 累积文本并渲染；完成事件再更新本轮状态。'];
+let messageStep=0;
+function showMessage(n){messageStep=Math.max(1,Math.min(8,n));document.querySelectorAll('.step').forEach(s=>s.classList.toggle('active',s.id==='message-'+messageStep));document.querySelectorAll('[data-message-step]').forEach(x=>x.setAttribute('aria-pressed',String(Number(x.dataset.messageStep)===messageStep)));document.getElementById('message-explanation').textContent=messageStep+' / 8 · '+descriptions[messageStep-1];document.getElementById('message-position').textContent='消息 '+messageStep+' / 8';document.getElementById('message-prev').disabled=messageStep<=1;document.getElementById('message-next').disabled=messageStep>=8;locate('message-'+messageStep);}
+document.querySelectorAll('[data-message-step]').forEach(b=>b.onclick=()=>showMessage(Number(b.dataset.messageStep)));document.getElementById('message-prev').onclick=()=>showMessage(messageStep-1);document.getElementById('message-next').onclick=()=>showMessage(messageStep+1);
+document.getElementById('export-svg').onclick=()=>{const copy=svg.cloneNode(true);copy.removeAttribute('id');copy.removeAttribute('style');copy.setAttribute('width','1600');copy.setAttribute('height','3670');copy.querySelectorAll('.active').forEach(n=>n.classList.remove('active'));const blob=new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(copy)],{type:'image/svg+xml;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='MA4-architecture-2026-10-22.svg';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);document.getElementById('export-status').textContent='已请求下载整张 SVG：含图内样式、说明与版本，无外部资源。';};
+let printOpen=[];window.addEventListener('beforeprint',()=>{printOpen=[...document.querySelectorAll('details')].filter(n=>n.open);document.querySelectorAll('details.reading').forEach(n=>n.open=true);});window.addEventListener('afterprint',()=>document.querySelectorAll('details').forEach(n=>n.open=printOpen.includes(n)));document.getElementById('print-page').onclick=()=>window.print();
+      const list = document.getElementById('flow-list');
+      const steps = [...list.children];
+      const nav = document.getElementById('step-nav');
+      let current = 0;
+      const buttons = steps.map((step,index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = String(index + 1).padStart(2,'0');
+        button.setAttribute('aria-label',`第 ${index + 1} 步：${step.dataset.short}`);
+        button.addEventListener('click',() => showStep(index));
+        nav.append(button);
+        return button;
+      });
+      function showStep(index) {
+        current = Math.max(0,Math.min(steps.length - 1,index));
+        steps.forEach((step,i) => {step.hidden = i !== current;});
+        buttons.forEach((button,i) => {if(i === current)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');});
+        const active = new Set(steps[current].dataset.actors.split(' '));
+        document.querySelectorAll('[data-actor]').forEach(actor => {
+          const on = active.has(actor.dataset.actor);
+          actor.classList.toggle('active',on);
+          actor.setAttribute('aria-label',actor.querySelector('b').textContent+(on?'：当前参与':'：本步未参与'));
+        });
+        document.getElementById('previous-step').disabled = current === 0;
+        document.getElementById('next-step').disabled = current === steps.length - 1;
+        document.getElementById('flow-counter').textContent = `${String(current + 1).padStart(2,'0')} / ${steps.length} · ${steps[current].dataset.short}`;
+      }
+      document.getElementById('previous-step').addEventListener('click',() => showStep(current - 1));
+      document.getElementById('next-step').addEventListener('click',() => showStep(current + 1));
+      document.getElementById('reset-steps').addEventListener('click',() => showStep(0));
+      document.getElementById('show-rework').addEventListener('click',() => {showStep(3);buttons[3].focus({preventScroll:true});});
+showStep(0);})();</script></body></html>

@@ -8,7 +8,7 @@ import sys
 import time
 
 from appserver import Disconnected, RpcError, tcp_address
-from runtime import ROOT, child_environment, find_codex, load_config, open_terminal
+from runtime import ROOT, child_environment, find_codex, load_config, open_terminal, ensure_daemon
 
 
 def main():
@@ -36,6 +36,11 @@ def main():
     if args.component == "terminal":
         open_terminal(binary, endpoint, Path(args.cwd).resolve(),
                       args.thread_id, config.get("codex_home"))
+        return 0
+
+    if not endpoint.startswith("ws://"):
+        ensure_daemon(binary, endpoint, config.get("codex_home"))
+        print("Codex 原生后台已就绪；关闭此窗口不会停止后台。", flush=True)
         return 0
 
     host, port = tcp_address(endpoint)

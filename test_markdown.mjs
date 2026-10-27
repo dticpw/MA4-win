@@ -31,16 +31,29 @@ test("tables, lists and headings", () => {
   assert.ok(html.includes("<td>1</td><td>2</td>"));
 });
 
-test("local file links show the name only", () => {
+test("local file links are keyboard accessible desktop actions", () => {
   const html = renderMarkdown("见 [README.md](/mnt/e/PG/x/README.md)");
-  assert.ok(html.includes('<span class="file-ref" title="/mnt/e/PG/x/README.md">README.md</span>'));
+  assert.ok(html.includes('<button type="button" class="file-ref" data-file-path="/mnt/e/PG/x/README.md"'));
+  assert.ok(html.includes('>README.md</button>'));
   assert.ok(!html.includes("href="));
 });
 
-test("Windows and spaced local links stay inert and escaped", () => {
-  const html = renderMarkdown('[文档](<E:/中文 项目/README.md>) [x](C:\\Users\\a.txt)');
-  assert.ok(html.includes('title="E:/中文 项目/README.md"'));
-  assert.ok(html.includes('title="C:\\Users\\a.txt"'));
-  assert.ok(!html.includes('href='));
-  assert.ok(!renderMarkdown('[x](javascript:alert(1))').includes('href='));
+test("file references preserve relative paths, spaces, parentheses and line citations", () => {
+  for (const path of ["README.md:12", "src/ui.js#L3-L9", "./report.html", "../other/file.txt", "file:///home/a.png", "E:/PG/readme.md", "/a/file(1).png"]) {
+    assert.ok(renderMarkdown(`[文件](${path})`).includes(`data-file-path="${path}"`), path);
+  }
+  assert.ok(renderMarkdown("[报告](</home/中文目录/a b.html:5>)").includes('data-file-path="/home/中文目录/a b.html:5"'));
+  assert.ok(renderMarkdown("[`README.md`](README.md)").includes('><code>README.md</code></button>'));
+});
+
+test("file links cannot inject markup, activate schemes or format code examples", () => {
+  for (const path of ["javascript:alert(1)", "data:text/html,evil", "vscode://file/a", "//evil/a", "#heading"]) {
+    assert.ok(!renderMarkdown(`[x](${path})`).includes('class="file-ref"'), path);
+  }
+  const html = renderMarkdown('[<img src=x onerror=alert(1)>](</a/" onclick="evil.txt>)');
+  assert.ok(html.includes('&quot; onclick=&quot;'));
+  assert.ok(!html.includes('<img'));
+  assert.ok(!html.includes(' onclick="'));
+  assert.ok(!renderMarkdown('`[README](README.md)`').includes('<button'));
+  assert.ok(renderMarkdown('[x](/a/**keep**.txt)').includes('data-file-path="/a/**keep**.txt"'));
 });

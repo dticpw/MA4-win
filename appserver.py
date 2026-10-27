@@ -1,6 +1,7 @@
 """JSON-RPC client for the shared Codex app-server daemon.
 
-The shared server uses loopback TCP on Windows or a Unix socket on Linux,
+The shared server uses a native proxy on Windows or a Unix socket on Linux,
+with explicit loopback TCP also supported,
 with WebSocket text frames carrying JSON-RPC. This module uses only the standard library: a small WebSocket
 client, a reader thread, and request/response matching.
 """
@@ -16,7 +17,7 @@ import threading
 from urllib.parse import urlsplit
 
 DEFAULT_SOCKET = Path.home() / ".codex/app-server-control/app-server-control.sock"
-DEFAULT_ENDPOINT = "ws://127.0.0.1:8765" if os.name == "nt" else DEFAULT_SOCKET
+DEFAULT_ENDPOINT = "proxy://" if os.name == "nt" else DEFAULT_SOCKET
 
 
 def tcp_address(endpoint):
@@ -42,9 +43,15 @@ class Disconnected(Exception):
 class WebSocket:
     """Minimal WebSocket client over local TCP or a Unix socket (text only)."""
 
-    def __init__(self, path, timeout=10):
+    def __init__(self, path, timeout=10, codex_bin=None):
         endpoint = str(path)
-        if endpoint.startswith("ws://"):
+        if endpoint.startswith("proxy://"):
+            if not codex_bin:
+                raise ValueError("proxy 接入需要明确 Codex 可执行文件")
+            from os_adapters.windows import ProxyStream
+            self.sock = ProxyStream(codex_bin, endpoint[8:] or DEFAULT_SOCKET, timeout=timeout)
+            authority = "localhost"
+        elif endpoint.startswith("ws://"):
             host, port = tcp_address(endpoint)
             self.sock = socket.create_connection((host, port), timeout=timeout)
             authority = ("[" + host + "]" if ":" in host else host) + ":" + str(port)
@@ -160,7 +167,8 @@ class AppServer:
     """
 
     def __init__(self, path=DEFAULT_ENDPOINT, on_notification=None, on_request=None,
-                 on_disconnect=None, client_name="ma4", version="0.1"):
+                 on_disconnect=None, client_name="ma4", version="0.1", experimental=True,
+                 codex_bin=None):
         self.on_notification = on_notification or (lambda method, params: None)
         self.on_request = on_request or (lambda rid, method, params: None)
         self.on_disconnect = on_disconnect or (lambda reason: None)
@@ -168,13 +176,13 @@ class AppServer:
         self.pending = {}
         self.lock = threading.Lock()
         self.closed = False
-        self.ws = WebSocket(path)
+        self.ws = WebSocket(path, codex_bin=codex_bin)
         self.reader = threading.Thread(target=self._read_loop, daemon=True)
         self.reader.start()
         try:
             self.info = self.call("initialize", {
                 "clientInfo": {"name": client_name, "version": version},
-                "capabilities": {"experimentalApi": True}})
+                "capabilities": {"experimentalApi": experimental}})
             self.notify("initialized")
         except Exception:
             self.close()
@@ -203,7 +211,12 @@ class AppServer:
                 slots, self.pending = list(self.pending.values()), {}
             for slot in slots:
                 slot["event"].set()
-            self.on_disconnect(reason)
+            # Reconnect drops the old client reference. Release its socket/proxy
+            # here as well as in close(), including peer-initiated disconnects.
+            try:
+                self.ws.close()
+            finally:
+                self.on_disconnect(reason)
 
     def call(self, method, params=None, timeout=30):
         if self.closed:

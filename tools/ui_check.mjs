@@ -30,14 +30,14 @@ try {
       if (r.url().startsWith(base) && r.status() >= 400) problems.push(w + ": HTTP " + r.status() + " " + r.url());
     });
     await page.goto(base + "/" + (id ? "#" + id : ""));
-    await page.waitForSelector(id ? ".turn" : ".thread", { timeout: 15000 });
+    await page.waitForSelector(id ? ".turn" : ".thread, .project-group", { timeout: 15000 });
     await page.waitForTimeout(300);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (overflow > 0) problems.push(w + ": horizontal overflow " + overflow + "px");
     await page.getByRole("searchbox", { name: "搜索会话或目录" }).count().then(n => {
       if (n !== 1) problems.push(w + ": search label missing");
     });
-    if (id && await page.locator("#input").getAttribute("aria-label") !== "发送消息")
+    if (id && await page.locator("#input").getAttribute("aria-label") !== "消息正文")
       problems.push(w + ": composer label missing");
     await page.screenshot({ path: join(out, "w" + w + ".png"), fullPage: true });
     checks.push(w + "x" + h + " " + scheme + ": rendered, no horizontal overflow");

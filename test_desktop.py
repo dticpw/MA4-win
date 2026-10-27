@@ -1,5 +1,6 @@
 """Windows process integration tests in a disposable, isolated CODEX_HOME."""
 import json
+import contextlib
 import os
 from pathlib import Path
 import socket
@@ -7,7 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import desktop
 from runtime import ROOT, child_environment, find_codex
@@ -17,6 +18,37 @@ def free_port():
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
         return s.getsockname()[1]
+
+
+class NativeLauncherTest(unittest.TestCase):
+    def test_native_reuse_has_no_owned_backend_or_tcp_probe(self):
+        with tempfile.TemporaryDirectory() as folder:
+            config = Path(folder) / 'config.json'
+            config.write_text(json.dumps({'app_server': 'proxy://' + str(Path(folder) / 'control')}), encoding='utf-8')
+            with patch('desktop.launch_lock', return_value=contextlib.nullcontext()), \
+                    patch('desktop.port_open', return_value=True), \
+                    patch('desktop.web_state', return_value={'daemon': {'connected': True}}), \
+                    patch('desktop.find_codex', return_value='codex'), \
+                    patch('desktop.ensure_daemon') as ensure, \
+                    patch('desktop.AppServer') as client, \
+                    patch('desktop.tcp_address') as tcp, patch('desktop.spawn') as spawn:
+                desktop.start(config, browser=False)
+                ensure.assert_called_once()
+                self.assertEqual(client.call_args.kwargs['codex_bin'], 'codex')
+                client.return_value.close.assert_called_once()
+                tcp.assert_not_called()
+                spawn.assert_not_called()
+                self.assertEqual(desktop.context(config)[3], {})
+
+    def test_include_backend_never_stops_native_daemon(self):
+        with tempfile.TemporaryDirectory() as folder:
+            state_file = Path(folder) / 'state.json'
+            state = {'web': {'pid': 1}, 'backend': {'pid': 2}}
+            with patch('desktop.launch_lock', return_value=contextlib.nullcontext()), \
+                    patch('desktop.context', return_value=(None, {'app_server': 'proxy://control'}, state_file, state)), \
+                    patch('desktop.stop_owned', return_value=True) as stop:
+                self.assertEqual(desktop.stop('config', include_backend=True), ['web'])
+                stop.assert_called_once_with({'pid': 1})
 
 
 @unittest.skipUnless(os.name == "nt", "Windows launcher")

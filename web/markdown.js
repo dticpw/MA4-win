@@ -6,20 +6,30 @@ const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({
 }[c]));
 
 function inline(text) {
-  const codes = [];
+  const fragments = [];
+  const keep = (html) => `\u0000${fragments.push(html) - 1}\u0000`;
+  const restore = (s) => s.replace(/\u0000(\d+)\u0000/g, (_, i) => fragments[i]);
   let s = escapeHtml(text).replace(/`([^`\n]+)`/g, (_, code) => {
-    codes.push(code);
-    return `\u0000${codes.length - 1}\u0000`;
+    return keep(`<code>${code}</code>`);
   });
-  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    (_, label, url) => `<a href="${url}" target="_blank" rel="noopener">${label}</a>`);
-  // Codex links local files as [name](/abs/path); show the name, keep the path in a tooltip.
-  s = s.replace(/\[([^\]]+)\]\((?:&lt;)?((?:\/|[A-Za-z]:[\\/]|\\\\)[^\n)]*?)(?:&gt;)?\)/g,
-    (_, label, path) => `<span class="file-ref" title="${path}">${label}</span>`);
+  s = s.replace(/\[([^\]]+)\]\((?:&lt;([^\n]*?)&gt;|([^\s()]*(?:\([^\s()]*\)[^\s()]*)*))\)/g,
+    (match, label, angle, plain) => {
+      const path = angle ?? plain;
+      if (!path || /[\u0000-\u001f]/.test(path)) return match;
+      label = restore(label);
+      if (/^https?:\/\//i.test(path)) {
+        return keep(`<a href="${path}" target="_blank" rel="noopener">${label}</a>`);
+      }
+      // File references are desktop actions: browsers refuse HTTP -> file:// navigation.
+      if (path.startsWith("#") || path.startsWith("//") ||
+          (/^[a-z][a-z0-9+.-]*:/i.test(path) && !/^file:\/\//i.test(path) &&
+           !/^[a-z]:[\\/]/i.test(path) && !/^[^:]+:\d+(?::\d+)?(?:-\d+)?$/.test(path))) return match;
+      return keep(`<button type="button" class="file-ref" data-file-path="${path}" title="用系统默认应用打开：${path}">${label}</button>`);
+    });
   s = s.replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g,
-    (_, pre, url) => `${pre}<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
+    (_, pre, url) => `${pre}${keep(`<a href="${url}" target="_blank" rel="noopener">${url}</a>`)}`);
   s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`);
+  return restore(s);
 }
 
 function table(lines) {

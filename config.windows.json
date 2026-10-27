@@ -1,0 +1,15 @@
+{
+  "app_server": "proxy://",
+  "data_dir": ".ma4",
+  "activity": {
+    "credential_cli": "C:/Users/DTICPW/agent-workflows/skills/credential-vault/scripts/credential_vault.py",
+    "credential_file": "E:/PG/keys/credentials.md"
+  },
+  "folds": [
+    {
+      "name": "RPGO3dPixel · 旧普通会话",
+      "cwd_prefix": "E:/PG/RPGO3dPixel",
+      "include_active": true
+    }
+  ]
+}

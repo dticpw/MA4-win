@@ -1,6 +1,11 @@
 {
   "port": 8764,
   "codex_bin": null,
+  "activity": {
+    "games_url": "https://muq.koa-ol.com/ace21-api",
+    "stats_url": "https://koa-ol.com/api/stats",
+    "stats_credential": "koa-chat-stats"
+  },
   "links": [
     {
       "name": "muQ",
@@ -21,13 +26,6 @@
       "url": "https://koa-ol.com/ace21-api/health"
     }
   ],
-  "folds": [
-    {
-      "name": "RPGO3dPixel",
-      "cwd_prefix": "E:/PG/RPGO3dPixel",
-      "include_active": true
-    }
-  ],
-  "app_server": "ws://127.0.0.1:8765",
-  "codex_home": null
+  "app_server": null,
+  "auto_start_daemon": true
 }

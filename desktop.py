@@ -13,7 +13,7 @@ import time
 import urllib.request
 
 from appserver import AppServer, tcp_address
-from runtime import ROOT, child_environment, find_app_browser, find_codex, load_config, runtime_key
+from runtime import ROOT, child_environment, find_app_browser, find_codex, load_config, runtime_key, ensure_daemon
 
 
 # Retain handles for deliberately detached children while this launcher is alive.
@@ -197,7 +197,8 @@ def start(config_path, browser=True):
         if not 1 <= port <= 65535:
             raise ValueError("网页端口必须在 1–65535 之间")
         endpoint = config["app_server"]
-        host, backend_port = tcp_address(endpoint)
+        native = not endpoint.startswith("ws://")
+        host, backend_port = (None, None) if native else tcp_address(endpoint)
         if port == backend_port:
             raise ValueError("网页和共享后台必须使用不同端口")
         base = "http://127.0.0.1:" + str(port)
@@ -205,9 +206,11 @@ def start(config_path, browser=True):
         if web_exists:
             web_state(base, key)  # refuse foreign HTTP before starting anything
         created = []
+        binary = find_codex(config.get("codex_bin"))
         try:
-            if not port_open(host, backend_port):
-                binary = find_codex(config.get("codex_bin"))
+            if native:
+                ensure_daemon(binary, endpoint, config.get("codex_home"))
+            elif not port_open(host, backend_port):
                 proc = spawn([binary, "app-server", "--listen", endpoint],
                              child_environment(binary, config.get("codex_home")))
                 created.append(("backend", proc))
@@ -216,7 +219,7 @@ def start(config_path, browser=True):
                 wait_ready(proc, lambda: backend_ready(endpoint), "共享后台")
             elif not backend_ready(endpoint):
                 raise ValueError("后台端口已占用，但不是已就绪的 Codex app-server")
-            client = AppServer(endpoint, client_name="ma4_launcher")
+            client = AppServer(endpoint, client_name="ma4_launcher", codex_bin=binary)
             client.close()
             if not web_exists:
                 proc = spawn([sys.executable, "-B", "-X", "utf8", str(ROOT / "launch.py"),
@@ -251,7 +254,7 @@ def start(config_path, browser=True):
 def stop(config_path, include_backend=False):
     with launch_lock(config_path):
         path, config, state_file, state = context(config_path)
-        roles = ["web", "backend"] if include_backend else ["web"]
+        roles = ["web", "backend"] if include_backend and config["app_server"].startswith("ws://") else ["web"]
         stopped = []
         for role in roles:
             if stop_owned(state.get(role)):

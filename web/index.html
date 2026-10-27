@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MA4</title>
-<link rel="icon" type="image/x-icon" href="/favicon.ico?v=ma4-panels-1">
-<link rel="icon" type="image/svg+xml" sizes="any" href="/ma4-icon.svg?v=ma4-panels-1">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" sizes="any" href="/ma4-icon.svg">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -37,7 +37,7 @@
   </nav>
   <div class="top-right">
     <button id="notify-toggle" class="ghost small" type="button">开启桌面提醒</button>
-    <span id="daemon" class="daemon" title="Codex 共享后台">共享后台</span>
+    <span id="daemon" class="daemon" title="Codex 守护进程">守护进程</span>
     <button id="theme-toggle" class="icon-button" type="button" title="切换外观"></button>
     <div class="clock"><b id="clock-time">--:--</b><span id="clock-date"></span></div>
   </div>
@@ -48,14 +48,19 @@
     <div class="sessions-head">
       <div class="search">
         <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg>
-        <input id="search" aria-label="搜索会话或目录" type="search" placeholder="搜索会话 / 目录" autocomplete="off">
+        <input id="search" type="search" aria-label="搜索会话或目录" placeholder="搜索会话 / 目录" autocomplete="off">
       </div>
-      <button id="new-thread" class="primary small" type="button">＋ 新建</button>
+      <div class="new-actions"><button id="new-controller" class="primary small" type="button">＋ 中控</button><button id="new-thread" class="ghost small" type="button">＋ 会话</button></div>
+    </div>
+    <div id="session-tabs" class="session-tabs" role="tablist" aria-label="会话类型">
+      <button id="tab-tasks" type="button" role="tab" data-sidebar-view="tasks" aria-controls="session-panel" aria-selected="true">中控任务 <span>0</span></button>
+      <button id="tab-sessions" type="button" role="tab" data-sidebar-view="sessions" aria-controls="session-panel" aria-selected="false" tabindex="-1">普通会话 <span>0</span></button>
     </div>
     <div id="filter-bar" class="filter-bar" hidden>
       <span id="filter-label"></span><button id="filter-clear" class="link" type="button">显示全部</button>
     </div>
-    <ul id="thread-list" class="thread-list"></ul>
+    <p id="controller-error" class="controller-error" hidden></p>
+    <div id="session-panel" class="session-panel" role="tabpanel" aria-labelledby="tab-tasks" tabindex="0"><ul id="thread-list" class="thread-list"></ul></div>
   </aside>
 
   <section class="chat glass" id="chat">
@@ -78,22 +83,44 @@
         </div>
         <div class="chat-actions">
           <button id="pin" class="ghost small" type="button">置顶</button>
-          <button id="terminal" class="ghost small" type="button" title="通过共享后台在终端继续此会话">在终端打开</button>
+          <button id="terminal" class="ghost small" type="button" title="用 codex resume 在终端接入同一会话">在终端打开</button>
           <button id="interrupt" class="danger small" type="button" hidden>中断</button>
         </div>
       </div>
+      <section id="task-context" class="task-context" hidden>
+        <div class="task-context-head"><strong id="task-name"></strong><span id="task-state" class="task-state"></span></div>
+        <p id="task-budget" class="hint"></p>
+        <p id="task-phase" class="hint"></p>
+        <p id="task-draft-notice" class="task-note" hidden></p>
+        <div id="task-reports" class="task-reports" aria-live="polite" hidden></div>
+        <details><summary>正式目标与验收结论</summary><p id="task-target"></p><p id="task-summary" hidden></p></details>
+        <details><summary>工作目录与执行范围</summary><div id="task-workspace-summary"></div></details>
+        <details id="task-statistics-details"><summary>用时与 token 统计</summary><div id="task-statistics"></div></details>
+        <p id="task-note" class="task-note" hidden></p>
+        <div class="task-controls">
+          <button id="task-resume" class="primary small" type="button">确认目标并启动</button>
+          <button id="task-pause" class="ghost small" type="button">暂停任务</button>
+          <button id="task-edit" class="ghost small" type="button">草案与预算</button>
+          <button id="task-handoff" class="ghost small" type="button">中控交接</button>
+          <button id="task-artifacts" class="ghost small" type="button">临时材料</button>
+          <button id="task-remove" class="ghost small" type="button">移除任务</button>
+          <button id="task-back-host" class="ghost small" type="button" hidden>返回当前中控</button>
+        </div>
+      </section>
       <div id="messages" class="messages">
         <button id="older" class="ghost small older" type="button" hidden>加载更早的记录</button>
         <div id="turns"></div>
         <div id="live-status" class="live-status" hidden></div>
       </div>
       <form id="composer" class="composer">
-        <ul id="palette" class="palette glass" hidden></ul>
+        <ul id="palette" class="palette glass" role="listbox" aria-label="命令与 Skill 候选" hidden></ul>
+        <div id="composer-skills" class="composer-skills" aria-label="本条消息的 Skill 附件" hidden></div>
         <div class="composer-box">
-          <textarea id="input" aria-label="发送消息" rows="2" placeholder="发给这个会话…"></textarea>
+          <textarea id="input" rows="2" placeholder="发给这个会话…" aria-label="消息正文" aria-controls="palette" aria-expanded="false" aria-autocomplete="list"></textarea>
           <button id="send" class="primary send" type="submit">发送</button>
         </div>
         <div class="composer-row">
+          <button id="choose-skill" class="ghost small" type="button" aria-controls="palette" aria-expanded="false">＋ Skill 附件</button>
           <span id="composer-hint" class="hint"></span>
           <span class="keys"><kbd>/</kbd> 命令 <kbd>$</kbd> Skill <kbd>Shift</kbd>+<kbd>Enter</kbd> 换行</span>
         </div>
@@ -115,14 +142,27 @@
       <ul id="health" class="health"></ul>
       <div id="links" class="links"></div>
     </section>
+    <section class="card glass" id="activity-card" hidden>
+      <h3>服务使用情况</h3>
+      <div id="service-activity"></div>
+      <p class="hint activity-note">游戏仅统计已入座且保持连接的玩家。</p>
+    </section>
   </aside>
 </main>
+
+<dialog id="activity-dialog" class="glass activity-dialog" aria-labelledby="activity-title">
+  <h3 id="activity-title">Chat / 代理 · 近期活跃</h3>
+  <p class="hint">最近 5 分钟有调用记录的 IP，包含网页 Chat 与 GPT 代理。不是实时在线人数；城市为网络出口归属地。</p>
+  <p id="activity-detail-status" class="hint" role="status"></p>
+  <div id="activity-visitors"></div>
+  <form method="dialog"><div class="dialog-row"><button class="ghost">关闭</button></div></form>
+</dialog>
 
 <dialog id="new-dialog" class="glass">
   <form method="dialog" id="new-form">
     <h3>新建会话</h3>
     <label>工作目录
-      <input id="new-cwd" list="cwd-options" required placeholder="E:\PG\项目名">
+      <input id="new-cwd" list="cwd-options" required placeholder="已存在的项目绝对路径">
     </label>
     <datalist id="cwd-options"></datalist>
     <label>第一条消息（可选）
@@ -136,6 +176,63 @@
   </form>
 </dialog>
 
+<dialog id="task-dialog" class="glass task-dialog">
+  <form id="task-form" onsubmit="return false">
+    <h3 id="task-dialog-title">新建任务中控</h3>
+    <label>项目文件夹<input id="task-cwd" list="cwd-options" required placeholder="已存在的项目绝对路径"></label>
+    <label>中控 / 任务名称<input id="task-form-name" required maxlength="100" placeholder="例如：废墟花园场景复刻"></label>
+    <div id="task-create-fields">
+      <label>初步想法（可选）<textarea id="task-form-idea" rows="3" maxlength="40000" placeholder="可以先说大概想做什么，再和中控一起梳理。"></textarea></label>
+      <p class="hint">填写后将作为第一条讨论消息发给中控；留空则等你开口。创建不会启动执行，讨论仍消耗模型额度。</p>
+    </div>
+    <div id="task-review-fields" hidden>
+    <details id="task-current-details"><summary>当前正式目标（与下方草案对照）</summary><pre id="task-current-target" class="goal-compare"></pre></details>
+    <label>目标、范围与验收草案<textarea id="task-form-target" rows="8" maxlength="20000" placeholder="目标：希望得到什么&#10;范围：包括哪些内容、哪些不做&#10;验收：通过什么实际成果与证据判断完成"></textarea></label>
+    <p id="task-change-note" class="hint" role="status"></p>
+    <fieldset class="workspace-fields">
+      <legend>本任务可用的工作目录</legend>
+      <p class="hint">每个执行会话使用一个目录；写入范围相对此目录，每行一个路径。范围留空允许整个目录。所有目录共用本任务的目标与预算。</p>
+      <details id="task-current-workspaces"><summary>当前已授权目录（与草案对照）</summary><pre id="task-current-workspace-text" class="goal-compare"></pre></details>
+      <div id="task-workspace-rows"></div>
+      <button id="task-add-workspace" type="button" class="ghost">＋ 添加工作目录</button>
+      <p id="task-workspace-note" class="hint" role="status"></p>
+    </fieldset>
+    </div>
+    <label><span id="task-duration-label">启动后时限（min）</span><input id="task-duration" type="number" min="1" step="1" inputmode="numeric" aria-describedby="task-duration-hint" placeholder="填写分钟数，例如 480"></label>
+    <p id="task-duration-hint" class="hint" hidden>填写后按点击保存或确认时起算，替换下方截止时间；留空则保留该时间。不是在旧截止时间上追加。只存草案时记录截止时间，确认后才生效。</p>
+    <p class="hint">到时停止新增派工，等待当前工作收尾，再由中控汇总。实际结束可能稍晚；token 与金额上限仍会请求立即停止。</p>
+    <details id="task-advanced-budget" class="money-options"><summary>其他预算限制（可选）</summary>
+      <div class="budget-fields">
+        <label>累计 token 上限<input id="task-tokens" type="number" min="1" step="1" placeholder="不限制"></label>
+        <label><span id="task-deadline-label">指定截止时间（优先）</span><input id="task-deadline" type="datetime-local"></label>
+      </div>
+      <div class="budget-fields"><label>金额上限<input id="task-money" type="number" min="0.001" step="any" placeholder="不限制"></label><label>币种<input id="task-currency" maxlength="8" value="CNY"></label></div>
+      <p class="hint">每百万 token 单价；金额是估算，不是供应商账单。</p>
+      <div class="budget-fields rates"><label>输入<input id="task-rate-input" type="number" min="0" step="any"></label><label>缓存输入<input id="task-rate-cached" type="number" min="0" step="any"></label><label>输出<input id="task-rate-output" type="number" min="0" step="any"></label></div>
+    </details>
+    <p class="hint">默认不设金额和 token 上限。创建时填写的启动后时限在首次启动时开始计时；已设定的截止时间不会因暂停、继续或交接自动推迟。</p>
+    <p id="task-confirm-hint" class="hint" hidden></p>
+    <p id="task-form-error" class="error" role="alert"></p>
+    <div class="dialog-row task-form-actions"><button type="button" class="ghost" data-close-dialog="task-dialog">取消</button><button id="task-save-draft" type="button" class="ghost" hidden>只存草案</button><button id="task-confirm-only" type="button" class="ghost" hidden>确认保存，暂不启动</button><button id="task-save" type="button" class="primary">创建并进入讨论</button></div>
+  </form>
+</dialog>
+<dialog id="handoff-dialog" class="glass">
+  <form id="handoff-form" onsubmit="return false">
+    <h3>交接给新的中控会话</h3>
+    <p class="hint">目标、预算和执行会话会保留。当前中控结束本轮后切换；也可在对话中请中控自行整理并发起交接。</p>
+    <label>交接说明<textarea id="handoff-summary" required rows="6" placeholder="已确认的用户决定、成果位置、未解决问题。不要把未经验证的判断写成事实。"></textarea></label>
+    <p id="handoff-error" class="error" role="alert"></p>
+    <div class="dialog-row"><button type="button" class="ghost" data-close-dialog="handoff-dialog">取消</button><button id="handoff-submit" type="button" class="primary">安排交接</button></div>
+  </form>
+</dialog>
+<dialog id="artifacts-dialog" class="glass">
+  <h3>本任务的临时材料</h3>
+  <p id="artifacts-info" class="hint"></p>
+  <div id="artifacts-list" class="artifacts-list"></div>
+  <label>清理依据或保留理由<textarea id="artifacts-reason" rows="2" placeholder="确认无依赖，或说明随哪个问题保留…"></textarea></label>
+  <p id="artifacts-error" class="error" role="alert"></p>
+  <div class="dialog-row"><button type="button" class="ghost" data-close-dialog="artifacts-dialog">关闭</button><button id="artifacts-keep" type="button" class="ghost">保留所选</button><button id="artifacts-clean" type="button" class="danger">清理所选</button></div>
+</dialog>
 <div id="toast" class="toast" hidden></div>
 <script type="module" src="/app.js"></script>
 </body>

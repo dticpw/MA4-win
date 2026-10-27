@@ -5,8 +5,8 @@ PartOf=graphical-session.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/dticpw/PG_linux/MA4
-ExecStart=/home/dticpw/conda/envs/py310/bin/python /home/dticpw/PG_linux/MA4/server.py
+WorkingDirectory=/mnt/e/PG/MA4-win
+ExecStart=/home/dticpw/conda/envs/py310/bin/python /mnt/e/PG/MA4-win/server.py
 Environment=PYTHONUNBUFFERED=1
 Restart=on-failure
 RestartSec=3
