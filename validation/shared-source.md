@@ -1,6 +1,6 @@
 # 共享源码迁移 · 当前验证记录
 
-2026-10-28。Linux 实施完成，Windows 本轮核心实测完成并保留明确缺项，下一步回 Linux 做针对性回归。此文件维护当前结果，不新增每轮历史副本。
+2026-10-28。Linux 实施、Windows 核心实测及返回 Linux 的针对性回归已完成；保留明确未测项。此文件维护当前结果，不新增每轮历史副本。
 
 ## 新实现与证据
 
@@ -29,11 +29,23 @@
 - **路径与侧栏：** 中文/空格文本文件由 `/api/file/open` 打开，在 Notepad3 中确认准确两行；小写盘符与编码后的 file URI 成功。实际 `.py`、`.cmd`、`.lnk` 均 HTTP 400 拒绝执行。HTML 由默认 Chrome 打开，窗口标题可见，但浏览器策略拒绝观察 `file://` 内容，故渲染未验收。通知为未授权状态，未操作授权弹窗或测试真实通知。凭据通过 credential-vault 读取，仅写本侧私有 `.ma4/quota-source.json`；使用同服务文档已支持的多家额度接口，当前 Codex/Claude/Grok/Gemini 均有效，muQ 与 21 点健康 HTTP 200，德州/21 点/Chat 统计均不陈旧（本次均 0）。不输出密钥 URL 或访客详情。
 - **一次真实模型实验通过：** 任务 `dd779cf589e74a48`，中控 `01a17e40-f24f-74e1-ab04-7d1ac5f0d7bc`（2 轮），执行者 `01a17e43-1a92-73b3-b32e-f0ef7aef46cc`（1 轮）。116.96 秒，288,401 tokens，其中缓存输入 233,984、输出 3,121；没有提高 15 分钟/300,000 上限，没有第二次模型实验。只产生 `验证 结果.txt`，66 字节，SHA256 `f3be67d616443ecf41d94abf87641a2443e05b6cd17bea50b7f9d5345ec71128`。中控真实命令读取后核对路径、UTF-8 无 BOM、无 CR、两处 LF、准确两行和全文内容，外层再次逐字节核对。中控同一回合中一次 PowerShell 引号错误及一次缺少 finish 结论参数均得到明确错误并修正，未增加回合。最终 completed/met，两个会话已通过现有移除接口归档，中控任务数回到 0；原始 Codex 历史仍由 Codex 管理，未复制。
 
+## 返回 Linux 核对（2026-10-28）
+
+核对对象为共享提交 `1614e51`，工作区起始干净。逐个重算 Windows JSON 记录的 7 个文件 SHA256，全部一致；复核 Windows 模型实验成果 66 字节、SHA256、严格 UTF-8 内容和 LF，全部与记录吻合。Windows 当前任务列表为 0、私有额度源文件存在（未读取或输出凭据），两批临时文件数量/大小符合其记录。Windows 进程/Junction/终端/GUI 的实测结论仍归属 Windows 当日证据，不伪称在 Linux 重跑了 Windows。
+
+- `test_activity`（7 项）+ `test_controllers`（85 项）：共 92 项通过，无跳过或失败；涵盖本次 UTF-8 子进程修正及变动过的路径/报告断言。未扩大为无关全量复跑。
+- `tools/service_activity_check.mjs` 和 `tools/controller_discussion_check.mjs`：1440/1024/390、浅深主题、重连提示/统计失败状态、讨论/权限/预算确认通过。API 模拟，不调用模型。
+- 实际浏览器先连接既有 8764 服务，按约定重启现有 `ma4.service`，观察 SSE 的 `open → error → open`，页面恢复“守护进程已连接”，无脚本错误。原生 daemon 未停止。
+- 重启前后 12 项任务的 id/host/formerHosts/cwd/target/budget/workspaces/draft/goalConfirmed/status/workers 摘要一致；本次开机已载入的 8 个会话全部保留，恢复状态结束。此前开机的 9 个是上一阶段数据，不能要求跨系统重启后的载入集合恒等。
+- 真实德州/21点/Chat 三项统计 `stale=false`、无错误，额度不陈旧，两站健康 `ok=true`；未输出访客详情或密钥。
+- **真实登录启动已验证：** 本次 boot 为 2026-10-28 01:29:34 CST；在本轮任何服务操作前，systemd 本次启动日志已记录 01:30:11 启动 MA4，01:30:12 图形会话目标激活。服务 enabled/active/running、WorkingDirectory=/mnt/e/PG/MA4-win、ExecStart 指共享 server.py、WantedBy=graphical-session.target、KillMode=process；Linger=no。因此证明本次图形登录自动启动，不证明退出登录后持续执行。
+- 未修改业务代码、全局指令或客户端配置，未追加模型实验。只更新现有 README/清单/本验证记录、系统看板与 machine-state。
+
 ## 尚待验证
 
 Windows：4 项 symlink 检查受权限限制；真实通知弹出未测；HTML 的 `file://` 内容观察被浏览器安全策略拒绝；普通 CLI/App 的完整实时共享和运行中跨后台 409 未测（相关错误映射单元测试已通过）。这些缺项不以模拟结果替代，也不为补测另开整套模型实验。
 
-Linux 接续：当前共享源码无需复制。运行 `test_activity` 和 `tools/service_activity_check.mjs`（后者输出放本轮独立临时目录），按需复核改过的跨平台路径/讨论脚本；重启现有 `ma4.service` 后检查真实统计与 SSE 重连提示，核实真正登录启动。不能用 Windows 通过替代 Linux 实测，也不能宣布双系统迁移全部验收。
+Linux 必需回归和真实登录启动已完成。核心迁移可以日常使用，剩余 Windows 明确缺项按实际需求在正常使用时补测，不为补齐报告重新安排整套模型实验或无必要的系统往返。
 
 模型验收上限保持不变且本次已用完授权的一次实验。Linux 实施阶段模型调用为 0。详见清单与看板 B-20261027-02。
 
@@ -54,3 +66,7 @@ Linux 实施阶段正式成果为共享源码/测试/配置/文档与当前验�
 一次性回退材料：两个本地 Git 提交、原位旧 Linux 源码、上述全局指令原文备份/审查目录；保留到 Windows 验收与 Linux 回归完成时复查。旧任务 `.agent-tmp/B-20261027-01/` 等原样保留，不属于本次清理。没有压缩包、持续备份、计划任务或新自启；未 push。
 
 已运行 session_inventory.py，范围含两项目、共享看板/状态/审查目录及四份全局指令。清点中的 Linux `.ma4/controllers.json` 与 `quota-cache.json` 为服务自行维护，未手工编辑或提交。`persona-snapshot.json` 是 persona-sync 既有当前快照，更新一次，不是新备份机制；before-status/facts 是本次独立审查证据。清点列出的 ma4/sunshine/ma3-workbench 均为既有服务，本轮仅修改 ma4 的源码入口。
+
+返回 Linux 本轮的 `.agent-tmp/linux-return/` 18 个模拟检查截图（3,764,117 字节）已在核对后清理；浏览器测试进程已退出，无本轮临时残留。Windows 被策略拒绝删除的两目录和旧协议文件保持原状，没有在 Linux 换命令重试清理。回退源码与既有全局指令审查备份继续登记保留，未新建备份或定时机制。
+
+返回 Linux 收尾已运行 session_inventory.py（从本次01:30起，限定两项目和共享文档目录）：正式修改为共享README/实施清单/本记录、旧Linux README接续指针及看板/machine-state；Linux `.ma4/controllers.json` / `quota-cache.json` 是服务自行更新，未手工改写或提交。未新增备份、打包或定时服务。

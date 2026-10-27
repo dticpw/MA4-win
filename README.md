@@ -4,13 +4,17 @@
 
 ## 现状与接续
 
-2026-10-28：共享源码已在两侧运行，Windows 本轮核心验证完成，明确缺项见下文。**唯一维护源码为 `E:/PG/MA4-win`（Linux `/mnt/e/PG/MA4-win`）**，两边看到的是同一个 NTFS 文件夹。公共 Python/前端文件共用，系统接口在 `os_adapters/linux.py` / `windows.py`，设置按系统覆盖；不建立第二份源码或持续同步。
+2026-10-28：共享源码已在两侧运行，Windows 核心实测及返回 Linux 的针对性回归已完成；核心迁移可投入日常使用，明确缺项见下文。**唯一维护源码为 `E:/PG/MA4-win`（Linux `/mnt/e/PG/MA4-win`）**，两边看到的是同一个 NTFS 文件夹。公共 Python/前端文件共用，系统接口在 `os_adapters/linux.py` / `windows.py`，设置按系统覆盖；不建立第二份源码或持续同步。
 
 Linux 当前中控、预算、跨目录授权、报告回传、恢复、临时材料、服务活动和界面已合入，并保留 Windows 启动器、TCP、路径和编码修复。Linux 上一阶段 178 项 Python 检查（174 通过、4 个 Windows 专属跳过）、22 项 Node、五组模拟页面及实际网页通过；12 项任务和原 9 个载入会话保留。四份全局指令已完成独立审查与同步。
 
 Windows 最终 179 项 Python 检查中 175 通过、4 个 symlink 权限不足跳过；真实 Junction 与 3 项启动器集成测试通过。22 项 Node、五组模拟页面、实际网页 1440/1024/390 通过。原生 CLI/daemon 0.164.0、proxy 断开回收/再连接、快捷方式双击复用、关窗口保留后台、隔离原生/TCP 停止边界、中文空格文件路径、额度四家来源和三项服务统计已核实。唯一真实实验为 1 中控 2 轮 + 1 执行者 1 轮，116.96 秒、288,401 tokens（含 233,984 缓存输入）：单文件写入、报告回传、中控亲自读取、完成及网页/同端点终端实时显示均通过；两个测试会话已归档。证据见 [共享验证记录](validation/shared-source.md) 与 [Windows 实测摘要](validation/windows-parity.json)。
 
-本轮修正共享 `activity.py` 的凭据子进程 UTF-8 编解码，以及 `web/app.js` 断线重连后残留“未连接”提示；其余改动为测试和说明。**下一步回 Linux**：对上述两处做针对性回归（`test_activity`、`service_activity_check` 及真实页面重连），核实既有 `ma4.service` 的真实登录启动；不要再传源码、复制运行数据或默认重复模型实验。Windows 通知实际弹出、HTML 内容渲染、普通 CLI/App 的完整实时共享及运行中跨后台 409 尚未实测；空闲会话跨后台恢复实测为 HTTP 200，不能外推为实时共享。获准清单见 [WINDOWS-PARITY-PLAN.md](WINDOWS-PARITY-PLAN.md)。本轮临时目录清理被自动策略拒绝，已登记保留，禁止换命令绕过；没有推送、全局配置或自启改动。交接只更新本节，不另建历史副本。
+Windows 修正了共享 `activity.py` 的凭据子进程 UTF-8 编解码，以及 `web/app.js` 断线重连后残留“未连接”提示；其余为测试和说明。**Linux 已于本次返回后完成回归**：7 个 Windows 被测文件 SHA256 与现有源码一致，66 字节测试成果摘要/内容符合；`test_activity` + `test_controllers` 92 项通过，服务活动与讨论页面在 1440/1024/390 浅深主题通过。实际浏览器经历 open→error→open 后恢复“守护进程已连接”，无脚本错误；重启前后 12 项任务目标/预算/目录授权/状态一致，本次载入的 8 个会话保留，三项统计和额度不陈旧。
+
+本次真实开机时间为 01:29:34，systemd 日志确认既有 `ma4.service` 于 01:30:11 自动启动共享源码，图形会话目标于 01:30:12 激活；核对时服务 enabled/active/running，Linger=no，不宣称注销后或关机仍能执行。没有再调用模型或修改业务代码。核心迁移不需要再专门安排系统往返；按正常使用反馈维护共享源码。
+
+Windows 真实通知、HTML 内容渲染、普通 CLI/App 的完整实时共享及运行中跨后台 409 仍未实测，4 项 symlink 检查受权限限制；不把同端点 remote TUI 通过外推到所有客户端，也不重复已用完授权的一次模型实验。获准清单见 [WINDOWS-PARITY-PLAN.md](WINDOWS-PARITY-PLAN.md)。Windows 遗留临时删除此前被自动审批拒绝，66 文件/8,824,786 字节已复核并原样保留，不换系统或命令绕过；其余旧材料不动。本轮 Linux 临时截图已清理，结果写现有验证记录与看板 B-20261027-02。交接只更新本节，不另建历史副本。
 
 回退点：旧 Linux 仓库 `510fc47`；本共享仓库原 Windows 版本 `1fec307`。旧 Linux 源码暂留作本次回退，**后续功能不再在旧目录维护**。运行数据、Codex 会话、凭据和环境未迁移。历史 Windows 验证及会话迁移说明保存在 `1fec307:README.md`，不把旧实测视为当前 Windows 通过。
 
@@ -166,7 +170,7 @@ node --test test_markdown.mjs test_controllers.mjs test_paths.mjs
 
 `tools/session_creation_check.mjs`、`controller_discussion_check.mjs`、`controller_details_check.mjs`、`skill_selection_check.mjs`、`service_activity_check.mjs` 使用模拟 API，覆盖桌面/窄屏、键盘、浅深主题和失败状态，不调用模型。`MA4_URL` 可指定本机静态测试入口；截图放本任务 `.agent-tmp/`。`tools/controller_ui_check.mjs` 会创建真实的空闲测试会话，仅在明确需要时运行；不把它当作纯只读检查。
 
-本次各系统实测结果、未测项、临时文件保留原因及回退办法见 [validation/shared-source.md](validation/shared-source.md)。Windows 同端点 remote TUI 的实时事件已经实测；不能外推到其他后台的普通 CLI 或桌面 App。Linux 返回后的针对性回归及真实登录启动尚待完成。
+本次各系统实测结果、未测项、临时文件保留原因及回退办法见 [validation/shared-source.md](validation/shared-source.md)。Windows 同端点 remote TUI 的实时事件已经实测；不能外推到其他后台的普通 CLI 或桌面 App。Linux 返回后的针对性回归及本次真实图形登录启动已验证，剩余 Windows 缺项按前文说明保留。
 
 ## 文件与维护约定
 
