@@ -1,0 +1,101 @@
+{
+  "at": 1794053798.898869,
+  "result": "passed",
+  "stage": "stage1_online",
+  "modelCalls": 0,
+  "oldWeb": {
+    "pid": 13132,
+    "created": 134385010187268453
+  },
+  "daemonProcesses": [
+    {
+      "pid": 29072,
+      "created": 134384984516877459
+    },
+    {
+      "pid": 14016,
+      "created": 134385010176718330
+    },
+    {
+      "pid": 7668,
+      "created": 134385010183479694
+    }
+  ],
+  "taskDigestBefore": "1a1c2c921793e4ce11d09210ff2986668c8dc1dbbeb92727a817fa1604aa43d2",
+  "loadedBefore": [
+    "01a181f9-eab5-7040-913d-0188b7e0d91d",
+    "01a1828e-5d70-7e60-82e8-edc855a77cd4",
+    "01a182d0-eec4-7743-9003-15ebe4c6b555",
+    "01a19c37-3878-7620-be39-d9c9dad7530c",
+    "01a1ac9f-7f79-7c33-a429-a2618115c593",
+    "01a1acfb-3eaa-76d0-9eb8-b78514fcf2d5",
+    "01a1af77-8ad6-7070-9236-81dbfbdef841",
+    "01a1b49e-863b-7a30-b1ba-51664bdd8bd1",
+    "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5",
+    "01a1b571-079e-75f0-a4d2-e8de27bfa9e2"
+  ],
+  "loadedAfter": [
+    "01a181f9-eab5-7040-913d-0188b7e0d91d",
+    "01a1828e-5d70-7e60-82e8-edc855a77cd4",
+    "01a182d0-eec4-7743-9003-15ebe4c6b555",
+    "01a19c37-3878-7620-be39-d9c9dad7530c",
+    "01a1ac9f-7f79-7c33-a429-a2618115c593",
+    "01a1acfb-3eaa-76d0-9eb8-b78514fcf2d5",
+    "01a1af77-8ad6-7070-9236-81dbfbdef841",
+    "01a1b49e-863b-7a30-b1ba-51664bdd8bd1",
+    "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5",
+    "01a1b571-079e-75f0-a4d2-e8de27bfa9e2"
+  ],
+  "protectedTaskFieldsPreserved": true,
+  "daemonProcessesPreserved": true,
+  "observerConnectionPreserved": true,
+  "diagnoses": {
+    "e65cd30e77cb455d": "completed",
+    "06d898324d4744be": "completed",
+    "54e0ee423c2d4b79": "completed",
+    "4724144705094629": "completed",
+    "1dda5fb483a146eb": "completed"
+  },
+  "newWeb": {
+    "pid": 19768,
+    "created": 134385274026579389
+  },
+  "sourceCommit": "5b79fe63149c9068c11b58af4f131365b95a35fa",
+  "page": {
+    "result": "passed",
+    "at": "2026-11-07T12:17:28.972Z",
+    "pages": [
+      {
+        "width": 1440,
+        "theme": "light",
+        "diagnosis": "completed",
+        "formOpenedWithoutRenewal": true,
+        "overflow": false
+      },
+      {
+        "width": 1024,
+        "theme": "dark",
+        "diagnosis": "completed",
+        "formOpenedWithoutRenewal": true,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "diagnosis": "completed",
+        "formOpenedWithoutRenewal": true,
+        "overflow": false
+      }
+    ],
+    "errors": [],
+    "blockedMutationAttempts": [],
+    "mode": "real HTTP/API/SSE, existing Chrome; no API fixture, no model call; open only marks session seen"
+  },
+  "method": [
+    "Check launcher PID/birth time and localhost 8764 owner",
+    "Check live and native loaded threads; only current unmanaged conversation may be active",
+    "Keep independent AppServer connection open; stop/start web with existing desktop entry",
+    "Compare protected task fields, native process identities and loaded thread set",
+    "Open actual RPG host page using Chrome headless at 1440/1024/390, keyboard and confirmation form; no send or task mutations"
+  ]
+}
