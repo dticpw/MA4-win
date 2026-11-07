@@ -90,13 +90,9 @@
       <section id="task-context" class="task-context" hidden>
         <div class="task-context-head"><strong id="task-name"></strong><span id="task-state" class="task-state"></span></div>
         <p id="task-budget" class="hint"></p>
+        <div id="task-diagnosis" class="task-diagnosis" aria-label="任务状态诊断" hidden></div>
         <p id="task-phase" class="hint"></p>
         <p id="task-draft-notice" class="task-note" hidden></p>
-        <div id="task-reports" class="task-reports" aria-live="polite" hidden></div>
-        <details><summary>正式目标与验收结论</summary><p id="task-target"></p><p id="task-summary" hidden></p></details>
-        <details><summary>工作目录与执行范围</summary><div id="task-workspace-summary"></div></details>
-        <details id="task-statistics-details"><summary>用时与 token 统计</summary><div id="task-statistics"></div></details>
-        <p id="task-note" class="task-note" hidden></p>
         <div class="task-controls">
           <button id="task-resume" class="primary small" type="button">确认目标并启动</button>
           <button id="task-pause" class="ghost small" type="button">暂停任务</button>
@@ -106,6 +102,11 @@
           <button id="task-remove" class="ghost small" type="button">移除任务</button>
           <button id="task-back-host" class="ghost small" type="button" hidden>返回当前中控</button>
         </div>
+        <div id="task-reports" class="task-reports" aria-live="polite" hidden></div>
+        <details><summary>正式目标与验收结论</summary><p id="task-target"></p><p id="task-summary" hidden></p></details>
+        <details><summary>工作目录与执行范围</summary><div id="task-workspace-summary"></div></details>
+        <details id="task-statistics-details"><summary>用时与 token 统计</summary><div id="task-statistics"></div></details>
+        <p id="task-note" class="task-note" hidden></p>
       </section>
       <div id="messages" class="messages">
         <button id="older" class="ghost small older" type="button" hidden>加载更早的记录</button>

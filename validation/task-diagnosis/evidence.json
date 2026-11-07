@@ -1,0 +1,339 @@
+{
+  "date": "2026-11-07",
+  "stage": "分阶段优化·阶段1：任务诊断与恢复指引",
+  "scope": "派生状态说明、同一确认/交接阻碍判断、复用现有暂停与确认路径；无自动修复、持久化格式变更、新常驻进程或模型调用",
+  "initialRegression": {
+    "command": "unittest test_controllers.ControllerTest.test_diagnosis_expired_handoff_is_read_only_and_confirmation_renews_explicitly",
+    "result": "failed on old implementation",
+    "error": "KeyError: diagnosis"
+  },
+  "testCorrection": "首次新增在途暂停测试把刚排队的执行者当成已启动；补上现有 tick 启动步骤后通过，未放宽断言。 加入恢复前保护测试时，最初把拒绝断言放在已有 tick 核对之后，定点失败；移到核对前，并保留核对后能继续的原断言。",
+  "checks": {
+    "result": "passed_with_skips",
+    "at_utc": "2026-11-07T10:33:22.295910+00:00",
+    "platform": "win32",
+    "python": "3.10.19",
+    "profiles": [
+      "tasks"
+    ],
+    "ui_requested": true,
+    "checks": [
+      {
+        "check": "python",
+        "status": "passed_with_skips",
+        "exit_code": 0,
+        "counts": {
+          "total": 96,
+          "skipped": 4
+        },
+        "seconds": 19.203
+      },
+      {
+        "check": "node",
+        "status": "passed",
+        "exit_code": 0,
+        "counts": {
+          "total": 14,
+          "passed": 14,
+          "failed": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "seconds": 0.344
+      },
+      {
+        "check": "controller_discussion_check",
+        "status": "passed",
+        "exit_code": 0,
+        "seconds": 11.515
+      },
+      {
+        "check": "controller_details_check",
+        "status": "passed",
+        "exit_code": 0,
+        "seconds": 7.047
+      }
+    ],
+    "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+  },
+  "finalUi": {
+    "command": "既有 tools.verify.static_site + node tools/controller_details_check.mjs；不连接真实API",
+    "result": "OK: pending reports, statistics, tool details, sidebar tabs, closing; diagnosis, expired handoff, in-flight pause, uncertain-send blockers, preserved form inputs, keyboard/live update, 1440/1024/390; no model or state writes",
+    "screenshots": [
+      "diagnosis-w1440.png",
+      "diagnosis-w1024.png",
+      "diagnosis-w390.png",
+      "active-w390.png"
+    ]
+  },
+  "observedRpg": {
+    "id": "06d898324d4744be",
+    "name": "RPGO3d资产管理",
+    "host": "01a1af77-8ad6-7070-9236-81dbfbdef841",
+    "status": "waiting",
+    "hostBusy": false,
+    "hostTurn": null,
+    "note": "",
+    "budget": {
+      "deadline": 1794059808.54,
+      "currency": "CNY"
+    },
+    "workerStates": [
+      "idle",
+      "idle",
+      "idle",
+      "idle",
+      "idle",
+      "idle",
+      "running",
+      "idle"
+    ],
+    "pending": 0,
+    "handoffPending": false,
+    "connected": true,
+    "diagnosisPresent": false
+  },
+  "offlineDiagnosis": {
+    "source": "read-only disk copy; not live service response",
+    "sampledAt": 1794047614.0310981,
+    "tasks": [
+      {
+        "id": "e65cd30e77cb455d",
+        "name": "MA4-win",
+        "status": "completed",
+        "diagnosis": {
+          "code": "completed",
+          "title": "目标已记录为达标",
+          "reason": "结束记录已保存。未记录在途回合。",
+          "nextStep": "你：查看验收结论及实际成果；需要继续时重新核对目标与预算并确认。",
+          "facts": [],
+          "work": {
+            "running": 0,
+            "sending": 0,
+            "queued": 0,
+            "idle": 13,
+            "host": false,
+            "reports": 0
+          },
+          "confirmBlocker": null,
+          "handoffBlocker": "任务已结束或有发送状态未确认",
+          "canPause": false
+        }
+      },
+      {
+        "id": "06d898324d4744be",
+        "name": "RPGO3d资产管理",
+        "status": "waiting",
+        "diagnosis": {
+          "code": "workers_busy",
+          "title": "执行者仍在工作",
+          "reason": "中控当前空闲，不代表整个任务已经停住。",
+          "nextStep": "执行者：完成工作并报告；MA4 在中控空闲且条件允许时自动回传。",
+          "facts": [],
+          "work": {
+            "running": 1,
+            "sending": 0,
+            "queued": 0,
+            "idle": 7,
+            "host": false,
+            "reports": 0
+          },
+          "confirmBlocker": "还有回合或发送操作未结束，请等它们返回后再确认目标",
+          "handoffBlocker": null,
+          "canPause": true
+        }
+      },
+      {
+        "id": "54e0ee423c2d4b79",
+        "name": "中象服务优化",
+        "status": "completed",
+        "diagnosis": {
+          "code": "completed",
+          "title": "目标已记录为达标",
+          "reason": "结束记录已保存。未记录在途回合。",
+          "nextStep": "你：查看验收结论及实际成果；需要继续时重新核对目标与预算并确认。",
+          "facts": [],
+          "work": {
+            "running": 0,
+            "sending": 0,
+            "queued": 0,
+            "idle": 4,
+            "host": false,
+            "reports": 0
+          },
+          "confirmBlocker": null,
+          "handoffBlocker": "任务已结束或有发送状态未确认",
+          "canPause": false
+        }
+      },
+      {
+        "id": "4724144705094629",
+        "name": "东方塔防优化",
+        "status": "completed",
+        "diagnosis": {
+          "code": "completed",
+          "title": "目标已记录为达标",
+          "reason": "结束记录已保存。未记录在途回合。",
+          "nextStep": "你：查看验收结论及实际成果；需要继续时重新核对目标与预算并确认。",
+          "facts": [],
+          "work": {
+            "running": 0,
+            "sending": 0,
+            "queued": 0,
+            "idle": 2,
+            "host": false,
+            "reports": 0
+          },
+          "confirmBlocker": null,
+          "handoffBlocker": "任务已结束或有发送状态未确认",
+          "canPause": false
+        }
+      },
+      {
+        "id": "1dda5fb483a146eb",
+        "name": "MA4 · 第三轮可复用验证工具",
+        "status": "completed",
+        "diagnosis": {
+          "code": "completed",
+          "title": "目标已记录为达标",
+          "reason": "结束记录已保存。未记录在途回合。",
+          "nextStep": "你：查看验收结论及实际成果；需要继续时重新核对目标与预算并确认。",
+          "facts": [],
+          "work": {
+            "running": 0,
+            "sending": 0,
+            "queued": 0,
+            "idle": 1,
+            "host": false,
+            "reports": 0
+          },
+          "confirmBlocker": null,
+          "handoffBlocker": "任务已结束或有发送状态未确认",
+          "canPause": false
+        }
+      }
+    ]
+  },
+  "unverified": [
+    "Windows 当前服务尚未重载：RPG 执行者在途，结束前再复核",
+    "Linux 实机",
+    "真实供应商故障根因及自动修复",
+    "真实在途暂停/断线/交接，本轮为逻辑和模拟页面覆盖",
+    "其他浏览器及手机真机"
+  ],
+  "source_sha256": {
+    "controllers.py": "46b6036ad4ef096ab904a98e7c3e713dbd3218a187f10319e8cccd2ec7e9dc6b",
+    "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
+    "web/index.html": "d9ff96fa000f61d6cfd4e32fed029f6aec3e241bd4098535457d182f3240a37a",
+    "web/style.css": "f1ada9afbefaae6ff31a9bd781955f028d698474552ebbd829517b03341c5226",
+    "test_controllers.py": "df5cefb7c5a3bf7c42bd0880c906365b394ce3a0c1f33586566c436c8769bbdf",
+    "test_controllers.mjs": "e6ac0bc929ef5898e881e0fcccb76754b5e7d2756ad171b4f14dc0c00fa2ce47",
+    "test_hub.py": "f51c68d85d63da5eba4ec65c24aeba1f969d9c4bfd2004bcf0c34f9708ddfb87",
+    "tools/controller_details_check.mjs": "bcb046deabc4feed932e6db265dbe92f6559f7d3d6917639fab09f3a870c8c2e"
+  },
+  "finalCi": {
+    "result": "passed_with_skips",
+    "at_utc": "2026-11-07T10:39:55.916755+00:00",
+    "platform": "win32",
+    "python": "3.10.19",
+    "profiles": [
+      "ci"
+    ],
+    "ui_requested": false,
+    "checks": [
+      {
+        "check": "python",
+        "status": "passed_with_skips",
+        "exit_code": 0,
+        "counts": {
+          "total": 231,
+          "skipped": 4
+        },
+        "seconds": 24.485
+      },
+      {
+        "check": "node",
+        "status": "passed",
+        "exit_code": 0,
+        "counts": {
+          "total": 37,
+          "passed": 37,
+          "failed": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "seconds": 0.281
+      },
+      {
+        "check": "map",
+        "status": "passed",
+        "exit_code": 0,
+        "seconds": 0.312
+      }
+    ],
+    "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。",
+    "command": "D:/python/anaconda/envs/th123/python.exe -B -X utf8 tools/verify.py run ci --output <本轮临时新目录>"
+  },
+  "initialCiFailure": {
+    "errors": 5,
+    "cause": "旧 test_hub 的 Skill 测试绕过连接线程，FakeClient 可调用但 daemon.connected 仍为 False；新确认保护正确拒绝。只在该辅助方法标明模拟连接已就绪，原 Skill 断言未变。"
+  },
+  "safetyChecks": [
+    "诊断不写入持久化状态、不调用RPC、不触发发送",
+    "过期预算直接恢复被拒绝；明确确认新预算后恰好发送一次，交接说明保留",
+    "目标/工作目录/执行者/任务身份不变",
+    "发送不确定及在途状态阻止确认，交接不重复",
+    "连接未核对或交接中，直接恢复API同样拒绝",
+    "终态仍有收尾回合时不提供会改写完成状态的暂停入口",
+    "明确当前中控失败须有可信且可排序的时间，前任及旧失败不冒充当前原因"
+  ],
+  "liveLoad": {
+    "at": 1794048094.7145565,
+    "loaded": false,
+    "reason": "真实RPG任务仍有执行者在途，为保留调度未重载web",
+    "status": "waiting",
+    "hostBusy": false,
+    "busyWorkers": 1,
+    "diagnosisInLiveApi": false,
+    "daemonRestarted": false,
+    "modelCalls": 0,
+    "taskMutations": 0
+  },
+  "finalRpgDiagnosis": {
+    "code": "workers_busy",
+    "title": "执行者仍在工作",
+    "reason": "中控当前空闲，不代表整个任务已经停住。",
+    "nextStep": "执行者：完成工作并报告；MA4 在中控空闲且条件允许时自动回传。",
+    "facts": [],
+    "work": {
+      "running": 1,
+      "sending": 0,
+      "queued": 0,
+      "idle": 7,
+      "unknown": 0,
+      "host": false,
+      "reports": 0
+    },
+    "confirmBlocker": "还有回合或发送操作未结束，请等它们返回后再确认目标",
+    "handoffBlocker": null,
+    "canPause": true
+  },
+  "git": {
+    "branch": "feat/task-diagnosis",
+    "base": "b71bcf0",
+    "prStatus": "未创建；此前GitHub网页未登录且无可用API凭据，本轮不取新凭据",
+    "title": "Explain controller task state and guard recovery actions",
+    "body": "任务停止输出时，旧页面会笼统建议重新准备草案，无法区分预算到期、交接、执行者仍在工作和发送待确认。本改动从已有状态生成页面/状态工具共用的诊断，并让确认、直接恢复和交接复用后端限制；不自动续期或重发。\n\n验证：本地 CI 231 Python（227 通过、4 权限跳过）、37 Node；三种宽度的任务页面与恢复回归通过。真实 RPG 状态只读核对；执行者在途，服务暂未重载，Linux 与真实故障恢复未测。"
+  },
+  "cleanup": {
+    "files": 101,
+    "bytes": 17068357,
+    "path": ".agent-tmp/task-diagnosis-20261107",
+    "removed": true,
+    "kept": "正式验证JSON和4张代表截图；旧任务材料未动",
+    "newPersistentProcesses": 0,
+    "backups": 0
+  }
+}

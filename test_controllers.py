@@ -100,6 +100,126 @@ class ControllerTest(unittest.TestCase):
         self.c.event("turn/completed", {"threadId": tid, "turn": turn})
         return turn
 
+    def test_diagnosis_expired_handoff_is_read_only_and_confirmation_renews_explicitly(self):
+        t = self.task()
+        t.update(status="attention", budget={"deadline": 999}, handoffPending="先核对已有成果")
+        t["workers"] = {"old-worker": {"name": "旧执行者", "state": "idle", "scope": [], "access": "read"}}
+        before = copy.deepcopy(t)
+        self.c.publish()
+        d = self.c.snapshot()["tasks"][0]["diagnosis"]
+        self.assertEqual(d["code"], "budget")
+        self.assertIn("截止", d["reason"])
+        self.assertTrue(any("交接" in f for f in d["facts"]))
+        self.assertEqual(d["work"]["idle"], 1)
+        self.assertIsNone(d["confirmBlocker"])  # form can renew, old budget cannot resume
+        self.assertEqual(t, before)
+        self.assertNotIn("diagnosis", json.loads(self.c.path.read_text(encoding="utf-8"))["tasks"][t["id"]])
+        with self.assertRaises(ValueError): self.c.do_resume(t["id"])
+        self.assertEqual(self.hub.sent, [])
+        self.c.do_confirm(t["id"], t["draftRevision"], t["name"], t["target"], {"deadline": 2000}, True)
+        self.assertEqual(len(self.hub.sent), 1)
+        self.assertIn("先核对已有成果", self.hub.sent[0][1])
+        for key in ("target", "revision", "workers", "host", "workspaces"):
+            self.assertEqual(t[key], before[key])
+        self.assertEqual(t["budget"]["deadline"], 2000)
+        self.assertNotIn("handoffPending", t)
+
+    def test_diagnosis_tracks_workers_and_pause_until_interrupt_is_confirmed(self):
+        t = self.active()
+        tid, w = self.worker(t)
+        self.c.tick()
+        self.assertEqual(self.c.diagnosis(t)["code"], "workers_busy")
+        self.c.do_pause(t["id"])
+        d = self.c.diagnosis(t)
+        self.assertEqual(d["code"], "pausing")
+        self.assertEqual(d["work"]["running"], 1)
+        self.assertTrue(d["canPause"])
+        self.assertIsNotNone(d["confirmBlocker"])
+        with self.assertRaisesRegex(ValueError, "回合"):
+            self.confirm(t, start=True)
+        self.finish_worker(t, tid, w)
+        d = self.c.diagnosis(t)
+        self.assertEqual(d["code"], "paused")
+        self.assertEqual(d["work"]["reports"], 1)
+        self.assertIsNone(d["confirmBlocker"])
+
+    def test_diagnosis_unknown_send_blocks_confirmation_and_handoff_without_mutation(self):
+        t = self.task()
+        t["outbox"] = {"id": "uncertain", "tid": t["host"], "kind": "host", "deliveries": []}
+        before = copy.deepcopy(t)
+        d = self.c.diagnosis(t)
+        self.assertEqual(d["code"], "sending")
+        with self.assertRaises(ValueError) as cm: self.confirm(t, start=True)
+        self.assertEqual(str(cm.exception), d["confirmBlocker"])
+        with self.assertRaises(ValueError) as cm: self.c.do_handoff(t["id"], "重试")
+        self.assertEqual(str(cm.exception), d["handoffBlocker"])
+        self.assertEqual(t, before)
+        self.assertEqual(self.hub.sent, [])
+
+    def test_diagnosis_connection_recovery_and_terminal_precedence(self):
+        t = self.task()
+        t.update(status="completed", budget={"deadline": 999})
+        self.assertEqual(self.c.diagnosis(t)["code"], "completed")
+        t["hostBusy"] = True  # a final summarizing turn must not undo the completion
+        self.assertFalse(self.c.diagnosis(t)["canPause"])
+        self.hub.daemon["connected"] = False
+        self.assertEqual(self.c.diagnosis(t)["code"], "disconnected")
+        with self.assertRaises(ValueError): self.confirm(t, start=True)
+        with self.assertRaises(ValueError): self.c.do_resume(t["id"])
+        self.hub.daemon["connected"] = True
+        self.c.recovering = True
+        self.assertEqual(self.c.diagnosis(t)["code"], "recovering")
+        self.c.error = "状态损坏"
+        self.assertEqual(self.c.diagnosis(t)["code"], "error")
+        self.assertEqual(self.hub.sent, [])
+
+    def test_diagnosis_refreshes_expired_idle_budget_on_existing_tick(self):
+        t = self.task()
+        t["budget"] = {"deadline": 1010}
+        self.c.tick()
+        self.assertEqual(self.c.snapshot()["tasks"][0]["diagnosis"]["code"], "paused")
+        self.now[0] = 1016
+        self.c.tick()
+        self.assertEqual(self.c.snapshot()["tasks"][0]["diagnosis"]["code"], "budget")
+        self.assertEqual(t["budget"]["deadline"], 1010)
+        self.assertEqual(self.hub.sent, [])
+
+    def test_diagnosis_does_not_blame_old_host_or_ambiguously_ordered_failure(self):
+        t = self.task()
+        t["status"] = "attention"
+        t["metrics"] = {"former": {"turns": {"old": {"id": "old", "status": "failed", "startedAt": 50}}}}
+        self.assertEqual(self.c.diagnosis(t)["code"], "idle")
+        turns = t["metrics"][t["host"]] = {"turns": {"fail": {"id": "fail", "status": "failed", "startedAt": 900}}}
+        self.assertEqual(self.c.diagnosis(t)["code"], "failed")
+        turns["turns"]["new"] = {"id": "new", "status": "completed", "startedAt": 950}
+        self.assertEqual(self.c.diagnosis(t)["code"], "idle")
+        turns["turns"]["new"]["timeEstimated"] = True
+        self.assertEqual(self.c.diagnosis(t)["code"], "idle")
+
+    def test_diagnosis_pending_handoff_draft_closing_and_queued_work(self):
+        t = self.task()
+        t["handoffPending"] = "接任说明"
+        self.assertEqual(self.c.diagnosis(t)["code"], "handoff_ready")
+        t["handoff"] = "等待交接"
+        self.assertEqual(self.c.diagnosis(t)["code"], "handoff")
+        self.assertIsNotNone(self.c.diagnosis(t)["confirmBlocker"])
+        before = copy.deepcopy(t)
+        with self.assertRaises(ValueError): self.c.do_resume(t["id"])
+        self.assertEqual(t, before)
+        self.assertEqual(self.hub.sent, [])
+        t.pop("handoff")
+        t["draft"] = {"target": "新的草案"}
+        self.assertEqual(self.c.diagnosis(t)["code"], "draft")
+        t.update(status="closing", closing={"needsReview": False, "reviewStarted": False})
+        self.assertEqual(self.c.diagnosis(t)["code"], "closing")
+        self.assertIsNotNone(self.c.diagnosis(t)["handoffBlocker"])
+        t.pop("draft"); t.pop("handoffPending")
+        t["status"] = "waiting"
+        t["workers"]["q"] = {"state": "queued"}
+        self.assertEqual(self.c.diagnosis(t)["code"], "queued")
+        t["pending"] = [{"id": "q:one"}]
+        self.assertEqual(self.c.diagnosis(t)["code"], "reports")
+
     def test_project_can_have_two_independent_tasks(self):
         a, b = self.task("甲"), self.task("乙")
         self.assertNotEqual(a["id"], b["id"])
@@ -132,6 +252,7 @@ class ControllerTest(unittest.TestCase):
         result = self.c.tool_call({"threadId": t["host"], "tool": "ma4_control",
                                    "arguments": {"action": "status"}})
         self.assertEqual(len(result["workers"]), 20)
+        self.assertEqual(result["diagnosis"]["work"]["idle"], 20)
         self.c.publish(save=False)
         self.assertEqual(len(self.c.snapshot()["tasks"][0]["workers"]), 20)
         self.assertEqual(t, before)
@@ -148,6 +269,7 @@ class ControllerTest(unittest.TestCase):
         for state in ("running", "sending", "queued", "unknown", "idle"):
             self.assertIn(state + "-scope", context)
         self.assertIn("待回传报告 1 份", context)
+        self.assertEqual(self.c.diagnosis(t)["work"]["unknown"], 1)
         self.assertNotIn("省略", self.c.worker_context(t))
         before = copy.deepcopy(t["pending"])
         self.c.context(t)
@@ -324,6 +446,8 @@ class ControllerTest(unittest.TestCase):
         legacy.pop("goalConfirmed"); legacy.pop("draftRevision")
         self.c.publish()
         restored = Controllers(self.hub, self.root / "data", clock=lambda: self.now[0])
+        # Recovered state must be reconciled before direct resume.
+        with self.assertRaises(ValueError): restored.do_resume(legacy["id"])
         restored.tick()
         self.assertEqual(restored.tasks[legacy["id"]]["target"], legacy["target"])
         self.assertFalse(self.hub.sent)

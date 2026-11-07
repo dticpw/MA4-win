@@ -148,12 +148,79 @@ try {
     assert.equal(await page.locator("#task-handoff").isDisabled(), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.screenshot({ path: join(out, `closing-w${width}.png`), fullPage: true });
+    // Formerly all idle/attention tasks said "prepare a draft". Exercise an
+    // expired, already handed-off task, without sending or renewing anything.
+    const diagnosed = structuredClone(controllers), dt = diagnosed.tasks[0];
+    dt.status = "attention";
+    dt.budget = { deadline: 1000 };
+    delete dt.completion;
+    dt.summary = dt.evidence = "";
+    dt.diagnosis = { code: "budget", title: "预算已到，需确认后继续", reason: "已到截止时间，不能按当前预算启动新工作。",
+      nextStep: "你：打开“查看并确认后继续”，核对目标与目录，明确调整预算后再启动；仅聊天不会恢复自动推进。",
+      facts: ["接任中控已创建，交接说明尚未发送；下一次消息会附带说明。"],
+      work: { host: false, running: 0, sending: 0, queued: 0, idle: 7, reports: 0 },
+      confirmBlocker: null, handoffBlocker: null, canPause: false };
+    const push = async () => page.evaluate(value => window.fixtureEvents.onmessage({ data: JSON.stringify({ kind: "controllers", controllers: value }) }), diagnosed);
+    await push();
+    assert.equal(await page.locator("#task-phase").isVisible(), false);
+    assert.match(await page.locator("#task-diagnosis").innerText(), /预算已到/);
+    assert.match(await page.locator("#task-diagnosis").innerText(), /空闲 7/);
+    await page.locator("[data-diagnosis-evidence] > summary").focus();
+    await page.keyboard.press("Enter");
+    assert.match(await page.locator("#task-diagnosis").innerText(), /交接说明尚未发送/);
+    await push();
+    assert.equal(await page.locator("[data-diagnosis-evidence] > summary").evaluate(el => document.activeElement === el), true);
+    dt.diagnosis.work.reports = 1;
+    await push();
+    assert.equal(await page.locator("[data-diagnosis-evidence]").evaluate(el => el.open), true);
+    assert.equal(await page.locator("[data-diagnosis-evidence] > summary").evaluate(el => document.activeElement === el), true);
+    dt.diagnosis.work.reports = 0;
+    await push();
+    await page.keyboard.press("Enter");
+    await page.locator("#task-context").evaluate(el => { el.scrollTop = 0; });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    assert.equal(await page.locator("#task-pause").isVisible(), false);
+    await page.screenshot({ path: join(out, `diagnosis-w${width}.png`), fullPage: true });
+    await page.locator("#task-resume").focus();
+    await page.keyboard.press("Enter");
+    assert.equal(await page.locator("#task-dialog").evaluate(el => el.open), true);
+    assert.equal(await page.locator("#task-duration").inputValue(), ""); // no automatic extension
+    assert.equal(await page.locator("#task-save").isDisabled(), false);
+    await page.locator("#task-duration").fill("30");
+    const originalGoal = await page.locator("#task-form-target").inputValue();
+    Object.assign(dt.diagnosis, { code: "sending", title: "消息发送结果待确认", reason: "尚未取得确认", nextStep: "MA4：按消息标记核对。",
+      confirmBlocker: "还有回合或发送操作未结束，请等它们返回后再确认目标", handoffBlocker: "任务已结束或有发送状态未确认" });
+    await push();
+    assert.equal(await page.locator("#task-save").isDisabled(), true);
+    assert.equal(await page.locator("#task-confirm-only").isDisabled(), true);
+    assert.match(await page.locator("#task-confirm-hint").innerText(), /发送操作未结束/);
+    assert.equal(await page.locator("#task-duration").inputValue(), "30");
+    assert.equal(await page.locator("#task-form-target").inputValue(), originalGoal);
+    await page.keyboard.press("Escape");
+    assert.equal(await page.locator("#task-handoff").isDisabled(), true);
+    Object.assign(dt.diagnosis, { code: "pausing", title: "自动推进已停，仍有回合未结束", canPause: true });
+    dt.status = "paused";
+    dt.diagnosis.work.running = 1;
+    await push();
+    assert.equal(await page.locator("#task-pause").innerText(), "停止在途回合");
+    dt.status = "waiting";
+    dt.budget = { deadline: Date.now() / 1000 + 3600 };
+    Object.assign(dt.diagnosis, { code: "workers_busy", title: "执行者仍在工作", reason: "中控当前空闲，不代表整个任务已经停住。",
+      nextStep: "执行者：完成工作并报告；MA4 在中控空闲且条件允许时自动回传。", facts: [],
+      confirmBlocker: "还有回合或发送操作未结束，请等它们返回后再确认目标", handoffBlocker: null });
+    await push();
+    assert.match(await page.locator("#task-diagnosis").innerText(), /执行者仍在工作/);
+    assert.match(await page.locator("#task-diagnosis").innerText(), /执行中 1/);
+    assert.equal(await page.locator("#task-resume").isVisible(), false);
+    assert.equal(await page.locator("#task-handoff").isDisabled(), false);
+    await page.locator("#task-context").evaluate(el => { el.scrollTop = 0; });
+    await page.screenshot({ path: join(out, `diagnosis-active-w${width}.png`), fullPage: true });
     await page.locator("#tab-sessions").click();
     await page.screenshot({ path: join(out, `ordinary-w${width}.png`), fullPage: true });
     await page.close();
   }
   assert.deepEqual(problems, []);
-  console.log("OK: pending reports and reasons, statistics, tool details, separate sidebar tabs, legacy folds, search, default cwd, closing state, keyboard, live update, 1440/1024/390; no model or state writes");
+  console.log("OK: pending reports, statistics, tool details, sidebar tabs, closing; diagnosis, expired handoff, in-flight pause, uncertain-send blockers, preserved form inputs, keyboard/live update, 1440/1024/390; no model or state writes");
 } finally {
   await browser.close();
 }

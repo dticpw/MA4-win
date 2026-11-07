@@ -28,6 +28,13 @@ export function reportDeliveryHtml(delivery) {
   return `<strong>${number(delivery.count)} 份执行报告待回传</strong><p>${esc(delivery.reason)}</p><ul>${reports.slice(0, 8).map((r) => `<li>${r.threadId ? `<button type="button" class="ghost small" data-report-thread="${esc(r.threadId)}" title="查看执行会话">${esc(r.name)}</button>` : esc(r.name)}</li>`).join("")}</ul>${delivery.count > 8 ? `<p>另有 ${number(delivery.count - 8)} 份，后续分批回传。</p>` : ""}`;
 }
 
+export function diagnosisHtml(d) {
+  if (!d) return "";
+  const w = d.work;
+  const counts = `记录中的工作：中控${w.host ? "忙碌" : "空闲"} · 执行中 ${number(w.running)} · 发送中 ${number(w.sending)} · 排队 ${number(w.queued)} · 空闲 ${number(w.idle)} · 待回传 ${number(w.reports)}${w.unknown ? ` · 状态待核对 ${number(w.unknown)}` : ""}`;
+  return `<strong>${esc(d.title)}</strong><p class="hint">${counts}</p><p>${esc(d.nextStep)}</p><details data-diagnosis-evidence><summary>判断依据</summary><p>${esc(d.reason)}</p>${(d.facts || []).map(f => `<p>${esc(f)}</p>`).join("")}${d.confirmBlocker ? `<p>暂不能确认：${esc(d.confirmBlocker)}</p>` : ""}${d.handoffBlocker ? `<p>暂不能交接：${esc(d.handoffBlocker)}</p>` : ""}</details>`;
+}
+
 export function messagePresentation(raw = "") {
   const match = raw.match(/^\[MA4 message:[^\]\n]+\]\n\[MA4 source:(user|automatic|worker_report)\]\n([\s\S]*?)\n\[MA4 content\]\n([\s\S]*)$/);
   if (match) return { source: match[1], context: match[2], text: match[3] };
@@ -194,8 +201,18 @@ export function createControllers({ api, openThread, toast, refresh, current, ho
     $("task-target").textContent = t.target || "尚未确认正式目标。先与中控讨论，再查看草案。";
     $("task-workspace-summary").innerHTML = workspaceHtml(t);
     const running = ["running", "waiting", "review", "closing"].includes(t.status);
+    const diagnostic = $("task-diagnosis"), diagnosticHtml = diagnosisHtml(t.diagnosis);
+    diagnostic.hidden = !diagnosticHtml;
+    if (diagnostic._html !== diagnosticHtml || diagnostic.dataset.task !== t.id) {
+      const opened = diagnostic.dataset.task === t.id && diagnostic.querySelector("details")?.open;
+      const focused = diagnostic.dataset.task === t.id && diagnostic.querySelector("summary") === document.activeElement;
+      diagnostic.innerHTML = diagnosticHtml; diagnostic._html = diagnosticHtml; diagnostic.dataset.task = t.id;
+      if (opened) diagnostic.querySelector("details").open = true;
+      if (focused) diagnostic.querySelector("summary")?.focus({ preventScroll: true });
+    }
+    $("task-phase").hidden = Boolean(t.diagnosis);
     $("task-phase").textContent = running ? "当前正在执行；消息会交给中控协调。目标变更需另行确认。"
-      : "当前仅讨论：聊天不会恢复执行。请让中控整理目标、范围和验收草案，再确认预算并启动。";
+      : "当前仅讨论：聊天不会恢复执行。请查看已有目标或草案，核对预算后再确认启动。";
     $("task-draft-notice").hidden = !t.draft?.target;
     $("task-draft-notice").textContent = t.target ? "有待确认的新草案，正式目标尚未改变。" : "草案已准备好，等待你查看并确认。";
     $("task-budget").textContent = budgetText(t);
@@ -217,10 +234,11 @@ export function createControllers({ api, openThread, toast, refresh, current, ho
     }
     $("task-resume").hidden = ["running", "waiting", "review", "closing"].includes(t.status);
     $("task-resume").textContent = t.target ? "查看并确认后继续" : "确认目标并启动";
-    $("task-pause").hidden = !["running", "waiting", "review", "closing"].includes(t.status);
-    $("task-pause").textContent = t.status === "closing" ? "立即停止" : "暂停任务";
+    $("task-pause").hidden = !(t.diagnosis?.canPause ?? running);
+    $("task-pause").textContent = t.status === "closing" ? "立即停止" : running ? "暂停任务" : "停止在途回合";
     $("task-remove").hidden = ["running", "waiting", "review", "closing"].includes(t.status) || t.hostBusy;
-    $("task-handoff").disabled = ["completed", "stopped", "closing"].includes(t.status) || !t.host;
+    $("task-handoff").disabled = t.diagnosis ? Boolean(t.diagnosis.handoffBlocker) : ["completed", "stopped", "closing"].includes(t.status) || !t.host;
+    $("task-handoff").title = t.diagnosis?.handoffBlocker || "交接保留原目标、预算和执行者；不会自动续期";
     const isHost = current() === t.host;
     $("choose-skill").disabled = $("input").disabled = !isHost;
     $("send").disabled = !isHost || $("send").dataset.pending === "true";
@@ -315,9 +333,11 @@ export function createControllers({ api, openThread, toast, refresh, current, ho
     const stale = t && (t.draftRevision || 0) !== formRevision;
     const busy = t && (t.hostBusy || Object.values(t.workers).some((w) => ["running", "sending"].includes(w.state)));
     const active = t && ["running", "waiting", "review", "closing"].includes(t.status);
-    $("task-save").disabled = $("task-confirm-only").disabled = Boolean(stale || busy || active);
+    const blocker = t?.diagnosis?.confirmBlocker;
+    $("task-save").disabled = $("task-confirm-only").disabled = Boolean(stale || (t?.diagnosis ? blocker : busy || active));
     $("task-save-draft").disabled = Boolean(stale || t?.status === "closing");
     $("task-confirm-hint").textContent = stale ? "草案刚刚更新了，请关闭并重新打开，查看最新内容后确认。"
+      : blocker ? blocker
       : busy ? "还有回合未结束，可以先保存草案；等它们返回后再确认。"
       : active ? "任务正在执行；请先保存草案或暂停，再确认变更。"
       : "确认将保存这里显示的完整目标、目录授权和预算。只存草案不会启动，也不会替换正式目标。";

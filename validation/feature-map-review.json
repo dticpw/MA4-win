@@ -3,7 +3,7 @@
   "limits": "人工记录；current 仅表示登记内容未变化。未登记依赖、环境或语义正确性仍需人工判断。",
   "features": {
     "sessions": {
-      "source_reviewed_at": "2026-11-07T09:18:54.273151+00:00",
+      "source_reviewed_at": "2026-11-07T10:36:37.973583+00:00",
       "recipe_sha256": "1a4df63bf1747ab53095b0d173d96c939e2f560137ebe76ac104b7a9268ab37d",
       "inputs": {
         "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
@@ -13,12 +13,12 @@
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
         "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
-        "controllers.py": "a3721f50b9727ca05d481484b6a9ed4804600c06869d194fc3bd62ff61833bcc",
+        "controllers.py": "46b6036ad4ef096ab904a98e7c3e713dbd3218a187f10319e8cccd2ec7e9dc6b",
         "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
         "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
-        "web/controllers.js": "2a4d86623646b0d852431c6a02de3f288c325ed6644910c1a393d27c48465f80",
-        "web/index.html": "0307c52ff886b91a5b3e29a6eb0faa1de73a77db5914e9645a897e0dccdc483a",
-        "web/style.css": "fbf19f26fceade51d9f98e946977e7a2306840379d3576e6af8cd977ed6a4847",
+        "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
+        "web/index.html": "d9ff96fa000f61d6cfd4e32fed029f6aec3e241bd4098535457d182f3240a37a",
+        "web/style.css": "f1ada9afbefaae6ff31a9bd781955f028d698474552ebbd829517b03341c5226",
         "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
         "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276",
         "os_adapters/__init__.py": "0146c232416cb9ef79ca466205c3020f5245c6d5da028ee92c5a54416a273c5f",
@@ -28,7 +28,8 @@
         "tools/ui_check.mjs": "cce6a2c174991c3898e325ed8d23f41a86ac990576950744f1821b1517a9f3d5",
         "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
-        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b"
+        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
+        "test_hub.py": "f51c68d85d63da5eba4ec65c24aeba1f969d9c4bfd2004bcf0c34f9708ddfb87"
       },
       "evidence": [
         {
@@ -323,11 +324,11 @@
         "审批/Skill/插话等的真实浏览器链路",
         "其他浏览器与手机真机"
       ],
-      "review_note": "2026-11-07 首个维护 PR：核对 Node TAP 统计、跳过/todo/无有效检查的结果与失败传播，真实 Node 样例及 tooling 回归通过。业务源码、各功能检查清单和三个流程操作说明未变；旧页面/模型证据仅按原覆盖复用，未测项保留。"
+      "review_note": "阶段1人工核对：普通会话发送/历史路径未改；新增只读诊断及共用确认/交接阻碍检查。UI保持原ID与入口，复用报告、暂停、确认路径；过期交接不会自动续期。旧实测不外推新增功能在线生效。"
     },
     "tasks": {
-      "source_reviewed_at": "2026-11-07T09:18:54.277350+00:00",
-      "recipe_sha256": "35fc1f65f216213b74118fbdeba946341afefeb1f092ca99a2cb7a88141a8527",
+      "source_reviewed_at": "2026-11-07T10:36:37.977737+00:00",
+      "recipe_sha256": "e6198f13fcadf2197d842ead889099a9d3666b67053b1695859b569c55346d96",
       "inputs": {
         "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
@@ -336,18 +337,19 @@
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
         "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
-        "controllers.py": "a3721f50b9727ca05d481484b6a9ed4804600c06869d194fc3bd62ff61833bcc",
+        "controllers.py": "46b6036ad4ef096ab904a98e7c3e713dbd3218a187f10319e8cccd2ec7e9dc6b",
         "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
         "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
-        "web/controllers.js": "2a4d86623646b0d852431c6a02de3f288c325ed6644910c1a393d27c48465f80",
-        "web/index.html": "0307c52ff886b91a5b3e29a6eb0faa1de73a77db5914e9645a897e0dccdc483a",
-        "web/style.css": "fbf19f26fceade51d9f98e946977e7a2306840379d3576e6af8cd977ed6a4847",
-        "test_controllers.py": "c43df514f3b6fdf8e2e22258a3eaf4e027ae03c474772c75b50392c5a5fffdfe",
-        "test_controllers.mjs": "9ad31ecd075c6ff858d14d52eba0f4decdf8a1b43914e7d17dfd7bbc989d4a1a",
+        "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
+        "web/index.html": "d9ff96fa000f61d6cfd4e32fed029f6aec3e241bd4098535457d182f3240a37a",
+        "web/style.css": "f1ada9afbefaae6ff31a9bd781955f028d698474552ebbd829517b03341c5226",
+        "test_controllers.py": "df5cefb7c5a3bf7c42bd0880c906365b394ce3a0c1f33586566c436c8769bbdf",
+        "test_controllers.mjs": "e6ac0bc929ef5898e881e0fcccb76754b5e7d2756ad171b4f14dc0c00fa2ce47",
         "tools/controller_discussion_check.mjs": "d665808a45471f691c315e29107593e4ac26ed4024ecb9c634844fa300d48c0e",
         "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
-        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b"
+        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
+        "tools/controller_details_check.mjs": "bcb046deabc4feed932e6db265dbe92f6559f7d3d6917639fab09f3a870c8c2e"
       },
       "evidence": [
         {
@@ -405,19 +407,28 @@
         {
           "path": "validation/pr-pilot.json",
           "sha256": "b923f50b8e3dad99090c0c937d720a4c1c7520964a83e59ba0e2f1b629991a79"
+        },
+        {
+          "path": "validation/task-diagnosis/evidence.json",
+          "sha256": "48e4a0c35de876af40d09ae5f717253d3818fef921194d26e6e7fdee4d4217b2"
+        },
+        {
+          "path": "validation/task-diagnosis/diagnosis-w390.png",
+          "sha256": "9d342d90aa3a9217dd067569ef23571ad384ec6f67024c9b62a43aab278decda"
         }
       ],
-      "coverage": "Windows；目标确认、预算、派工与材料管理的逻辑检查，讨论/确认模拟页面三种宽度通过；Python 4 项符号链接权限跳过。源码与页面入口已核对。 2026-11-07 Windows 现有 8764 已加载，真实材料列表计数/字节与完整磁盘只读统计一致；不外推派工全链路。 第三轮真实8764经HTTP确认后，一个真实中控与一个真实执行者完成三轮工作；目标/预算/授权与原四任务保持，最终completed。",
+      "coverage": "Windows；目标确认、预算、派工与材料管理的逻辑检查，讨论/确认模拟页面三种宽度通过；Python 4 项符号链接权限跳过。源码与页面入口已核对。 2026-11-07 Windows 现有 8764 已加载，真实材料列表计数/字节与完整磁盘只读统计一致；不外推派工全链路。 第三轮真实8764经HTTP确认后，一个真实中控与一个真实执行者完成三轮工作；目标/预算/授权与原四任务保持，最终completed。 阶段1新增任务诊断、恢复安全逻辑与三种宽度模拟页面；当前服务加载状态见 validation/task-diagnosis/evidence.json。",
       "unverified": [
         "页面真实模型讨论→用户确认完整路径",
         "Windows 跳过的符号链接检查",
-        "Linux 实机"
+        "Linux 实机",
+        "阶段1诊断在真实Windows服务加载后的页面；当前另有RPG在途工作"
       ],
-      "review_note": "2026-11-07 首个维护 PR：核对 Node TAP 统计、跳过/todo/无有效检查的结果与失败传播，真实 Node 样例及 tooling 回归通过。业务源码、各功能检查清单和三个流程操作说明未变；旧页面/模型证据仅按原覆盖复用，未测项保留。"
+      "review_note": "阶段1人工核对：普通会话发送/历史路径未改；新增只读诊断及共用确认/交接阻碍检查。UI保持原ID与入口，复用报告、暂停、确认路径；过期交接不会自动续期。旧实测不外推新增功能在线生效。"
     },
     "reports": {
-      "source_reviewed_at": "2026-11-07T09:18:54.279868+00:00",
-      "recipe_sha256": "fbfbd7a2d50e06430dfa5916c3da51334b9c7330fe89e2692fdbe101f3461241",
+      "source_reviewed_at": "2026-11-07T10:36:37.980743+00:00",
+      "recipe_sha256": "4b974b22e6fc3a3e864400c1e52befad9cb724f3248d3a8affd7c9b12436333b",
       "inputs": {
         "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
@@ -426,15 +437,15 @@
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
         "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
-        "controllers.py": "a3721f50b9727ca05d481484b6a9ed4804600c06869d194fc3bd62ff61833bcc",
+        "controllers.py": "46b6036ad4ef096ab904a98e7c3e713dbd3218a187f10319e8cccd2ec7e9dc6b",
         "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
         "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
-        "web/controllers.js": "2a4d86623646b0d852431c6a02de3f288c325ed6644910c1a393d27c48465f80",
-        "web/index.html": "0307c52ff886b91a5b3e29a6eb0faa1de73a77db5914e9645a897e0dccdc483a",
-        "web/style.css": "fbf19f26fceade51d9f98e946977e7a2306840379d3576e6af8cd977ed6a4847",
-        "test_controllers.py": "c43df514f3b6fdf8e2e22258a3eaf4e027ae03c474772c75b50392c5a5fffdfe",
-        "test_controllers.mjs": "9ad31ecd075c6ff858d14d52eba0f4decdf8a1b43914e7d17dfd7bbc989d4a1a",
-        "tools/controller_details_check.mjs": "d42b008a6c49896b539281e34f8add3c0ca3ed13578233ef46b89831e042b675",
+        "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
+        "web/index.html": "d9ff96fa000f61d6cfd4e32fed029f6aec3e241bd4098535457d182f3240a37a",
+        "web/style.css": "f1ada9afbefaae6ff31a9bd781955f028d698474552ebbd829517b03341c5226",
+        "test_controllers.py": "df5cefb7c5a3bf7c42bd0880c906365b394ce3a0c1f33586566c436c8769bbdf",
+        "test_controllers.mjs": "e6ac0bc929ef5898e881e0fcccb76754b5e7d2756ad171b4f14dc0c00fa2ce47",
+        "tools/controller_details_check.mjs": "bcb046deabc4feed932e6db265dbe92f6559f7d3d6917639fab09f3a870c8c2e",
         "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
         "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b"
@@ -487,15 +498,24 @@
         {
           "path": "validation/pr-pilot.json",
           "sha256": "b923f50b8e3dad99090c0c937d720a4c1c7520964a83e59ba0e2f1b629991a79"
+        },
+        {
+          "path": "validation/task-diagnosis/evidence.json",
+          "sha256": "48e4a0c35de876af40d09ae5f717253d3818fef921194d26e6e7fdee4d4217b2"
+        },
+        {
+          "path": "validation/task-diagnosis/diagnosis-w390.png",
+          "sha256": "9d342d90aa3a9217dd067569ef23571ad384ec6f67024c9b62a43aab278decda"
         }
       ],
-      "coverage": "Windows；回传去重、等待、暂停、恢复、交接等逻辑及报告详情模拟页面三种宽度通过；源码与页面入口已核对。 第三轮真实模型任务三份执行报告各自动回传一次；空闲时暂停→同任务恢复→验收完成，未重复派工，截止不延长。",
+      "coverage": "Windows；回传去重、等待、暂停、恢复、交接等逻辑及报告详情模拟页面三种宽度通过；源码与页面入口已核对。 第三轮真实模型任务三份执行报告各自动回传一次；空闲时暂停→同任务恢复→验收完成，未重复派工，截止不延长。 阶段1新增任务诊断、恢复安全逻辑与三种宽度模拟页面；当前服务加载状态见 validation/task-diagnosis/evidence.json。",
       "unverified": [
         "在途暂停、断线恢复和中控交接",
         "Linux 实机",
-        "其他浏览器与手机真机"
+        "其他浏览器与手机真机",
+        "阶段1诊断在真实Windows服务加载后的页面；当前另有RPG在途工作"
       ],
-      "review_note": "2026-11-07 首个维护 PR：核对 Node TAP 统计、跳过/todo/无有效检查的结果与失败传播，真实 Node 样例及 tooling 回归通过。业务源码、各功能检查清单和三个流程操作说明未变；旧页面/模型证据仅按原覆盖复用，未测项保留。"
+      "review_note": "阶段1人工核对：普通会话发送/历史路径未改；新增只读诊断及共用确认/交接阻碍检查。UI保持原ID与入口，复用报告、暂停、确认路径；过期交接不会自动续期。旧实测不外推新增功能在线生效。"
     }
   }
 }

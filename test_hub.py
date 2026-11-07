@@ -661,6 +661,8 @@ class HubTest(unittest.TestCase):
         self.assertEqual(sent["input"][0]["text"], "先使用 $vibehub")
 
     def controller_with_skill_context(self):
+        # This fixture supplies a working client without starting Hub's connector.
+        self.hub.daemon["connected"] = True
         c = self.hub.controllers
         created = c.do_create(self.dir.name, "Skill 隔离", target="目标中曾提到 $vibehub")
         t = c.tasks[created["taskId"]]

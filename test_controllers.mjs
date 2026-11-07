@@ -1,6 +1,19 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { dynamicToolHtml, statisticsHtml, ordinarySessionGroups, messagePresentation, userMessageHtml, workspaceHtml, reportDeliveryHtml, sessionActivityAt, mergeThreadTimes } from "./web/controllers.js";
+import { dynamicToolHtml, statisticsHtml, ordinarySessionGroups, messagePresentation, userMessageHtml, workspaceHtml, reportDeliveryHtml, diagnosisHtml, sessionActivityAt, mergeThreadTimes } from "./web/controllers.js";
+
+test("diagnosis preserves work counts and escapes reasons, instructions and blockers", () => {
+  assert.equal(diagnosisHtml(undefined), "");
+  const html = diagnosisHtml({ title: "<script>bad</script>", reason: "结果 <待核对>", nextStep: '你：检查 <img src=x onerror="bad()">',
+    facts: ["交接 <事实>"], confirmBlocker: "发送 <未确认>", handoffBlocker: "连接 <中断>",
+    work: { host: false, running: 1, sending: 2, queued: 3, idle: 7, reports: 4 } });
+  assert.match(html, /中控空闲 · 执行中 1 · 发送中 2 · 排队 3 · 空闲 7 · 待回传 4/);
+  assert.match(html, /暂不能确认：发送 &lt;未确认&gt;/);
+  assert.match(html, /交接 &lt;事实&gt;/);
+  assert(!html.includes("<script>"));
+  assert(!html.includes("<img"));
+  assert(!html.includes("<details open"));
+});
 
 test("session dates use only that session's trustworthy activity, including former hosts", () => {
   const task = { updatedAt: 9000, host: "host", formerHosts: ["former"], statistics: { sessions: [
