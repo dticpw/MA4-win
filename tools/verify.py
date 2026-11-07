@@ -26,7 +26,7 @@ PROFILES = {
                  ("test_markdown.mjs", "test_paths.mjs"),
                  ("session_creation_check", "skill_selection_check")),
     "tasks": ("目标确认、预算、派工、报告回传与恢复",
-              ("test_controllers",), ("test_controllers.mjs",),
+              ("test_controllers", "test_task_policy"), ("test_controllers.mjs",),
               ("controller_discussion_check", "controller_details_check")),
     "side": ("活动、健康、额度；使用模拟来源",
              ("test_activity", "test_health", "test_quota", "test_server"), (),
@@ -36,6 +36,8 @@ PROFILES = {
                  ("test_paths.mjs",), ()),
     "tooling": ("验证入口的选择、失败传播、输出和静态服务边界",
                 ("test_verify", "test_feature_map"), ("test_session_actions.mjs",), ()),
+    "architecture": ("任务规则层的依赖方向与副作用入口检查",
+                     ("test_architecture",), (), ()),
 }
 
 

@@ -1,0 +1,260 @@
+{
+  "stage": "阶段2首条核心路径：分离任务纯规则与副作用",
+  "result": "passed_with_skips_and_online_verified",
+  "equivalence": {
+    "result": "passed",
+    "baselineCommit": "5b79fe6",
+    "baselineSourceSha256": "46b6036ad4ef096ab904a98e7c3e713dbd3218a187f10319e8cccd2ec7e9dc6b",
+    "seed": 41807,
+    "scenarios": 2000,
+    "comparisons": 16000,
+    "methods": [
+      "control_blocker",
+      "usage",
+      "cost",
+      "exhausted",
+      "confirm_blocker",
+      "handoff_blocker",
+      "report_delivery",
+      "diagnosis"
+    ],
+    "observedDiagnosisCodes": [
+      "budget",
+      "closing",
+      "completed",
+      "cost_uncertain",
+      "disconnected",
+      "draft",
+      "error",
+      "handoff",
+      "handoff_ready",
+      "host_busy",
+      "idle",
+      "missing_host",
+      "paused",
+      "pausing",
+      "queued",
+      "recovering",
+      "reports",
+      "sending",
+      "stopped",
+      "unknown_work",
+      "workers_busy"
+    ],
+    "inputMutation": false,
+    "modelCalls": 0,
+    "limits": "Generated combinations compare existing semantics; they do not prove every possible state or real transport recovery.",
+    "unchangedActorMethods": 55,
+    "changedNondelegatedMethods": []
+  },
+  "checks": {
+    "result": "passed_with_skips",
+    "at_utc": "2026-11-07T12:22:07.659318+00:00",
+    "platform": "win32",
+    "python": "3.10.19",
+    "profiles": [
+      "tasks",
+      "architecture"
+    ],
+    "ui_requested": false,
+    "checks": [
+      {
+        "check": "python",
+        "status": "passed_with_skips",
+        "exit_code": 0,
+        "counts": {
+          "total": 105,
+          "skipped": 4
+        },
+        "seconds": 14.0
+      },
+      {
+        "check": "node",
+        "status": "passed",
+        "exit_code": 0,
+        "counts": {
+          "total": 14,
+          "passed": 14,
+          "failed": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "seconds": 0.156
+      }
+    ],
+    "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+  },
+  "architecture": "task_policy imports only math/dataclasses; reverse dependency, I/O and dynamic builtin references fail with file/line; pure input immutability tested; not a sandbox",
+  "compatibility": "unchanged HTTP/state JSON; Controllers public methods delegate; state mutation, persistence and RPC ordering unchanged",
+  "source_sha256": {
+    "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+    "task_policy.py": "002db16e77b0e3c8d2c4ab3646f020aa347dab9bdbf8d8ce23b7debd85c1c0b3",
+    "tools/check_architecture.py": "4ce00a29e2da3be4c7f415d5fa5e8bfb3b0b2a78057e40b9c91c257875da0f93",
+    "test_architecture.py": "4f6ec4a77313364b3d63f7b2bab3c6b82231fdab5182fd57ed866336fc5c8563",
+    "test_task_policy.py": "5cbde606620c4833d89f17abc9d47c2199d9e0923f9705bf6f0823e0962ea074",
+    "tools/verify.py": "d7b88fca16d759e0f3c3876b61104a599f610cfe2f03f210395207d4e48260c4",
+    "test_verify.py": "0d617c17605936953584949dd3c5ccc4921f053c4cc392048a752d8f1d8ae26c"
+  },
+  "unverified": [
+    "Linux实机",
+    "无历史上下文Agent的真实修改试验",
+    "长期迭代收益",
+    "真实故障恢复或自动维护，属于后续阶段"
+  ],
+  "modelCalls": 0,
+  "at_utc": "2026-11-07T12:27:09.702482+00:00",
+  "ci": {
+    "result": "passed_with_skips",
+    "at_utc": "2026-11-07T12:24:45.825178+00:00",
+    "platform": "win32",
+    "python": "3.10.19",
+    "profiles": [
+      "ci"
+    ],
+    "ui_requested": false,
+    "checks": [
+      {
+        "check": "python",
+        "status": "passed_with_skips",
+        "exit_code": 0,
+        "counts": {
+          "total": 240,
+          "skipped": 4
+        },
+        "seconds": 20.359
+      },
+      {
+        "check": "node",
+        "status": "passed",
+        "exit_code": 0,
+        "counts": {
+          "total": 37,
+          "passed": 37,
+          "failed": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "seconds": 0.219
+      },
+      {
+        "check": "map",
+        "status": "passed",
+        "exit_code": 0,
+        "seconds": 0.203
+      }
+    ],
+    "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+  },
+  "online": {
+    "at": 1794054332.762982,
+    "result": "passed",
+    "stage": "stage2_policy_online",
+    "modelCalls": 0,
+    "oldWeb": {
+      "pid": 19768,
+      "created": 134385274026579389
+    },
+    "daemonProcesses": [
+      {
+        "pid": 7668,
+        "created": 134385010183479694
+      },
+      {
+        "pid": 14016,
+        "created": 134385010176718330
+      },
+      {
+        "pid": 29072,
+        "created": 134384984516877459
+      }
+    ],
+    "taskDigestBefore": "1a1c2c921793e4ce11d09210ff2986668c8dc1dbbeb92727a817fa1604aa43d2",
+    "loadedBefore": [
+      "01a181f9-eab5-7040-913d-0188b7e0d91d",
+      "01a1828e-5d70-7e60-82e8-edc855a77cd4",
+      "01a182d0-eec4-7743-9003-15ebe4c6b555",
+      "01a1ac9f-7f79-7c33-a429-a2618115c593",
+      "01a1af77-8ad6-7070-9236-81dbfbdef841",
+      "01a1b49e-863b-7a30-b1ba-51664bdd8bd1"
+    ],
+    "derivedViewsPreserved": true,
+    "loadedAfter": [
+      "01a181f9-eab5-7040-913d-0188b7e0d91d",
+      "01a1828e-5d70-7e60-82e8-edc855a77cd4",
+      "01a182d0-eec4-7743-9003-15ebe4c6b555",
+      "01a1ac9f-7f79-7c33-a429-a2618115c593",
+      "01a1af77-8ad6-7070-9236-81dbfbdef841",
+      "01a1b49e-863b-7a30-b1ba-51664bdd8bd1"
+    ],
+    "protectedTaskFieldsPreserved": true,
+    "daemonProcessesPreserved": true,
+    "observerConnectionPreserved": true,
+    "diagnoses": {
+      "e65cd30e77cb455d": "completed",
+      "06d898324d4744be": "completed",
+      "54e0ee423c2d4b79": "completed",
+      "4724144705094629": "completed",
+      "1dda5fb483a146eb": "completed"
+    },
+    "newWeb": {
+      "pid": 7816,
+      "created": 134385279359825525
+    },
+    "page": {
+      "result": "passed",
+      "at": "2026-11-07T12:26:09.597Z",
+      "pages": [
+        {
+          "width": 1440,
+          "theme": "light",
+          "diagnosis": "completed",
+          "formOpenedWithoutRenewal": true,
+          "overflow": false
+        },
+        {
+          "width": 1024,
+          "theme": "dark",
+          "diagnosis": "completed",
+          "formOpenedWithoutRenewal": true,
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "theme": "light",
+          "diagnosis": "completed",
+          "formOpenedWithoutRenewal": true,
+          "overflow": false
+        }
+      ],
+      "errors": [],
+      "blockedMutationAttempts": [],
+      "mode": "real HTTP/API/SSE, existing Chrome; no API fixture, no model call; open only marks session seen"
+    },
+    "visualEvidence": "复用未修改前端的 validation/task-diagnosis/live-w1440.png 与 live-w390.png；阶段2再次在实际页面检查三种宽度、键盘和确认表单，无模型调用。"
+  },
+  "commands": [
+    "tools/verify.py run tasks architecture",
+    "tools/verify.py run ci",
+    "既有 desktop.stop/start web + 独立 AppServer 观察连接，操作前检查所有任务和原生载入会话",
+    "系统Chrome headless实际页面：1440/1024/390，不模拟API，仅打开已有任务及表单"
+  ],
+  "comparisonMethod": {
+    "path": "validation/task-policy-compare.py",
+    "sha256": "e2eb270de461eea5f47dc5d99dbcadcf426caea8a75457d8fc85d0f41e787846",
+    "recheck": "passed from permanent location; stdout only; requires Git commit 5b79fe6 locally"
+  },
+  "cleanup": {
+    "files": 22,
+    "bytes": 237250,
+    "areas": [
+      ".agent-tmp/stage1-online-20261107",
+      ".agent-tmp/task-policy-20261107"
+    ],
+    "removed": true,
+    "backups": 0,
+    "newPersistentMechanisms": 0,
+    "oldMaterials": "retained and excluded from commit"
+  }
+}

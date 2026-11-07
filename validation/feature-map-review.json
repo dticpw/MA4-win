@@ -3,17 +3,17 @@
   "limits": "人工记录；current 仅表示登记内容未变化。未登记依赖、环境或语义正确性仍需人工判断。",
   "features": {
     "sessions": {
-      "source_reviewed_at": "2026-11-07T10:36:37.973583+00:00",
+      "source_reviewed_at": "2026-11-07T12:27:09.706567+00:00",
       "recipe_sha256": "1a4df63bf1747ab53095b0d173d96c939e2f560137ebe76ac104b7a9268ab37d",
       "inputs": {
-        "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
+        "tools/verify.py": "d7b88fca16d759e0f3c3876b61104a599f610cfe2f03f210395207d4e48260c4",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
-        "test_verify.py": "3dfda341ea81b9b904fa6368686c483a257c1cbf4753332c93d63dd320a147b6",
+        "test_verify.py": "0d617c17605936953584949dd3c5ccc4921f053c4cc392048a752d8f1d8ae26c",
         "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
         "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
-        "controllers.py": "46b6036ad4ef096ab904a98e7c3e713dbd3218a187f10319e8cccd2ec7e9dc6b",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
         "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
         "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
         "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
@@ -29,7 +29,12 @@
         "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
         "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
-        "test_hub.py": "f51c68d85d63da5eba4ec65c24aeba1f969d9c4bfd2004bcf0c34f9708ddfb87"
+        "test_hub.py": "f51c68d85d63da5eba4ec65c24aeba1f969d9c4bfd2004bcf0c34f9708ddfb87",
+        "task_policy.py": "002db16e77b0e3c8d2c4ab3646f020aa347dab9bdbf8d8ce23b7debd85c1c0b3",
+        "tools/check_architecture.py": "4ce00a29e2da3be4c7f415d5fa5e8bfb3b0b2a78057e40b9c91c257875da0f93",
+        "test_architecture.py": "4f6ec4a77313364b3d63f7b2bab3c6b82231fdab5182fd57ed866336fc5c8563",
+        "test_task_policy.py": "5cbde606620c4833d89f17abc9d47c2199d9e0923f9705bf6f0823e0962ea074",
+        "ARCHITECTURE.md": "b03449da78e4e4d0997e1537077d9dbaee3f174ab8da8eb4a746f713b07532fa"
       },
       "evidence": [
         {
@@ -315,6 +320,10 @@
         {
           "path": "validation/pr-pilot.json",
           "sha256": "b923f50b8e3dad99090c0c937d720a4c1c7520964a83e59ba0e2f1b629991a79"
+        },
+        {
+          "path": "validation/task-policy.json",
+          "sha256": "94499052087749dde0449c656111d9b59b152d3074cdc66f61dab1b5b8f0f140"
         }
       ],
       "coverage": "Windows；17 Python/10 Node；真实故障恢复主路径1轮＋默认旧功能兼容会话1轮；独立CLI重复文本2轮/4消息重开刷新通过；未配对wait在fixture启动前拒绝。 最终 direct open 始终文档加载；双会话16步与11项Node通过，Python及旧兼容仅按原覆盖复用。",
@@ -324,20 +333,20 @@
         "审批/Skill/插话等的真实浏览器链路",
         "其他浏览器与手机真机"
       ],
-      "review_note": "阶段1人工核对：普通会话发送/历史路径未改；新增只读诊断及共用确认/交接阻碍检查。UI保持原ID与入口，复用报告、暂停、确认路径；过期交接不会自动续期。旧实测不外推新增功能在线生效。"
+      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。"
     },
     "tasks": {
-      "source_reviewed_at": "2026-11-07T10:36:37.977737+00:00",
-      "recipe_sha256": "e6198f13fcadf2197d842ead889099a9d3666b67053b1695859b569c55346d96",
+      "source_reviewed_at": "2026-11-07T12:27:09.706567+00:00",
+      "recipe_sha256": "8da7c55cd833385c54bf829aa6f8b4a5207ec303fbc060fa626e53c567c82909",
       "inputs": {
-        "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
+        "tools/verify.py": "d7b88fca16d759e0f3c3876b61104a599f610cfe2f03f210395207d4e48260c4",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
-        "test_verify.py": "3dfda341ea81b9b904fa6368686c483a257c1cbf4753332c93d63dd320a147b6",
+        "test_verify.py": "0d617c17605936953584949dd3c5ccc4921f053c4cc392048a752d8f1d8ae26c",
         "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
         "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
-        "controllers.py": "46b6036ad4ef096ab904a98e7c3e713dbd3218a187f10319e8cccd2ec7e9dc6b",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
         "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
         "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
         "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
@@ -349,7 +358,12 @@
         "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
         "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
-        "tools/controller_details_check.mjs": "bcb046deabc4feed932e6db265dbe92f6559f7d3d6917639fab09f3a870c8c2e"
+        "tools/controller_details_check.mjs": "bcb046deabc4feed932e6db265dbe92f6559f7d3d6917639fab09f3a870c8c2e",
+        "task_policy.py": "002db16e77b0e3c8d2c4ab3646f020aa347dab9bdbf8d8ce23b7debd85c1c0b3",
+        "tools/check_architecture.py": "4ce00a29e2da3be4c7f415d5fa5e8bfb3b0b2a78057e40b9c91c257875da0f93",
+        "test_architecture.py": "4f6ec4a77313364b3d63f7b2bab3c6b82231fdab5182fd57ed866336fc5c8563",
+        "test_task_policy.py": "5cbde606620c4833d89f17abc9d47c2199d9e0923f9705bf6f0823e0962ea074",
+        "ARCHITECTURE.md": "b03449da78e4e4d0997e1537077d9dbaee3f174ab8da8eb4a746f713b07532fa"
       },
       "evidence": [
         {
@@ -419,6 +433,10 @@
         {
           "path": "validation/task-diagnosis/online.json",
           "sha256": "ad9ecd2b24c0f5dfe676040aeb82e768385e7434e5b367d2cfd6eb740086a135"
+        },
+        {
+          "path": "validation/task-policy.json",
+          "sha256": "94499052087749dde0449c656111d9b59b152d3074cdc66f61dab1b5b8f0f140"
         }
       ],
       "coverage": "Windows；目标确认、预算、派工与材料管理的逻辑检查，讨论/确认模拟页面三种宽度通过；Python 4 项符号链接权限跳过。源码与页面入口已核对。 2026-11-07 Windows 现有 8764 已加载，真实材料列表计数/字节与完整磁盘只读统计一致；不外推派工全链路。 第三轮真实8764经HTTP确认后，一个真实中控与一个真实执行者完成三轮工作；目标/预算/授权与原四任务保持，最终completed。 阶段1新增任务诊断、恢复安全逻辑与三种宽度模拟页面；当前服务加载状态见 validation/task-diagnosis/evidence.json。 阶段1 Windows 已实际加载；五任务/10载入会话保持，真实已达标任务页面三种宽度与键盘/只打开确认表单通过。",
@@ -427,20 +445,20 @@
         "Windows 跳过的符号链接检查",
         "Linux 实机"
       ],
-      "review_note": "阶段1人工核对：普通会话发送/历史路径未改；新增只读诊断及共用确认/交接阻碍检查。UI保持原ID与入口，复用报告、暂停、确认路径；过期交接不会自动续期。旧实测不外推新增功能在线生效。"
+      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。"
     },
     "reports": {
-      "source_reviewed_at": "2026-11-07T10:36:37.980743+00:00",
-      "recipe_sha256": "8a734a057b03e401b35366f925b823a548ff150cc67ccbf1fcab8421353da394",
+      "source_reviewed_at": "2026-11-07T12:27:09.706567+00:00",
+      "recipe_sha256": "bcb3852cf086f93ba15f797226d4b399a9b523bd98d9a566779393a2049b35d5",
       "inputs": {
-        "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
+        "tools/verify.py": "d7b88fca16d759e0f3c3876b61104a599f610cfe2f03f210395207d4e48260c4",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
-        "test_verify.py": "3dfda341ea81b9b904fa6368686c483a257c1cbf4753332c93d63dd320a147b6",
+        "test_verify.py": "0d617c17605936953584949dd3c5ccc4921f053c4cc392048a752d8f1d8ae26c",
         "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
         "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
-        "controllers.py": "46b6036ad4ef096ab904a98e7c3e713dbd3218a187f10319e8cccd2ec7e9dc6b",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
         "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
         "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
         "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
@@ -451,7 +469,12 @@
         "tools/controller_details_check.mjs": "bcb046deabc4feed932e6db265dbe92f6559f7d3d6917639fab09f3a870c8c2e",
         "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
-        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b"
+        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
+        "task_policy.py": "002db16e77b0e3c8d2c4ab3646f020aa347dab9bdbf8d8ce23b7debd85c1c0b3",
+        "tools/check_architecture.py": "4ce00a29e2da3be4c7f415d5fa5e8bfb3b0b2a78057e40b9c91c257875da0f93",
+        "test_architecture.py": "4f6ec4a77313364b3d63f7b2bab3c6b82231fdab5182fd57ed866336fc5c8563",
+        "test_task_policy.py": "5cbde606620c4833d89f17abc9d47c2199d9e0923f9705bf6f0823e0962ea074",
+        "ARCHITECTURE.md": "b03449da78e4e4d0997e1537077d9dbaee3f174ab8da8eb4a746f713b07532fa"
       },
       "evidence": [
         {
@@ -513,6 +536,10 @@
         {
           "path": "validation/task-diagnosis/online.json",
           "sha256": "ad9ecd2b24c0f5dfe676040aeb82e768385e7434e5b367d2cfd6eb740086a135"
+        },
+        {
+          "path": "validation/task-policy.json",
+          "sha256": "94499052087749dde0449c656111d9b59b152d3074cdc66f61dab1b5b8f0f140"
         }
       ],
       "coverage": "Windows；回传去重、等待、暂停、恢复、交接等逻辑及报告详情模拟页面三种宽度通过；源码与页面入口已核对。 第三轮真实模型任务三份执行报告各自动回传一次；空闲时暂停→同任务恢复→验收完成，未重复派工，截止不延长。 阶段1新增任务诊断、恢复安全逻辑与三种宽度模拟页面；当前服务加载状态见 validation/task-diagnosis/evidence.json。 阶段1 Windows 已实际加载；五任务/10载入会话保持，真实已达标任务页面三种宽度与键盘/只打开确认表单通过。",
@@ -521,7 +548,7 @@
         "Linux 实机",
         "其他浏览器与手机真机"
       ],
-      "review_note": "阶段1人工核对：普通会话发送/历史路径未改；新增只读诊断及共用确认/交接阻碍检查。UI保持原ID与入口，复用报告、暂停、确认路径；过期交接不会自动续期。旧实测不外推新增功能在线生效。"
+      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。"
     }
   }
 }

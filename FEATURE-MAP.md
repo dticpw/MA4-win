@@ -62,6 +62,8 @@
 
 **入口及前提：** 中控任务页创建项目任务，先讨论目标；有完整目标并经用户确认后才允许自主推进。
 
+**代码分工：** [任务控制边界](ARCHITECTURE.md)说明 `task_policy.py` 的纯判断、Controllers 的状态变更/发送，以及 Hub 的会话访问。新规则直接用任务快照和明确时间测试；不要把 RPC 或文件读写放入规则层。`run tasks architecture` 覆盖行为与依赖方向，`run ci` 自动包含两组。
+
 **用户操作与成功观察：**
 
 1. 点击“＋中控”，填写任务名、真实项目目录和初始想法，点“创建并进入讨论”。应进入目标讨论，不能因为创建就开始自主派工；讨论本身仍可能调用模型。
@@ -78,7 +80,7 @@
 
 1. `POST /api/tasks/create` → `Controllers.do_create`：建立任务及中控，初始想法进入讨论，不直接等同目标确认或自动派工。
 2. `/api/tasks/update` / 中控目标建议 → `stage_draft`：暂存目标、预算、工作目录与可写范围；保留版本号。
-3. `/api/tasks/confirm` → `do_confirm/confirm_blocker`：页面与后端共用确认阻碍说明；后端仍按提交字段校验草案版本、完整目标、授权与预算。过期版本不能覆盖新草案，也不能暗中扩大授权范围。普通聊天不替代确认或恢复。
+3. `/api/tasks/confirm` → `Controllers.do_confirm` → `task_policy.confirm_blocker`：页面与后端共用确认阻碍说明；后端仍按提交字段校验草案版本、完整目标、授权与预算。过期版本不能覆盖新草案，也不能暗中扩大授权范围。普通聊天不替代确认或恢复。
 4. `ma4_dispatch` → `dispatch/can_launch/launch`：检查预算和已授权目录、相对写入范围；重叠写入排队，不重叠才可并行。正式发送前再检查期限和路径。执行会话使用所属项目临时目录。
 
 **重要区别：** MA4 的写入排队只协调它管理的任务，不约束外部终端，也不是操作系统沙箱。默认两小时从首次启动计时；暂停、重连和交接不能自动重置预算。时间到期收尾与 token/金额硬上限的处理不同。
@@ -108,6 +110,7 @@
 
 1. `Controllers.event/complete_worker`：按执行会话和回合 ID 去重，把最终摘要、错误和来源放入已有 `pending` 队列；不是新增一份历史数据库。
 2. `report_delivery`：根据连接、任务状态、预算、中控是否忙、交接及待确认发送，给出报告尚未回传的原因。暂停时保留报告，普通聊天不会恢复任务；其他任务写入不阻挡报告接收，但会影响相关文件能否验收。
+   规则实现位于 `task_policy.py`，Controllers 保留委托方法以兼容已有调用；连接状态与当前时间经 `RuntimeState` 传入。与拆分前实现的固定样本对照、不可变输入测试及编排回归见[规则拆分验证](validation/task-policy.json)。
    `diagnosis` 从同一状态推导任务说明，随 `publish` 的快照/SSE 以及 `ma4_control(action=status)` 提供；复用既有核对周期刷新时间相关状态，不另存诊断历史、不增加轮询或自动修复。`confirm_blocker/handoff_blocker` 同时用于页面提示与后端操作检查；直接 `/api/tasks/resume` 也检查连接恢复、在途、交接和推进状态，不能绕过确认路径的这些限制。预算仍须用户明确调整。
 3. `tick/send_host`：条件满足时回传；`outbox` 保存正在确认的发送。`reconcile` 在重连后检查已发标记，避免“结果不确定就重发”导致重复执行。
 4. 中控检查实际产物，再通过 `ma4_control` 明确记录达标或未达标；`do_handoff/perform_handoff` 保留同一任务、执行者与预算，把摘要交给新中控。

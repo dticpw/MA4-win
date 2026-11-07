@@ -55,6 +55,8 @@ class VerifyTest(unittest.TestCase):
         self.assertNotIn("test_model_image_preview", python)
         self.assertIn("test_platform", python)
         self.assertEqual(python.count("test_controllers"), 1)
+        self.assertEqual(python.count("test_task_policy"), 1)
+        self.assertEqual(python.count("test_architecture"), 1)
         self.assertIn("test_session_actions.mjs", plan[1][1])
         self.assertIn("--test-reporter=tap", plan[1][1])
         with patch.object(verify, "execute") as execute, \
