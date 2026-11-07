@@ -1,0 +1,18 @@
+✔ full identity is required and each identity component must match (3.2086ms)
+✔ live port, remote URLs and disconnected backends are refused (0.3083ms)
+✔ plans use local aliases and reject arbitrary IDs, cwd, code and unknown actions (0.4243ms)
+✔ unowned session fails before any page access (0.8006ms)
+✔ unexpected action failure stops later actions and does not retry (1.4978ms)
+✔ unpaired send is rejected before the CLI can create output or fixture (0.3421ms)
+✔ repeated text is checked separately by both turn ID and item ID (0.2645ms)
+✔ history summary preserves item IDs and detects duplicate turns (0.1699ms)
+✔ CLI parses different compositions and rejects unknown flags/messages (0.1922ms)
+✔ CLI output refuses project root, existing files and escaping paths (0.4228ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 89.7212

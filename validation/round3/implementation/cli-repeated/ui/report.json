@@ -1,0 +1,640 @@
+{
+  "result": "passed",
+  "identity": {
+    "url": "http://127.0.0.1:8856",
+    "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-repeat\\runtime-7fz6h20f\\smoke-yo83x7nw",
+    "verification": {
+      "instance": "ca4e59f3b9724463a93e015894b269a6",
+      "ownerPid": 33240,
+      "backendPid": 23852,
+      "endpoint": "ws://127.0.0.1:8842",
+      "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-repeat\\runtime-7fz6h20f\\smoke-yo83x7nw\\codex-home",
+      "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-repeat\\runtime-7fz6h20f\\smoke-yo83x7nw\\state"
+    },
+    "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) dumb (ma4; 0.1)"
+  },
+  "checks": [
+    "1440x900 light: rendered, no horizontal overflow",
+    "1024x800 dark: rendered, no horizontal overflow",
+    "390x844 light: rendered, no horizontal overflow"
+  ],
+  "journeys": [
+    {
+      "feature": "sessions",
+      "result": "passed",
+      "steps": [
+        {
+          "index": 1,
+          "action": {
+            "op": "create",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:27:05.075Z",
+          "result": {
+            "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 2,
+          "action": {
+            "op": "send",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:27:05.979Z",
+          "result": {
+            "message": "中控独立重复文本验证",
+            "turnId": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+            "requestId": "6be1ec6a-8ba5-4cbb-8f74-f8badc30101f",
+            "screenshot": "02-before-send-1.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 3,
+          "action": {
+            "op": "wait",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:27:06.145Z",
+          "result": {
+            "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "03-reply.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 4,
+          "action": {
+            "op": "send",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:27:07.068Z",
+          "result": {
+            "message": "中控独立重复文本验证",
+            "turnId": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+            "requestId": "e00b3356-8c8b-46bb-9472-a5f256275189",
+            "screenshot": "04-before-send-2.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 5,
+          "action": {
+            "op": "wait",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:27:07.229Z",
+          "result": {
+            "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+            "turnCount": 2,
+            "itemCount": 4,
+            "summary": [
+              {
+                "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              },
+              {
+                "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "05-reply.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 6,
+          "action": {
+            "op": "reopen",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:27:07.785Z",
+          "result": {
+            "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+            "turnCount": 2,
+            "itemCount": 4,
+            "summary": [
+              {
+                "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              },
+              {
+                "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "06-reopened.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 7,
+          "action": {
+            "op": "refresh",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:27:08.025Z",
+          "result": {
+            "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+            "turnCount": 2,
+            "itemCount": 4,
+            "summary": [
+              {
+                "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              },
+              {
+                "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "07-refreshed.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 8,
+          "action": {
+            "op": "history",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:27:08.266Z",
+          "result": {
+            "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+            "turnCount": 2,
+            "itemCount": 4,
+            "summary": [
+              {
+                "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              },
+              {
+                "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+                    "type": "userMessage",
+                    "text": "中控独立重复文本验证"
+                  },
+                  {
+                    "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ]
+          },
+          "status": "passed"
+        }
+      ],
+      "sessions": [
+        {
+          "alias": "main",
+          "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+          "sends": [
+            {
+              "message": "中控独立重复文本验证",
+              "turnId": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+              "requestId": "6be1ec6a-8ba5-4cbb-8f74-f8badc30101f"
+            },
+            {
+              "message": "中控独立重复文本验证",
+              "turnId": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+              "requestId": "e00b3356-8c8b-46bb-9472-a5f256275189"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "compatibility": null,
+  "steps": [
+    {
+      "index": 1,
+      "action": {
+        "op": "create",
+        "session": "main"
+      },
+      "startedAt": "2026-11-07T06:27:05.075Z",
+      "result": {
+        "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73"
+      },
+      "status": "passed"
+    },
+    {
+      "index": 2,
+      "action": {
+        "op": "send",
+        "session": "main"
+      },
+      "startedAt": "2026-11-07T06:27:05.979Z",
+      "result": {
+        "message": "中控独立重复文本验证",
+        "turnId": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+        "requestId": "6be1ec6a-8ba5-4cbb-8f74-f8badc30101f",
+        "screenshot": "02-before-send-1.png"
+      },
+      "status": "passed"
+    },
+    {
+      "index": 3,
+      "action": {
+        "op": "wait",
+        "session": "main"
+      },
+      "startedAt": "2026-11-07T06:27:06.145Z",
+      "result": {
+        "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+        "turnCount": 1,
+        "itemCount": 2,
+        "summary": [
+          {
+            "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          }
+        ],
+        "screenshot": "03-reply.png"
+      },
+      "status": "passed"
+    },
+    {
+      "index": 4,
+      "action": {
+        "op": "send",
+        "session": "main"
+      },
+      "startedAt": "2026-11-07T06:27:07.068Z",
+      "result": {
+        "message": "中控独立重复文本验证",
+        "turnId": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+        "requestId": "e00b3356-8c8b-46bb-9472-a5f256275189",
+        "screenshot": "04-before-send-2.png"
+      },
+      "status": "passed"
+    },
+    {
+      "index": 5,
+      "action": {
+        "op": "wait",
+        "session": "main"
+      },
+      "startedAt": "2026-11-07T06:27:07.229Z",
+      "result": {
+        "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+        "turnCount": 2,
+        "itemCount": 4,
+        "summary": [
+          {
+            "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          },
+          {
+            "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          }
+        ],
+        "screenshot": "05-reply.png"
+      },
+      "status": "passed"
+    },
+    {
+      "index": 6,
+      "action": {
+        "op": "reopen",
+        "session": "main"
+      },
+      "startedAt": "2026-11-07T06:27:07.785Z",
+      "result": {
+        "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+        "turnCount": 2,
+        "itemCount": 4,
+        "summary": [
+          {
+            "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          },
+          {
+            "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          }
+        ],
+        "screenshot": "06-reopened.png"
+      },
+      "status": "passed"
+    },
+    {
+      "index": 7,
+      "action": {
+        "op": "refresh",
+        "session": "main"
+      },
+      "startedAt": "2026-11-07T06:27:08.025Z",
+      "result": {
+        "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+        "turnCount": 2,
+        "itemCount": 4,
+        "summary": [
+          {
+            "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          },
+          {
+            "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          }
+        ],
+        "screenshot": "07-refreshed.png"
+      },
+      "status": "passed"
+    },
+    {
+      "index": 8,
+      "action": {
+        "op": "history",
+        "session": "main"
+      },
+      "startedAt": "2026-11-07T06:27:08.266Z",
+      "result": {
+        "threadId": "01a1b4b0-750d-7bc2-b385-a9f610a8fa73",
+        "turnCount": 2,
+        "itemCount": 4,
+        "summary": [
+          {
+            "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          },
+          {
+            "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+            "status": "completed",
+            "items": [
+              {
+                "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+                "type": "userMessage",
+                "text": "中控独立重复文本验证"
+              },
+              {
+                "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+                "type": "agentMessage",
+                "text": "本机模拟回复：Windows 共享会话连接成功。"
+              }
+            ]
+          }
+        ]
+      },
+      "status": "passed"
+    }
+  ],
+  "diagnostics": [
+    {
+      "kind": "requestfailed",
+      "step": 7,
+      "url": "http://127.0.0.1:8856/api/events?since=3",
+      "method": "GET",
+      "text": "net::ERR_ABORTED",
+      "expected": true,
+      "reason": "own navigation closed prior SSE"
+    }
+  ],
+  "requests": [
+    {
+      "step": 1,
+      "url": "http://127.0.0.1:8856/api/new",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "step": 1,
+      "url": "http://127.0.0.1:8856/api/open",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "step": 2,
+      "url": "http://127.0.0.1:8856/api/send",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "step": 4,
+      "url": "http://127.0.0.1:8856/api/send",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "step": 6,
+      "url": "http://127.0.0.1:8856/api/open",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "step": 7,
+      "url": "http://127.0.0.1:8856/api/open",
+      "method": "POST",
+      "status": 200
+    }
+  ],
+  "problems": []
+}

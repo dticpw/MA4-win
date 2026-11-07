@@ -1,0 +1,131 @@
+test_after_deadline_discussion_does_not_restart_or_reset_budget (test_controllers.ControllerTest) ... ok
+test_artifact_aliases_count_once_and_keep_retention_when_cleaned (test_controllers.ControllerTest) ... ok
+test_artifact_cleanup_requires_exact_safe_owned_files (test_controllers.ControllerTest) ... skipped 'Windows 尚未授予符号链接权限；Junction 另有实机检查'
+test_assessment_arrives_during_archive_and_later_report_waits_for_busy_host (test_controllers.ControllerTest) ... ok
+test_budget_required_before_autonomy_and_cannot_be_raised_by_tool (test_controllers.ControllerTest) ... ok
+test_busy_host_reports_merge_after_restart_without_automatic_resume (test_controllers.ControllerTest) ... ok
+test_cleanup_preserves_other_task_and_refuses_hardlinks (test_controllers.ControllerTest) ... ok
+test_closing_can_record_an_honest_outcome_after_workers_return (test_controllers.ControllerTest) ... ok
+test_closing_waits_for_all_workers_and_preserves_queued_work (test_controllers.ControllerTest) ... ok
+test_closing_waits_own_workers_but_not_other_task_writer (test_controllers.ControllerTest) ... ok
+test_controller_pause_during_closing_does_not_interrupt_workers (test_controllers.ControllerTest) ... ok
+test_controller_pause_stops_workers_without_interrupting_own_tool (test_controllers.ControllerTest) ... ok
+test_creation_only_needs_project_and_name_and_cannot_start (test_controllers.ControllerTest) ... ok
+test_cross_project_worker_real_cwd_scope_budget_and_old_schema (test_controllers.ControllerTest) ... ok
+test_cross_task_actual_paths_serialize_and_disjoint_scopes_run (test_controllers.ControllerTest) ... ok
+test_deadline_restart_preserves_notices_and_single_review (test_controllers.ControllerTest) ... ok
+test_deadline_stops_queued_work (test_controllers.ControllerTest) ... ok
+test_deadline_waits_for_worker_then_one_final_controller_turn (test_controllers.ControllerTest) ... ok
+test_declared_disjoint_scopes_can_write_together (test_controllers.ControllerTest) ... ok
+test_default_deadline_survives_pause_restart_handoff_and_resume (test_controllers.ControllerTest) ... ok
+test_default_two_hours_begin_at_start_not_creation (test_controllers.ControllerTest) ... ok
+test_discussion_still_obeys_token_and_money_limits (test_controllers.ControllerTest) ... ok
+test_dispatch_rejects_ungranted_root_and_scope_widening_without_creating_threads (test_controllers.ControllerTest) ... ok
+test_duplicate_create_request_does_not_create_extra_controller (test_controllers.ControllerTest) ... ok
+test_expiry_during_a_tool_call_blocks_dispatch_without_tick (test_controllers.ControllerTest) ... ok
+test_explicit_acceptance_requires_evidence_and_no_outstanding_work (test_controllers.ControllerTest) ... ok
+test_explicit_deadline_and_existing_budgets_are_preserved (test_controllers.ControllerTest) ... ok
+test_external_model_change_invalidates_money_budget (test_controllers.ControllerTest) ... ok
+test_failed_start_does_not_begin_duration (test_controllers.ControllerTest) ... ok
+test_file_link_guidance_matches_platform_in_templates_and_each_managed_message (test_controllers.ControllerTest) ... ok
+test_finish_preserves_decision_when_scratch_registration_is_missing (test_controllers.ControllerTest) ... ok
+test_finish_reclaims_owned_empty_roots_and_preserves_review_files (test_controllers.ControllerTest) ... ok
+test_finish_records_settling_tokens_and_time_without_another_turn (test_controllers.ControllerTest) ... ok
+test_finish_reports_cleanup_io_failure_without_returning_failed_acceptance (test_controllers.ControllerTest) ... ok
+test_goal_change_cancels_queued_old_instructions (test_controllers.ControllerTest) ... ok
+test_goal_proposal_stops_new_work_but_waits_for_old_worker (test_controllers.ControllerTest) ... ok
+test_grant_change_cancels_queued_work_and_does_not_restart_budget (test_controllers.ControllerTest) ... ok
+test_handoff_keeps_workers_budget_and_task_identity (test_controllers.ControllerTest) ... ok
+test_handoff_waits_for_current_controller_turn (test_controllers.ControllerTest) ... ok
+test_hard_limits_and_manual_pause_still_interrupt_closing_turns (test_controllers.ControllerTest) ... ok
+test_host_has_full_capability_but_delegates_main_implementation (test_controllers.ControllerTest) ... ok
+test_host_review_scratch_registered_before_start_even_with_remote_workers (test_controllers.ControllerTest) ... ok
+test_idea_discussion_proposal_and_explicit_confirmation (test_controllers.ControllerTest) ... ok
+test_invalid_owner_markers_are_never_replaced (test_controllers.ControllerTest) ... skipped 'Windows 尚未授予符号链接权限；Junction 另有实机检查'
+test_invalid_workspace_grants_do_not_change_draft_or_formal_state (test_controllers.ControllerTest) ... ok
+test_launch_rechecks_deadline_at_the_send_boundary (test_controllers.ControllerTest) ... ok
+test_legacy_single_project_and_multiroot_state_survive_restart_handoff (test_controllers.ControllerTest) ... ok
+test_legacy_timing_is_unknown_and_resume_is_not_the_original_start (test_controllers.ControllerTest) ... ok
+test_legacy_usage_and_recovery_gaps_are_not_invented_turn_counts (test_controllers.ControllerTest) ... ok
+test_long_report_keeps_artifact_failure_and_source_without_full_context (test_controllers.ControllerTest) ... ok
+test_malformed_state_never_silently_overwrites_original (test_controllers.ControllerTest) ... ok
+test_money_estimate_separates_cached_input (test_controllers.ControllerTest) ... ok
+test_money_limit_takes_precedence_over_simultaneous_deadline (test_controllers.ControllerTest) ... ok
+test_multiroot_artifacts_remain_manageable_after_revocation (test_controllers.ControllerTest) ... ok
+test_named_idle_worker_in_user_message_is_included_on_start_and_steer (test_controllers.ControllerTest) ... ok
+test_nested_project_writes_also_coordinate (test_controllers.ControllerTest) ... ok
+test_pause_stops_owned_threads_only (test_controllers.ControllerTest) ... ok
+test_paused_and_hard_budget_reports_are_retained (test_controllers.ControllerTest) ... ok
+test_paused_handoff_delivers_summary_when_resumed (test_controllers.ControllerTest) ... ok
+test_pending_draft_survives_restart_and_legacy_goal_stays_confirmed (test_controllers.ControllerTest) ... ok
+test_pending_draft_worker_still_obeys_hard_limit_when_host_idle (test_controllers.ControllerTest) ... ok
+test_pending_draft_workers_keep_old_budget_without_automatic_review (test_controllers.ControllerTest) ... ok
+test_program_status_does_not_rewrite_confirmed_goal_or_draft (test_controllers.ControllerTest) ... ok
+test_project_can_have_two_independent_tasks (test_controllers.ControllerTest) ... ok
+test_prompt_keeps_every_nonidle_worker_and_pending_failed_report (test_controllers.ControllerTest) ... ok
+test_prompt_omits_idle_history_but_status_and_ui_keep_all_workers (test_controllers.ControllerTest) ... ok
+test_recovered_usage_gap_is_not_charged_to_the_next_turn (test_controllers.ControllerTest) ... ok
+test_recovery_matches_sent_marker_instead_of_resending (test_controllers.ControllerTest) ... ok
+test_removal_requires_inactive_task_and_clean_scratch (test_controllers.ControllerTest) ... ok
+test_report_delivery_state_explains_connection_and_handoff_waits (test_controllers.ControllerTest) ... ok
+test_report_send_lost_reply_is_reconciled_without_resending (test_controllers.ControllerTest) ... ok
+test_reused_worker_receives_current_test_and_closeout_guidance (test_controllers.ControllerTest) ... ok
+test_roles_keep_former_hosts_and_worker_usage_separate (test_controllers.ControllerTest) ... ok
+test_runtime_actor_executes_commands_without_blocking_rpc_reader (test_controllers.ControllerTest) ... ok
+test_scratch_identity_preserves_first_spelling_and_posix_case (test_controllers.ControllerTest) ... ok
+test_session_activity_uses_own_explicit_turn_times_not_task_or_estimates (test_controllers.ControllerTest) ... ok
+test_shared_artifact_links_and_busy_workers_are_not_cleaned (test_controllers.ControllerTest) ... skipped 'Windows 尚未授予符号链接权限；Junction 另有实机检查'
+test_shared_writes_warn_receiving_host_without_blocking_reports (test_controllers.ControllerTest) ... ok
+test_stale_or_invalid_confirmation_cannot_apply_goal_or_budget (test_controllers.ControllerTest) ... ok
+test_symlinks_checked_again_at_launch_and_grant_confirmation (test_controllers.ControllerTest) ... skipped 'Windows 尚未授予符号链接权限；Junction 另有实机检查'
+test_token_updates_are_cumulative_not_added_twice (test_controllers.ControllerTest) ... ok
+test_turn_usage_late_duplicate_notifications_and_restart (test_controllers.ControllerTest) ... ok
+test_uncertain_closing_notice_is_not_retried_or_a_new_turn (test_controllers.ControllerTest) ... ok
+test_uncertain_send_is_not_retried_after_restart (test_controllers.ControllerTest) ... ok
+test_unregistered_scratch_not_adopted_and_does_not_block_explanation (test_controllers.ControllerTest) ... ok
+test_worker_completion_delivered_once_without_claiming_goal_complete (test_controllers.ControllerTest) ... ok
+test_workspace_proposal_old_tool_is_not_authorization (test_controllers.ControllerTest) ... ok
+test_write_scope_is_always_project_relative (test_controllers.ControllerTest) ... ok
+test_writers_coordinate_across_tasks_and_review (test_controllers.ControllerTest) ... ok
+test_call_with_fragmented_reply_and_large_payload (test_appserver.AppServerTest) ... ok
+test_disconnect_fails_pending_calls (test_appserver.AppServerTest) ... ok
+test_error_reply_raises (test_appserver.AppServerTest) ... ok
+test_initialize_then_initialized (test_appserver.AppServerTest) ... ok
+test_notifications_requests_and_ping (test_appserver.AppServerTest) ... ok
+test_app_browser_discovery_and_explicit_path (test_runtime.RuntimeTest) ... ok
+test_only_explicit_loopback_endpoint (test_runtime.RuntimeTest) ... ok
+test_project_relative_runtime_paths (test_runtime.RuntimeTest) ... ok
+test_remote_resume_and_literal_terminal_arguments (test_runtime.RuntimeTest) ... ok
+test_file_link_mapping_rejects_network_and_unknown_linux_roots (test_platform.PlatformTest) ... ok
+test_file_links_map_shared_drives_in_both_platform_modes (test_platform.PlatformTest) ... ok
+test_junction_is_a_link_even_without_python312_is_junction (test_platform.PlatformTest) ... ok
+test_linux_file_links_with_simulated_posix_filesystem (test_platform.PlatformTest) ... ok
+test_proxy_bytes_timeout_and_close_only_own_child (test_platform.PlatformTest) ... ok
+test_real_junction_is_refused_as_authorized_root (test_platform.PlatformTest) ... ok
+test_running_daemon_is_never_restarted (test_platform.PlatformTest) ... ok
+test_runtime_data_and_codex_home_are_config_scoped (test_platform.PlatformTest) ... ok
+test_tcp_failure_does_not_start_native_daemon (test_platform.PlatformTest) ... ok
+test_windows_conflicts_respect_case_slashes_and_directory_boundaries (test_platform.PlatformTest) ... ok
+test_windows_default_application_never_runs_script_links (test_platform.PlatformTest) ... ok
+test_double_click_entry_reuse_browser_and_safe_stop (test_desktop.DesktopTest) ... MA4 已就绪：http://127.0.0.1:2111
+已停止本入口启动的：web
+共享后台保持运行；终端会话不受影响。
+MA4 已就绪：http://127.0.0.1:2111
+已停止本入口启动的：web、backend
+已停止本入口启动的：无运行实例
+ok
+test_foreign_ports_are_preserved_and_no_children_created (test_desktop.DesktopTest) ... 已停止本入口启动的：无运行实例
+ok
+test_reused_backend_is_not_stopped (test_desktop.DesktopTest) ... MA4 已就绪：http://127.0.0.1:2165
+已停止本入口启动的：web
+已停止本入口启动的：无运行实例
+ok
+test_include_backend_never_stops_native_daemon (test_desktop.NativeLauncherTest) ... 已停止本入口启动的：web
+ok
+test_native_reuse_has_no_owned_backend_or_tcp_probe (test_desktop.NativeLauncherTest) ... MA4 已就绪：http://127.0.0.1:8764
+ok
+
+----------------------------------------------------------------------
+Ran 114 tests in 22.136s
+
+OK (skipped=4)

@@ -5,6 +5,16 @@ export const taskLabels = { draft: "讨论中", running: "推进中", waiting: "
   closing: "到期收尾中", paused: "已暂停", budget: "预算已到", attention: "需要处理", completed: "已达标", stopped: "未达标结束" };
 
 const taskMembers = (t) => [t.host, ...(t.formerHosts || []), ...Object.keys(t.workers || {})].filter(Boolean);
+export const activityTimestamp = value => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 0;
+export function sessionActivityAt(task, id) {
+  const session = task.statistics?.sessions?.find(s => s.threadId === id);
+  return Math.max(activityTimestamp(session?.updatedAt), ...(session?.turns || []).flatMap(turn =>
+    turn.timeEstimated ? [] : [activityTimestamp(turn.startedAt), activityTimestamp(turn.completedAt)])) || null;
+}
+export function mergeThreadTimes(rows, previous) {
+  const times = new Map(previous.map(row => [row.id, activityTimestamp(row.updatedAt)]));
+  return rows.map(row => ({ ...row, updatedAt: Math.max(activityTimestamp(row.updatedAt), times.get(row.id) || 0) || null }));
+}
 const taskWorkspaces = (t) => t.workspaces || [{ cwd: t.cwd, write_scope: [] }];
 export const workspaceText = (rows) => rows.map((g) => `${g.cwd}\n可写：${g.write_scope.length ? g.write_scope.join("、") : "整个目录"}`).join("\n\n");
 export function workspaceHtml(t) {
@@ -91,6 +101,7 @@ export function createControllers({ api, openThread, toast, refresh, current, ho
   let formRelativeDeadline = false, formDeadline = null;
   const $ = (id) => document.getElementById(id);
   const projectOpen = new Map(), taskOpen = new Set();
+  const activityTimes = new Map(); // Current browser state only; never task.updatedAt.
   try {
     const saved = JSON.parse(localStorage.getItem("ma4-project-tree") || "{}");
     for (const [path, open] of Object.entries(saved.projects || {})) projectOpen.set(path, open);
@@ -110,7 +121,13 @@ export function createControllers({ api, openThread, toast, refresh, current, ho
   }
   function fallback(t, id, role) {
     return { id, name: role === "host" ? t.name : t.workers[id]?.name || "前任中控", cwd: t.workers[id]?.cwd || t.cwd,
-      status: role === "host" && t.hostBusy || t.workers[id]?.state === "running" ? "running" : "offline", updatedAt: t.updatedAt };
+      status: role === "host" && t.hostBusy || t.workers[id]?.state === "running" ? "running" : "offline", updatedAt: null };
+  }
+  function memberRow(t, id, role, byId) {
+    const row = byId.get(id) || fallback(t, id, role);
+    const at = Math.max(activityTimestamp(row.updatedAt), sessionActivityAt(t, id) || 0, activityTimes.get(id) || 0);
+    activityTimes.set(id, at);
+    return { ...row, updatedAt: at || null };
   }
   function tree(rows, filter, query, rowHtml, folds = [], view = "tasks") {
     if (view === "sessions") {
@@ -151,10 +168,10 @@ export function createControllers({ api, openThread, toast, refresh, current, ho
             for (const id of [t.host, ...Object.keys(t.workers)]) {
               if (!id) continue;
               const role = id === t.host ? "中控" : t.workers[id].access === "read" ? "只读执行" : "执行";
-              const row = byId.get(id) || fallback(t, id, id === t.host ? "host" : "worker");
+              const row = memberRow(t, id, id === t.host ? "host" : "worker", byId);
               html.push(rowHtml({ ...row, name: `${role} · ${id === t.host ? t.name : t.workers[id].name}` }));
             }
-            if (t.formerHosts.length) html.push(`<li class="former-hosts"><details><summary>前任中控 · ${t.formerHosts.length}</summary><ul>${t.formerHosts.map((id) => rowHtml(byId.get(id) || fallback(t, id, "former"))).join("")}</ul></details></li>`);
+            if (t.formerHosts.length) html.push(`<li class="former-hosts"><details><summary>前任中控 · ${t.formerHosts.length}</summary><ul>${t.formerHosts.map((id) => rowHtml(memberRow(t, id, "former", byId))).join("")}</ul></details></li>`);
             html.push("</ul>");
           }
           html.push("</li>");
@@ -405,5 +422,12 @@ export function createControllers({ api, openThread, toast, refresh, current, ho
     };
     for (const el of document.querySelectorAll("[data-close-dialog]")) el.onclick = () => $(el.dataset.closeDialog).close();
   }
-  return { tree, renderPanel, wire, taskFor, counts(rows) { return { tasks: data.tasks.length, sessions: rows.filter((r) => !taskFor(r.id)).length }; }, attentionCount(rows) { return data.tasks.filter((t) => ["attention", "budget"].includes(t.status) && !rows.some((r) => r.id === t.host && ["approval", "input"].includes(r.status))).length; }, setData(value) { data = value || { tasks: [] }; const t = taskFor(current()); if (t && selected !== t.id) taskOpen.add(t.id); renderPanel(); } };
+  return { tree, renderPanel, wire, taskFor, counts(rows) { return { tasks: data.tasks.length, sessions: rows.filter((r) => !taskFor(r.id)).length }; }, attentionCount(rows) { return data.tasks.filter((t) => ["attention", "budget"].includes(t.status) && !rows.some((r) => r.id === t.host && ["approval", "input"].includes(r.status))).length; }, setData(value) {
+    data = value || { tasks: [] };
+    for (const t of data.tasks) for (const id of members(t))
+      activityTimes.set(id, Math.max(activityTimes.get(id) || 0, sessionActivityAt(t, id) || 0));
+    const t = taskFor(current());
+    if (t && selected !== t.id) taskOpen.add(t.id);
+    renderPanel();
+  } };
 }

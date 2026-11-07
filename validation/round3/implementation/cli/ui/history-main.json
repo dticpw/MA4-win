@@ -1,0 +1,27 @@
+{
+  "turns": [
+    {
+      "id": "01a1b4a7-4e5d-7811-b4e9-c0ee5aa8d01d",
+      "status": "completed",
+      "startedAt": 1794032225,
+      "completedAt": 1794032226,
+      "durationMs": 590,
+      "error": null,
+      "items": [
+        {
+          "id": "01a1b4a7-4f66-7920-8e96-47f1aa8d7dcf",
+          "type": "userMessage",
+          "text": "独立入口第二种组合：先查空历史再发送",
+          "attachments": []
+        },
+        {
+          "id": "msg_0a76c78b6a7c493faa12c0166860542c",
+          "type": "agentMessage",
+          "text": "本机模拟回复：Windows 共享会话连接成功。",
+          "phase": null
+        }
+      ]
+    }
+  ],
+  "older": null
+}

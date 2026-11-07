@@ -1,6 +1,6 @@
 import { isWithin, shortPath as compactPath } from "/paths.js";
 import { renderMarkdown, escapeHtml } from "/markdown.js";
-import { createControllers, dynamicToolHtml, userMessageHtml } from "/controllers.js";
+import { createControllers, dynamicToolHtml, userMessageHtml, activityTimestamp, mergeThreadTimes } from "/controllers.js";
 
 const $ = (id) => document.getElementById(id);
 const state = {
@@ -34,7 +34,7 @@ const defaultCwd = () => state.side.runtime?.defaultCwd || "";
 const title = (t) => t.name || t.preview || t.id.slice(0, 8);
 
 function ago(seconds) {
-  if (!seconds) return "";
+  if (!activityTimestamp(seconds)) return "时间未知";
   const d = Date.now() / 1000 - seconds;
   if (d < 60) return "刚刚";
   if (d < 3600) return `${Math.floor(d / 60)} 分钟前`;
@@ -169,7 +169,7 @@ function threadRow(t) {
     </div>
     <div class="thread-side">
       <span class="thread-state ${key}"${since} data-label="${shown}">${shown}${since ? " " + elapsed(t.run) : ""}</span>
-      <span class="thread-time">${ago(t.updatedAt)}</span>
+      <span class="thread-time" title="${activityTimestamp(t.updatedAt) ? '最近活动：' + new Date(t.updatedAt * 1000).toLocaleString('zh-CN', { hour12: false }) : '没有可信的会话活动时间'}">${ago(t.updatedAt)}</span>
     </div>
   </li>`;
 }
@@ -777,15 +777,18 @@ function renderActivity() {
     activitySignature = signature;
     const focused = document.activeElement?.dataset.activity === "chat";
     $("service-activity").innerHTML = rows.map((row) => {
-      const ready = !row.stale && Number.isInteger(row.count) && row.count >= 0;
-      const number = ready ? row.count : "—";
-      const detail = row.error || (row.fetched_at ? row.stale ? "数据已过期" : `${activityTime(row.fetched_at)} 更新` : "查询中…");
+      const collecting = !row.stale && row.status === "collecting";
+      const ready = !row.stale && !collecting && Number.isSafeInteger(row.count) && row.count >= 0;
+      const number = collecting ? "积累中" : ready ? row.count : "未知";
+      const detail = row.error || (row.fetched_at ? row.stale ? "数据已过期" : collecting
+        ? `统计启动不足 5 分钟 · ${activityTime(row.fetched_at)} 更新` : `${activityTime(row.fetched_at)} 更新` : "查询中…");
       const content = `<span><span class="activity-name">${escapeHtml(row.label)}</span><span class="activity-metric">${escapeHtml(row.metric)}</span></span>
-        <span class="activity-value">${number}${row.key === "chat" ? '<span class="activity-arrow" aria-hidden="true">›</span>' : ""}</span>`;
+        <span class="activity-value${ready ? '' : ' activity-state'}">${number}${row.key === "chat" ? '<span class="activity-arrow" aria-hidden="true">›</span>' : ""}</span>`;
       const summary = row.key === "chat"
         ? `<button class="activity-summary" data-activity="chat" aria-haspopup="dialog" ${ready ? "" : "disabled"} aria-label="Chat / 代理，近 5 分钟活跃 IP ${ready ? number + ' 个，查看详情' : '未知'}">${content}</button>`
         : `<div class="activity-summary">${content}</div>`;
-      return `<div class="activity-service${ready ? "" : " unavailable"}">${summary}<p class="activity-updated">${escapeHtml(detail)}</p></div>`;
+      const note = row.key === "xiangqi-assist" ? '<p class="activity-updated">按浏览器标识统计，非精准人数；每 60 秒查询。</p>' : "";
+      return `<div class="activity-service${ready ? "" : " unavailable"}" data-service="${escapeHtml(row.key)}">${summary}<p class="activity-updated">${escapeHtml(detail)}</p>${note}</div>`;
     }).join("");
     if (focused) $("service-activity").querySelector("[data-activity='chat']")?.focus({ preventScroll: true });
     if ($("activity-dialog").open) renderActivityDetails();
@@ -826,9 +829,19 @@ function renderQuota(q, families) {
 
 function renderSites() {
   $("health").innerHTML = (state.side.health || []).map((h) => {
-    const cls = h.at === undefined ? "unknown" : h.ok ? "ok" : "bad";
+    const cls = h.at === undefined || h.stale ? "unknown" : h.ok ? "ok" : "bad";
+    if (h.type === "tcp") {
+      const status = h.at === undefined ? "检查中" : h.stale ? "未知 · 数据已过期" : h.ok ? "可达" : "不可达";
+      const timing = h.at === undefined ? "TCP 连接耗时：待检查" : h.stale || !h.ok ? "TCP 连接耗时：未知" : `TCP 连接耗时：${h.ms} ms`;
+      const checked = h.at === undefined ? "最近检查：尚无记录" : `最近检查：${new Date(h.at * 1000).toLocaleString("zh-CN", { hour12: false })}`;
+      return `<li class="health-tcp"><div class="health-summary"><span class="dot ${cls}" aria-hidden="true"></span><span>${escapeHtml(h.name)}</span><span class="hint">${status}</span></div>
+        <p class="health-detail">${escapeHtml(timing)}<br>${escapeHtml(checked)}</p>
+        <p class="health-detail">TCP 网络可达性 · ${escapeHtml(h.host)}:${escapeHtml(String(h.port))}<br>每 5 分钟检查；不代表 SSH 登录或主机健康。</p></li>`;
+    }
     const detail = h.at === undefined ? "检查中" : h.ok ? `${h.ms} ms` : (h.code ? `HTTP ${h.code}` : h.error || "不可达");
-    return `<li><span class="dot ${cls}"></span><a href="${escapeHtml(h.url)}" target="_blank" rel="noopener">${escapeHtml(h.name)}</a><span class="hint">${escapeHtml(detail)}</span></li>`;
+    const name = (h.type === undefined || h.type === "http") && /^https?:\/\//i.test(h.url || "")
+      ? `<a href="${escapeHtml(h.url)}" target="_blank" rel="noopener">${escapeHtml(h.name)}</a>` : `<span>${escapeHtml(h.name)}</span>`;
+    return `<li><span class="dot ${cls}"></span>${name}<span class="hint">${escapeHtml(h.stale ? "未知 · 数据已过期" : detail)}</span></li>`;
   }).join("");
   $("links").innerHTML = (state.side.links || []).map((l) =>
     `<a class="link-chip" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.name)} ↗</a>`).join("");
@@ -861,7 +874,7 @@ function setupNotifyToggle() {
 
 function applyThreads(threads) {
   const before = new Map(state.threads.map((t) => [t.id, t]));
-  state.threads = threads;
+  state.threads = mergeThreadTimes(threads, state.threads);
   state.openedThread = threads.find((t) => t.id === state.current) || state.openedThread;
   for (const t of threads) {
     const old = before.get(t.id);
@@ -938,7 +951,7 @@ async function loadState() {
   state.approvals = data.approvals;
   state.daemon = data.daemon;
   state.side = data.side;
-  state.threads = data.threads;
+  state.threads = mergeThreadTimes(data.threads, state.threads);
   state.openedThread = data.threads.find((t) => t.id === state.current) || state.openedThread;
   renderThreads();
   renderApprovals();
@@ -1144,6 +1157,8 @@ function wire() {
   });
   setInterval(() => api("/api/side").then((side) => { state.side = side; renderSide(); }).catch(() => {
     for (const row of state.side.activity || []) { row.stale = true; row.error = "MA4 连接中断，暂无法确认"; }
+    for (const row of state.side.health || []) row.stale = true;
+    renderSites();
     renderActivity();
   }), 15000);
   setInterval(renderThreads, 60000); // keep "n 分钟前" fresh

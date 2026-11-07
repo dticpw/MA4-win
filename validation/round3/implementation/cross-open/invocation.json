@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-07T06:33:04.887Z",
+  "argv": [
+    "--output",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\cross-open",
+    "--plan",
+    "[{\"op\": \"fail-create\"}, {\"op\": \"fail-create\"}, {\"op\": \"create\", \"session\": \"alpha\"}, {\"op\": \"send\", \"session\": \"alpha\", \"message\": \"同文两轮独立验收\"}, {\"op\": \"wait\", \"session\": \"alpha\"}, {\"op\": \"send\", \"session\": \"alpha\", \"message\": \"同文两轮独立验收\"}, {\"op\": \"wait\", \"session\": \"alpha\"}, {\"op\": \"create\", \"session\": \"beta\"}, {\"op\": \"send\", \"session\": \"beta\", \"message\": \"第二个会话独立验收\"}, {\"op\": \"wait\", \"session\": \"beta\"}, {\"op\": \"open\", \"session\": \"alpha\"}, {\"op\": \"history\", \"session\": \"alpha\"}, {\"op\": \"reopen\", \"session\": \"alpha\"}, {\"op\": \"refresh\", \"session\": \"alpha\"}, {\"op\": \"open\", \"session\": \"beta\"}, {\"op\": \"history\", \"session\": \"beta\"}]"
+  ],
+  "python": "D:/python/anaconda/envs/th123/python.exe",
+  "childArgv": [
+    "-B",
+    "-X",
+    "utf8",
+    "tools/smoke_test.py",
+    "--ui-output",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\cross-open\\ui",
+    "--output",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\cross-open\\session.json",
+    "--scratch-root",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\cross-open\\runtime",
+    "--session-plan",
+    "[{\"op\":\"fail-create\",\"session\":\"main\"},{\"op\":\"fail-create\",\"session\":\"main\"},{\"op\":\"create\",\"session\":\"alpha\"},{\"op\":\"send\",\"session\":\"alpha\",\"message\":\"同文两轮独立验收\"},{\"op\":\"wait\",\"session\":\"alpha\"},{\"op\":\"send\",\"session\":\"alpha\",\"message\":\"同文两轮独立验收\"},{\"op\":\"wait\",\"session\":\"alpha\"},{\"op\":\"create\",\"session\":\"beta\"},{\"op\":\"send\",\"session\":\"beta\",\"message\":\"第二个会话独立验收\"},{\"op\":\"wait\",\"session\":\"beta\"},{\"op\":\"open\",\"session\":\"alpha\"},{\"op\":\"history\",\"session\":\"alpha\"},{\"op\":\"reopen\",\"session\":\"alpha\"},{\"op\":\"refresh\",\"session\":\"alpha\"},{\"op\":\"open\",\"session\":\"beta\"},{\"op\":\"history\",\"session\":\"beta\"}]",
+    "--message",
+    "独立入口可组合动作验证"
+  ],
+  "exitCode": 0
+}

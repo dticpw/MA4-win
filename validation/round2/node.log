@@ -1,0 +1,24 @@
+✔ session dates use only that session's trustworthy activity, including former hosts (0.8171ms)
+✔ old lists and reconnects cannot regress dates or mix normal/managed sessions (0.6945ms)
+✔ program envelopes distinguish user, automatic and worker-report messages (0.5384ms)
+✔ legacy unknown sources remain honest and ordinary user text is not guessed (0.2184ms)
+✔ message labels and folded context safely escape user-controlled content (0.1956ms)
+✔ skill attachments are labelled separately without inventing user text (0.1895ms)
+✔ ordinary sessions are separated by task membership, not shared cwd (0.4609ms)
+✔ folder matching respects path boundaries and preserves important old sessions (0.1449ms)
+✔ dispatch details expose failure and escape task content (0.1521ms)
+✔ running and missing tool returns do not claim success (0.1938ms)
+✔ statistics separate cached input, missing attribution, and unknown time (12.8655ms)
+✔ workspace display includes actual worker locations, legacy roots and escaped scopes (0.268ms)
+✔ pending report display preserves source links, reasons and escapes content (0.2117ms)
+✔ Windows paths match case and separators at directory boundaries (0.6892ms)
+✔ Linux paths remain case sensitive (0.1586ms)
+✔ home abbreviation only matches the actual home prefix (0.1572ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 97.4375

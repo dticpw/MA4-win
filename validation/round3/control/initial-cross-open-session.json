@@ -1,0 +1,36 @@
+{
+  "result": "failed",
+  "browserExitCode": 1,
+  "instance": {
+    "url": "http://127.0.0.1:4077",
+    "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\round3-orchestrator-20261107\\final-composition\\runtime-x4kdv6ds\\smoke-4rkhljt3",
+    "verification": {
+      "instance": "ed5fc89fed1b45eebef2fa5e0bd0d354",
+      "ownerPid": 32716,
+      "backendPid": 33840,
+      "endpoint": "ws://127.0.0.1:4074",
+      "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\round3-orchestrator-20261107\\final-composition\\runtime-x4kdv6ds\\smoke-4rkhljt3\\codex-home",
+      "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\round3-orchestrator-20261107\\final-composition\\runtime-x4kdv6ds\\smoke-4rkhljt3\\state"
+    },
+    "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) dumb (ma4; 0.1)"
+  },
+  "journeys": [],
+  "argv": [
+    "node",
+    "E:\\PG\\MA4-win\\tools\\ui_check.mjs",
+    "",
+    "E:\\PG\\MA4-win\\.agent-tmp\\round3-orchestrator-20261107\\final-composition\\ui",
+    "http://127.0.0.1:4077",
+    "--exercise"
+  ],
+  "compatibility": null,
+  "modelRequests": 3,
+  "model": "local mock; no external model calls; excludes the real executor's model use",
+  "ui_report": "ui/report.json",
+  "cleanup": {
+    "backendExited": true,
+    "ownWebClosed": true,
+    "scratchRemoved": true,
+    "runtimeRemoved": true
+  }
+}

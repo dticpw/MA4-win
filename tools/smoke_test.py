@@ -43,6 +43,7 @@ class MockModel(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self.rfile.read(int(self.headers["Content-Length"]))
+        self.server.request_count += 1
         message_id = "msg_" + uuid.uuid4().hex
         response_id = "resp_" + uuid.uuid4().hex
         text = "本机模拟回复：Windows 共享会话连接成功。"
@@ -75,6 +76,12 @@ class MockModel(BaseHTTPRequestHandler):
                 self.wfile.write(("event: " + event["type"] + "\ndata: " +
                                   json.dumps(event, ensure_ascii=False) + "\n\n").encode())
                 self.wfile.flush()
+                if event["type"] == "response.created":
+                    self.server.request_started.set()
+                    # Keep the steer test active until it explicitly interrupts.
+                    # A fixed sleep is not a reliable turn boundary across CLI versions.
+                    if not self.server.release_response.wait(15):
+                        return
                 time.sleep(self.server.delay)
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             pass
@@ -91,8 +98,12 @@ class Side:
 
 @contextlib.contextmanager
 def fixture(port=0):
-    temp_parent = ROOT / ".agent-tmp"
-    temp_parent.mkdir(exist_ok=True)
+    temp_parent = Path(os.environ.get("MA4_TEST_SCRATCH", ROOT / ".agent-tmp")).resolve()
+    if not temp_parent.is_relative_to((ROOT / ".agent-tmp").resolve()):
+        raise ValueError("fixture scratch must stay under project .agent-tmp")
+    if port == 8764:
+        raise ValueError("fixture refuses live port 8764")
+    temp_parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="smoke-", dir=temp_parent) as directory:
         work = Path(directory).resolve()
         assert work.is_relative_to(temp_parent.resolve())
@@ -100,7 +111,11 @@ def fixture(port=0):
         home.mkdir()
         model = ThreadingHTTPServer(("127.0.0.1", 0), MockModel)
         model.daemon_threads = True
+        model.request_count = 0
         model.delay = .04
+        model.request_started = threading.Event()
+        model.release_response = threading.Event()
+        model.release_response.set()
         threading.Thread(target=model.serve_forever, daemon=True).start()
         (home / "config.toml").write_text(
             'model = "gpt-5"\nmodel_provider = "mock"\napproval_policy = "never"\n'
@@ -135,7 +150,10 @@ def fixture(port=0):
                 web = Server(("127.0.0.1", port), hub,
                              Side({"families": [], "error": "测试未连接额度来源"}),
                              Side([]), [{"name": "muQ", "url": "https://muq.koa-ol.com"}],
-                             runtime={"home": str(Path.home()), "defaultCwd": str(work), "platform": os.name})
+                             runtime={"home": str(Path.home()), "defaultCwd": str(work), "platform": os.name,
+                                      "verification": {"instance": uuid.uuid4().hex, "ownerPid": os.getpid(),
+                                                       "backendPid": process.pid, "endpoint": endpoint,
+                                                       "codexHome": str(home), "dataDir": str(work / "state")}})
                 threading.Thread(target=web.serve_forever, daemon=True).start()
                 opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
                 base = "http://127.0.0.1:%d" % web.server_port
@@ -151,8 +169,10 @@ def fixture(port=0):
                         raise AssertionError("HTTP " + str(exc.code) + " " + path + " " + exc.read().decode()) from exc
 
                 yield {"root": work, "home": home, "binary": binary, "endpoint": endpoint,
-                       "client": client, "hub": hub, "web": web, "model": model, "api": api, "url": base}
+                       "client": client, "hub": hub, "web": web, "model": model, "api": api, "url": base,
+                       "process": process}
             finally:
+                model.release_response.set()
                 if web:
                     web.shutdown()
                     web.server_close()
@@ -191,14 +211,20 @@ def checks(f):
     assert any(m == "item/agentMessage/delta" for m, p in notes)
 
     # Send during an active turn -> steer, then interrupt that same turn.
-    f["model"].delay = .25
-    result = api("/api/send", {"id": tid, "text": "测试插话和中断", "request_id": "smoke-slow"})
-    steered = api("/api/send", {"id": tid, "text": "追加一条输入", "request_id": "smoke-steer"})
-    assert steered["mode"] == "steer", steered
-    assert steered["turnId"] == result["turnId"]
-    api("/api/interrupt", {"id": tid})
+    f["model"].request_started.clear()
+    f["model"].release_response.clear()
+    try:
+        result = api("/api/send", {"id": tid, "text": "测试插话和中断", "request_id": "smoke-slow"})
+        assert result["mode"] == "start", result
+        assert f["model"].request_started.wait(10), "mock request did not start"
+        wait_for(lambda: hub.current_turn(tid) == result["turnId"])
+        steered = api("/api/send", {"id": tid, "text": "追加一条输入", "request_id": "smoke-steer"})
+        assert steered["mode"] == "steer", {"started": result, "steered": steered}
+        assert steered["turnId"] == result["turnId"]
+        api("/api/interrupt", {"id": tid})
+    finally:
+        f["model"].release_response.set()
     wait_for(lambda: api("/api/history?id=" + tid)["turns"][-1]["status"] == "interrupted")
-    f["model"].delay = .04
     api("/api/rename", {"id": tid, "name": "Windows 接入验证 · 本机模拟回复"})
     api("/api/pin", {"id": tid, "pinned": True})
 
@@ -225,16 +251,90 @@ def checks(f):
     return tid, summary
 
 
+def doctor(f):
+    """Check objects owned by this fixture and the same identity over real HTTP."""
+    state = f["api"]("/api/state")
+    runtime = state["side"]["runtime"]
+    identity = f["web"].runtime["verification"]
+    if (f["process"].poll() is not None or identity["backendPid"] != f["process"].pid
+            or identity["ownerPid"] != os.getpid()):
+        raise RuntimeError("验证实例的进程归属不符或后台已退出")
+    if (f["web"].server_port == 8764 or f["url"] != f"http://127.0.0.1:{f['web'].server_port}"
+            or not f["root"].is_relative_to(ROOT / ".agent-tmp")
+            or f["hub"].data_dir != f["root"] / "state"
+            or f["home"] != f["root"] / "codex-home"
+            or identity["endpoint"] != f["endpoint"]
+            or identity["dataDir"] != str(f["hub"].data_dir)
+            or identity["codexHome"] != str(f["home"])):
+        raise RuntimeError("验证实例的端口、后台或数据目录不符")
+    if (runtime.get("verification") != identity or runtime.get("defaultCwd") != str(f["root"])
+            or not state["daemon"].get("connected") or not state["daemon"].get("version")):
+        raise RuntimeError("HTTP 实例身份不符或后台未就绪")
+    return {"url": f["url"], "cwd": str(f["root"]), "verification": identity,
+            "backendVersion": state["daemon"]["version"]}
+
+
+def browser_checks(f, output, plan=None, message=None):
+    output.mkdir(parents=True, exist_ok=True)
+    identity = doctor(f)
+    env = os.environ.copy()
+    env["MA4_VERIFY_INSTANCE"] = json.dumps(identity)
+    env.pop("MA4_SESSION_PLAN", None)
+    env.pop("MA4_SESSION_MESSAGE", None)
+    if plan:
+        env["MA4_SESSION_PLAN"] = plan
+    if message:
+        env["MA4_SESSION_MESSAGE"] = message
+    command = ["node", str(ROOT / "tools/ui_check.mjs"), "", str(output), f["url"], "--exercise"]
+    result = subprocess.run(command, cwd=ROOT, env=env, stdin=subprocess.DEVNULL)
+    report_file = output / "report.json"
+    report = json.loads(report_file.read_text(encoding="utf-8")) if report_file.exists() else {}
+    passed = result.returncode == 0 and report.get("result") == "passed" and bool(report.get("journeys"))
+    doctor(f)
+    return {"result": "passed" if passed else "failed", "browserExitCode": result.returncode,
+            "instance": identity, "journeys": report.get("journeys", []), "argv": command,
+            "compatibility": report.get("compatibility"),
+            "modelRequests": f["model"].request_count,
+            "model": "local mock; no external model calls; excludes the real executor's model use", "ui_report": "ui/report.json"}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--serve", action="store_true")
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--ui-output", type=Path, help="仅运行隔离真实页面流程，输出审查证据")
+    parser.add_argument("--session-plan", help="有限 JSON 动作数组，由 session_actions 校验")
+    parser.add_argument("--message", help="动作 send 的默认消息")
+    parser.add_argument("--scratch-root", type=Path, help="项目临时区内新目录；fixture/cache 退出自动回收")
     args = parser.parse_args()
-    with fixture(args.port) as f:
-        tid, summary = checks(f)
-        print(json.dumps(summary, ensure_ascii=False, indent=2), flush=True)
-        if args.output:
+    if args.ui_output and (args.serve or args.port):
+        parser.error("--ui-output 只使用本次随机端口，不与 --serve/--port 合用")
+    if (args.session_plan or args.message or args.scratch_root) and not args.ui_output:
+        parser.error("session options require --ui-output")
+    with contextlib.ExitStack() as stack:
+        runtime = None
+        if args.ui_output:
+            parent = (args.scratch_root or Path(os.environ.get("MA4_TEST_SCRATCH", ROOT / ".agent-tmp"))).resolve()
+            if not parent.is_relative_to((ROOT / ".agent-tmp").resolve()):
+                parser.error("scratch must be inside project .agent-tmp")
+            if args.scratch_root and parent.exists():
+                parser.error("--scratch-root must be new")
+            if args.scratch_root:
+                parent.parent.mkdir(parents=True, exist_ok=True)
+                runtime = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix=parent.name + "-", dir=parent.parent)))
+            else:
+                parent.mkdir(parents=True, exist_ok=True)
+                runtime = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="session-runtime-", dir=parent)))
+            os.environ.update(MA4_TEST_SCRATCH=str(runtime), TEMP=str(runtime), TMP=str(runtime), TMPDIR=str(runtime))
+        f = stack.enter_context(fixture(args.port))
+        if args.ui_output:
+            summary = browser_checks(f, args.ui_output, args.session_plan, args.message)
+        else:
+            tid, summary = checks(f)
+        if not args.ui_output:
+            print(json.dumps(summary, ensure_ascii=False, indent=2), flush=True)
+        if args.output and not args.ui_output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
                                    encoding="utf-8", newline="\n")
@@ -256,8 +356,22 @@ def main():
             finally:
                 descriptor.unlink(missing_ok=True)
                 stop.unlink(missing_ok=True)
+    if args.ui_output:
+        summary["cleanup"] = {"backendExited": f["process"].poll() is not None,
+                              "ownWebClosed": f["web"].fileno() == -1,
+                              "scratchRemoved": not f["root"].exists(),
+                              "runtimeRemoved": runtime is not None and not runtime.exists()}
+        if not all(summary["cleanup"].values()):
+            raise RuntimeError("真实页面检查结束后仍有本次实例资源未回收")
+        print(json.dumps(summary, ensure_ascii=False, indent=2), flush=True)
+        if args.output:
+            args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+                                   encoding="utf-8", newline="\n")
+        if summary["result"] != "passed":
+            return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
 

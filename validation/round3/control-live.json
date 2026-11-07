@@ -1,0 +1,647 @@
+{
+  "result": "passed",
+  "atUtc": "2026-11-07T06:39:25.593096+00:00",
+  "scope": "Real Windows 8764 HTTP confirmation, MA4 controller dispatch and real-model implementation, automatic reports, rework, pause/resume, deadline close and finish. Browser CLI checks use independent fixtures and local mock models.",
+  "task": {
+    "id": "1dda5fb483a146eb",
+    "name": "MA4 · 第三轮可复用验证工具",
+    "host": "01a1b49e-863b-7a30-b1ba-51664bdd8bd1",
+    "status": "completed",
+    "revision": 1,
+    "budget": {
+      "currency": "CNY",
+      "deadline": 1794033464.608924
+    },
+    "completion": {
+      "outcome": "met",
+      "summary": "第三轮可复用会话验证工具已完成：动作层/参数CLI、隔离身份保护、真实受控失败、完整历史与多会话复用、原live-ui兼容；唯一执行者真实派工/报告回传/暂停恢复已实际完成。恢复后只核对未变成果并收尾，无新派工/测试。",
+      "evidence": "validation/round3/independent-review.json；validation/round3/implementation/evidence.json、cross-open/session.json与ui/report.json。中控亲自复现重复文本失败并看图，返工后人工核对最终实现和16项来源摘要全部匹配；根Agent独立同源码16步重跑已读取，2次真实HTTP400、2会话/3明确发送与3本机模拟请求，alpha2轮/beta1轮历史ID/条数一致、双向open/reopen/refresh通过、fixture四项回收均true。实际查看错误弹窗、重复文本故障与最终双会话刷新图。17 Python与最终11 Node、默认兼容与wait拒绝证据按影响核对复用，地图current仅代表登记未变。已按要求pause并收到程序resume：修订1、deadline1794033464.608924不变，唯一执行者01a1b49f-a9cc-7cb0-a3a6-42472f41caa5空闲、待报告0，最后报告01a1b4b5-69bb-7631-9ac2-84043e75b6a2与产物保持。session_inventory已执行；必要故障5文件正式副本逐字节相同后精确清理audit9文件，ma4_artifacts最终count0/bytes0；README已更新真实完成状态。Linux/真实供应商/其他浏览器/独立只读截图模式未实测；模拟模型请求与本任务真实模型消费分开；未改业务、旧任务、8764、配置或派发方control-live。",
+      "decidedAt": 1794033491.548232,
+      "threadId": "01a1b49e-863b-7a30-b1ba-51664bdd8bd1",
+      "turnId": "01a1b4b9-90da-70c3-aafc-6fb6938b756c",
+      "usageTotal": {
+        "totalTokens": 7407208,
+        "inputTokens": 7346130,
+        "cachedInputTokens": 7095168,
+        "outputTokens": 61078
+      },
+      "estimatedCost": null,
+      "settling": false,
+      "turnDurationMs": 1781756,
+      "elapsedMs": 1834391.0760879517,
+      "completedAt": 1794033499
+    },
+    "statistics": {
+      "roles": [
+        {
+          "role": "host",
+          "usage": {
+            "totalTokens": 2248588,
+            "inputTokens": 2239633,
+            "cachedInputTokens": 2112128,
+            "outputTokens": 8955
+          },
+          "durationMs": 352523,
+          "turnCount": 7
+        },
+        {
+          "role": "worker",
+          "usage": {
+            "totalTokens": 5158620,
+            "inputTokens": 5106497,
+            "cachedInputTokens": 4983040,
+            "outputTokens": 52123
+          },
+          "durationMs": 1429233,
+          "turnCount": 3
+        }
+      ],
+      "sessions": [
+        {
+          "threadId": "01a1b49e-863b-7a30-b1ba-51664bdd8bd1",
+          "role": "host",
+          "name": "当前中控",
+          "usage": {
+            "totalTokens": 2248588,
+            "inputTokens": 2239633,
+            "cachedInputTokens": 2112128,
+            "outputTokens": 8955
+          },
+          "turns": [
+            {
+              "id": "01a1b49e-beb3-7572-a1b1-7a454d387841",
+              "startedAt": 1794031664,
+              "status": "completed",
+              "completedAt": 1794031730,
+              "durationMs": 65964,
+              "usage": {
+                "totalTokens": 235679,
+                "inputTokens": 233638,
+                "cachedInputTokens": 174720,
+                "outputTokens": 2041
+              }
+            },
+            {
+              "id": "01a1b4a7-7718-7c13-9552-3d0887f8866c",
+              "startedAt": 1794032236,
+              "status": "completed",
+              "completedAt": 1794032242,
+              "durationMs": 6614,
+              "usage": {
+                "totalTokens": 64352,
+                "inputTokens": 64226,
+                "cachedInputTokens": 60032,
+                "outputTokens": 126
+              }
+            },
+            {
+              "id": "01a1b4ad-3703-7c81-b235-3cbc5adc80fd",
+              "startedAt": 1794032613,
+              "status": "completed",
+              "completedAt": 1794032695,
+              "durationMs": 82773,
+              "usage": {
+                "totalTokens": 438502,
+                "inputTokens": 436906,
+                "cachedInputTokens": 405760,
+                "outputTokens": 1596
+              }
+            },
+            {
+              "id": "01a1b4b4-effd-74a3-b601-142f9a27fbff",
+              "startedAt": 1794033119,
+              "status": "completed",
+              "completedAt": 1794033150,
+              "durationMs": 31016,
+              "usage": {
+                "totalTokens": 329978,
+                "inputTokens": 329278,
+                "cachedInputTokens": 320640,
+                "outputTokens": 700
+              }
+            },
+            {
+              "id": "01a1b4b6-dce1-70a2-81b5-d3e08fb34cdd",
+              "startedAt": 1794033245,
+              "status": "completed",
+              "completedAt": 1794033262,
+              "durationMs": 16889,
+              "usage": {
+                "totalTokens": 234892,
+                "inputTokens": 234543,
+                "cachedInputTokens": 226944,
+                "outputTokens": 349
+              }
+            },
+            {
+              "id": "01a1b4b7-4e2d-7be0-a86b-cea2aeb7ee37",
+              "startedAt": 1794033274,
+              "status": "completed",
+              "completedAt": 1794033346,
+              "durationMs": 72071,
+              "usage": {
+                "totalTokens": 526101,
+                "inputTokens": 523589,
+                "cachedInputTokens": 510336,
+                "outputTokens": 2512
+              }
+            },
+            {
+              "id": "01a1b4b9-90da-70c3-aafc-6fb6938b756c",
+              "startedAt": 1794033422,
+              "status": "completed",
+              "completedAt": 1794033499,
+              "durationMs": 77196,
+              "usage": {
+                "totalTokens": 419084,
+                "inputTokens": 417453,
+                "cachedInputTokens": 413696,
+                "outputTokens": 1631
+              }
+            }
+          ],
+          "updatedAt": 1794033499,
+          "durationMs": 352523,
+          "unattributedTokens": 0
+        },
+        {
+          "threadId": "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5",
+          "role": "worker",
+          "name": "第三轮 · 会话动作工具实现",
+          "usage": {
+            "totalTokens": 5158620,
+            "inputTokens": 5106497,
+            "cachedInputTokens": 4983040,
+            "outputTokens": 52123
+          },
+          "turns": [
+            {
+              "id": "01a1b49f-c0d2-76c2-b0f0-5a367c47b904",
+              "startedAt": 1794031730,
+              "status": "completed",
+              "completedAt": 1794032613,
+              "durationMs": 882191,
+              "usage": {
+                "totalTokens": 2154280,
+                "inputTokens": 2120349,
+                "cachedInputTokens": 2031872,
+                "outputTokens": 33931
+              }
+            },
+            {
+              "id": "01a1b4ae-7ade-7c51-b11a-ae328d41ac0f",
+              "startedAt": 1794032696,
+              "status": "completed",
+              "completedAt": 1794033119,
+              "durationMs": 423125,
+              "usage": {
+                "totalTokens": 2302208,
+                "inputTokens": 2288333,
+                "cachedInputTokens": 2259072,
+                "outputTokens": 13875
+              }
+            },
+            {
+              "id": "01a1b4b5-69bb-7631-9ac2-84043e75b6a2",
+              "startedAt": 1794033150,
+              "status": "completed",
+              "completedAt": 1794033274,
+              "durationMs": 123917,
+              "usage": {
+                "totalTokens": 702132,
+                "inputTokens": 697815,
+                "cachedInputTokens": 692096,
+                "outputTokens": 4317
+              }
+            }
+          ],
+          "updatedAt": 1794033274,
+          "durationMs": 1429233,
+          "unattributedTokens": 0
+        }
+      ]
+    }
+  },
+  "goalSha256": "a8d92dbd6699ec4248a04e35896a1ccf5be865e876c0a06372ea0046a49bc22c",
+  "transitions": [
+    {
+      "observedAt": "2026-11-07T06:09:18.207100+00:00",
+      "status": "waiting",
+      "hostBusy": false,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "running"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:23:39.650211+00:00",
+      "status": "review",
+      "hostBusy": true,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "idle"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:25:39.010035+00:00",
+      "status": "waiting",
+      "hostBusy": false,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "running"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:32:19.096438+00:00",
+      "status": "review",
+      "hostBusy": true,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "idle"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:32:55.037120+00:00",
+      "status": "waiting",
+      "hostBusy": false,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "running"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:34:22.290017+00:00",
+      "status": "waiting",
+      "hostBusy": true,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "running"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:35:16.564284+00:00",
+      "status": "review",
+      "hostBusy": true,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "idle"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:36:21.750587+00:00",
+      "status": "paused",
+      "hostBusy": false,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "idle"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:37:57.069583+00:00",
+      "status": "closing",
+      "hostBusy": true,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "idle"
+      }
+    },
+    {
+      "observedAt": "2026-11-07T06:39:07.364715+00:00",
+      "status": "completed",
+      "hostBusy": false,
+      "workers": {
+        "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "idle"
+      }
+    }
+  ],
+  "resume": {
+    "atUtc": "2026-11-07T06:37:02.631608+00:00",
+    "beforeStatus": "paused",
+    "beforeHostBusy": false,
+    "beforePending": 0,
+    "result": {
+      "resumed": true
+    },
+    "afterStatus": "running",
+    "afterHostBusy": true,
+    "preserved": {
+      "target": true,
+      "revision": true,
+      "budget": true,
+      "host": true,
+      "workspaces": true,
+      "workers": true
+    },
+    "sourceSha256": {
+      "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
+      "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+      "tools/ui_check.mjs": "cce6a2c174991c3898e325ed8d23f41a86ac990576950744f1821b1517a9f3d5",
+      "tools/smoke_test.py": "0b0636d5db06d1a0194b011ab6e9f86b523755beaa48839ec85f9571e2031f40"
+    },
+    "host": "01a1b49e-863b-7a30-b1ba-51664bdd8bd1",
+    "workers": {
+      "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": "01a1b4b5-69bb-7631-9ac2-84043e75b6a2"
+    },
+    "deadline": 1794033464.608924,
+    "precheckCorrection": "First read-only attempt assumed outbox is exposed by public state; KeyError before POST; corrected to exposed fields. Resume endpoint itself checks outbox."
+  },
+  "oneWorker": [
+    "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5"
+  ],
+  "reportsDeliveredExactlyOnce": {
+    "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5:01a1b49f-c0d2-76c2-b0f0-5a367c47b904": 1,
+    "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5:01a1b4ae-7ade-7c51-b11a-ae328d41ac0f": 1,
+    "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5:01a1b4b5-69bb-7631-9ac2-84043e75b6a2": 1
+  },
+  "noWorkerRerunAfterResume": {
+    "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5": true
+  },
+  "pendingReportsAtFinish": 0,
+  "hostToolCalls": [
+    {
+      "turnId": "01a1b49e-beb3-7572-a1b1-7a454d387841",
+      "id": "exec-da436648-9c7f-41a8-afef-aec33a3c0ef8",
+      "type": "dynamicToolCall",
+      "tool": "ma4_dispatch",
+      "status": "completed",
+      "success": true,
+      "arguments": {
+        "name": "第三轮 · 会话动作工具实现",
+        "access": "write",
+        "write_scope": [
+          "tools/ui_check.mjs",
+          "tools/smoke_test.py",
+          "tools/verify.py",
+          "tools/session_actions.mjs",
+          "tools/session_cli.mjs",
+          "test_session_actions.mjs",
+          "test_verify.py",
+          "test_feature_map.py",
+          "README.md",
+          "FEATURE-MAP.md",
+          "validation/shared-source.md",
+          "validation/feature-map-review.json",
+          "validation/round3",
+          ".agent-tmp/ma4-1dda5fb483a146eb/worker"
+        ]
+      }
+    },
+    {
+      "turnId": "01a1b4ad-3703-7c81-b235-3cbc5adc80fd",
+      "id": "exec-42a1826e-e10c-4c36-8367-55f27ef02572",
+      "type": "dynamicToolCall",
+      "tool": "ma4_dispatch",
+      "status": "completed",
+      "success": true,
+      "arguments": {
+        "session_id": "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5"
+      }
+    },
+    {
+      "turnId": "01a1b4b4-effd-74a3-b601-142f9a27fbff",
+      "id": "exec-a7ab3a2a-4e47-4382-9d57-7e36ca7b89d0",
+      "type": "dynamicToolCall",
+      "tool": "ma4_dispatch",
+      "status": "completed",
+      "success": true,
+      "arguments": {
+        "session_id": "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5",
+        "write_scope": [
+          "tools/session_actions.mjs",
+          "test_session_actions.mjs",
+          "README.md",
+          "FEATURE-MAP.md",
+          "validation/shared-source.md",
+          "validation/feature-map-review.json",
+          "validation/round3/implementation",
+          ".agent-tmp/ma4-1dda5fb483a146eb/worker"
+        ]
+      }
+    },
+    {
+      "turnId": "01a1b4b6-dce1-70a2-81b5-d3e08fb34cdd",
+      "id": "exec-1d49ac30-1741-4884-83e3-a93682f46ff4",
+      "type": "dynamicToolCall",
+      "tool": "ma4_artifacts",
+      "status": "completed",
+      "success": true,
+      "arguments": {
+        "action": "list"
+      }
+    },
+    {
+      "turnId": "01a1b4b7-4e2d-7be0-a86b-cea2aeb7ee37",
+      "id": "exec-ae9a7dec-2f14-4057-90f1-1a3c9962ca47",
+      "type": "dynamicToolCall",
+      "tool": "ma4_artifacts",
+      "status": "completed",
+      "success": true,
+      "arguments": {
+        "action": "clean"
+      }
+    },
+    {
+      "turnId": "01a1b4b7-4e2d-7be0-a86b-cea2aeb7ee37",
+      "id": "exec-83284ad7-540f-4b58-ad96-d38aa9033400",
+      "type": "dynamicToolCall",
+      "tool": "ma4_artifacts",
+      "status": "completed",
+      "success": true,
+      "arguments": {
+        "action": "list"
+      }
+    },
+    {
+      "turnId": "01a1b4b7-4e2d-7be0-a86b-cea2aeb7ee37",
+      "id": "exec-8606f34b-bc39-4a2d-b618-f95a2ce81eda",
+      "type": "dynamicToolCall",
+      "tool": "ma4_control",
+      "status": "completed",
+      "success": true,
+      "arguments": {
+        "action": "pause"
+      }
+    },
+    {
+      "turnId": "01a1b4b9-90da-70c3-aafc-6fb6938b756c",
+      "id": "exec-be8e97f0-6641-422a-88a2-65e2be73dd43",
+      "type": "dynamicToolCall",
+      "tool": "ma4_control",
+      "status": "completed",
+      "success": true,
+      "arguments": {
+        "action": "finish",
+        "outcome": "met"
+      }
+    }
+  ],
+  "oldTasksUnchanged": {
+    "e65cd30e77cb455d": true,
+    "06d898324d4744be": true,
+    "54e0ee423c2d4b79": true,
+    "4724144705094629": true
+  },
+  "protectedSourceUnchanged": {
+    "server.py": true,
+    "hub.py": true,
+    "controllers.py": true,
+    "runtime.py": true,
+    "appserver.py": true,
+    "paths.py": true,
+    "web/app.js": true,
+    "web/controllers.js": true,
+    "web/index.html": true,
+    "web/style.css": true,
+    "config.windows.json": true,
+    "config.linux.json": true
+  },
+  "allObservedGoalsAndBudgetsUnchanged": true,
+  "allObservedOldTasksUnchanged": true,
+  "finalTestSourceSha256": {
+    "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
+    "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+    "tools/ui_check.mjs": "cce6a2c174991c3898e325ed8d23f41a86ac990576950744f1821b1517a9f3d5",
+    "tools/smoke_test.py": "0b0636d5db06d1a0194b011ab6e9f86b523755beaa48839ec85f9571e2031f40"
+  },
+  "rootChecks": {
+    "finalCompositionSteps": 16,
+    "validSends": 3,
+    "expectedHttp400": 2,
+    "threadTurnCounts": [
+      2,
+      1
+    ],
+    "mockModelRequestsAcrossRootRuns": 8,
+    "unexpectedFailuresFixed": [
+      "duplicate text locator ambiguity",
+      "hash-only open did not switch visible session"
+    ],
+    "cleanupAllThreeRuns": [
+      {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      },
+      {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      },
+      {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "path": "validation/round3/control/running.png",
+      "sha256": "42798d9880933a8c790dfd31cada1b05e61ad60da973dac4daf7bca0e801fd4f",
+      "bytes": 39534
+    },
+    {
+      "path": "validation/round3/control/paused.png",
+      "sha256": "27dbe95ffbae8511bd41ac7e2c7a05113b6a77ace17fef519892b31e8c528a33",
+      "bytes": 43150
+    },
+    {
+      "path": "validation/round3/control/completed.png",
+      "sha256": "a034ea203d12435bff9505e7f410ebf30bd7257cfd92380d5b3eef06bcf1c439",
+      "bytes": 45736
+    },
+    {
+      "path": "validation/round3/control/running-panel.json",
+      "sha256": "506549e5b43eb071df88eedaea966cc4f466295c67c993bdf2b0411ec99aec53",
+      "bytes": 1176
+    },
+    {
+      "path": "validation/round3/control/paused-panel.json",
+      "sha256": "2a3348521d64b523616baa1c5d38f8c93c5fbb8fdc424d234ccb1d8d2183497f",
+      "bytes": 3107
+    },
+    {
+      "path": "validation/round3/control/completed-panel.json",
+      "sha256": "79a79eac5355060619462e7104ca1aef98c1115c58442ae11a701c37166bf3a1",
+      "bytes": 1859
+    },
+    {
+      "path": "validation/round3/control/plan.json",
+      "sha256": "b87ba6389ef6a24df957a26db439409dd7863f0e587f205e7018de3d2b55f5bc",
+      "bytes": 911
+    },
+    {
+      "path": "validation/round3/control/invocation.json",
+      "sha256": "7eb090f56db8ccc62a2cd75894a1a52f8fff577d1d9fa377bda7e9107a580a0b",
+      "bytes": 1493
+    },
+    {
+      "path": "validation/round3/control/report.json",
+      "sha256": "297d54482bf8f4a2556582a101eb6760eacc5b4d1cdfea2518ee9c134cd1518a",
+      "bytes": 36037
+    },
+    {
+      "path": "validation/round3/control/session.json",
+      "sha256": "5235fca98ef56cb801446444f66d132d85aab35ffee06a646c65f830b310bf20",
+      "bytes": 18358
+    },
+    {
+      "path": "validation/round3/control/history-alpha.json",
+      "sha256": "48b98600aa815452937a2b0d284a994e918ad16302f57089ebfc3528021dbbe4",
+      "bytes": 1287
+    },
+    {
+      "path": "validation/round3/control/history-beta.json",
+      "sha256": "542a45aec7e94a900bfc405d8f96f3afef39280a1a80c1c92a20eec887a2d758",
+      "bytes": 665
+    },
+    {
+      "path": "validation/round3/control/two-turns-refreshed.png",
+      "sha256": "e9e423c1001c8ddd229c48302cd1ed0be42c2210a1fee475cf28353b9da2c3e1",
+      "bytes": 321392
+    },
+    {
+      "path": "validation/round3/control/initial-repeat-invocation.json",
+      "sha256": "9623e67936d21ac3501cfcf431263247f7598325e88c9b9da93ea6f0ba670540",
+      "bytes": 782
+    },
+    {
+      "path": "validation/round3/control/initial-repeat-report.json",
+      "sha256": "ed91f6200ab988ef171666b1bd35f38d464337715d093f1c477482716ebb5163",
+      "bytes": 6465
+    },
+    {
+      "path": "validation/round3/control/initial-repeat-session.json",
+      "sha256": "2d0a196fd93923d002fc720a31cd8211ecc140adbfd22fbcbf82e0f83e42a77f",
+      "bytes": 1270
+    },
+    {
+      "path": "validation/round3/control/initial-cross-open-invocation.json",
+      "sha256": "f841aebc06aef3897fa272d269e2fc6e162f55adcc6f9f773ea6700446788fd4",
+      "bytes": 1499
+    },
+    {
+      "path": "validation/round3/control/initial-cross-open-report.json",
+      "sha256": "53a72b249ef45cc5d896fa0d1ea5b3fff0227ae7063495b56fa20d94145a13ea",
+      "bytes": 10840
+    },
+    {
+      "path": "validation/round3/control/initial-cross-open-session.json",
+      "sha256": "dce7d075922343018f2ee72c06fd86d4b6ac27299ab0eac42adb19e04accdb98",
+      "bytes": 1316
+    }
+  ],
+  "limits": [
+    "Task confirmation/resume used existing HTTP endpoints; no claim that the full browser discussion/confirmation flow was tested.",
+    "Pause/resume occurred after workers were idle; daemon loss, in-flight interruption and controller handoff were not tested.",
+    "Real model used by controller and worker for this maintenance task; ordinary-session CLI fixture model was local mock.",
+    "Linux, other browsers and standalone read-only screenshot mode not newly tested. No quantitative iteration speedup proven."
+  ],
+  "fileLifecycle": {
+    "rootScratchRemoved": ".agent-tmp/round3-orchestrator-20261107",
+    "removedFiles": 61,
+    "removedBytes": 8419305,
+    "keptRuntimeMarker": {
+      "path": ".agent-tmp/ma4-1dda5fb483a146eb/.ma4-owner.json",
+      "bytes": 29,
+      "reason": "MA4 task ownership metadata; no experiment output remains. Recheck when removing the task."
+    },
+    "newBackupsArchivesOrScheduledTasks": false,
+    "inventoryCommand": "D:/python/anaconda/envs/th123/python.exe -B -X utf8 C:/Users/DTICPW/agent-workflows/skills/project-file-lifecycle/scripts/session_inventory.py --since 2026-11-07T06:07:00Z --root E:/PG/MA4-win",
+    "inventoryCaveat": "before-send PNG names were heuristic backup flags, but these are validation screenshots, not backups."
+  }
+}

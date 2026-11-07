@@ -1,0 +1,112 @@
+{
+  "result": "passed_with_skips",
+  "at_utc": "2026-11-06T14:54:30.974393+00:00",
+  "platform": "win32",
+  "python": "3.10.19",
+  "profiles": [
+    "tasks",
+    "platform",
+    "transport",
+    "live-ui"
+  ],
+  "ui_requested": true,
+  "checks": [
+    {
+      "check": "python",
+      "argv": [
+        "D:\\python\\anaconda\\envs\\th123\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "unittest",
+        "-v",
+        "test_controllers",
+        "test_appserver",
+        "test_runtime",
+        "test_platform",
+        "test_desktop"
+      ],
+      "status": "passed_with_skips",
+      "exit_code": 0,
+      "log": "python.log",
+      "counts": {
+        "total": 114,
+        "skipped": 4
+      },
+      "seconds": 22.375
+    },
+    {
+      "check": "node",
+      "argv": [
+        "node",
+        "--test",
+        "test_controllers.mjs",
+        "test_paths.mjs"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "log": "node.log",
+      "seconds": 0.172
+    },
+    {
+      "check": "controller_discussion_check",
+      "argv": [
+        "node",
+        "tools/controller_discussion_check.mjs",
+        "E:\\PG\\MA4-win\\.agent-tmp\\round2-20261106\\regression\\controller_discussion_check"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "log": "controller_discussion_check.log",
+      "seconds": 6.906
+    },
+    {
+      "check": "controller_details_check",
+      "argv": [
+        "node",
+        "tools/controller_details_check.mjs",
+        "E:\\PG\\MA4-win\\.agent-tmp\\round2-20261106\\regression\\controller_details_check"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "log": "controller_details_check.log",
+      "seconds": 4.531
+    },
+    {
+      "check": "transport",
+      "argv": [
+        "D:\\python\\anaconda\\envs\\th123\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "tools/smoke_test.py",
+        "--output",
+        "E:\\PG\\MA4-win\\.agent-tmp\\round2-20261106\\regression\\transport.json"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "log": "transport.log",
+      "seconds": 3.516
+    },
+    {
+      "check": "live-ui",
+      "argv": [
+        "D:\\python\\anaconda\\envs\\th123\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "tools/smoke_test.py",
+        "--ui-output",
+        "E:\\PG\\MA4-win\\.agent-tmp\\round2-20261106\\regression\\ui",
+        "--output",
+        "E:\\PG\\MA4-win\\.agent-tmp\\round2-20261106\\regression\\live-ui.json"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "log": "live-ui.log",
+      "seconds": 6.594
+    }
+  ],
+  "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+}

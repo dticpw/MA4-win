@@ -1,11 +1,12 @@
 import copy
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from controllers import Controllers, overlap, budget_value, scopes, TOKEN_KEYS, DRAFT_PREFIX, WORKSPACES_MARKER, workspace_value, task_workspaces
+from controllers import Controllers, overlap, budget_value, scopes, TOKEN_KEYS, DRAFT_PREFIX, WORKSPACES_MARKER, workspace_value, task_workspaces, file_link_guidance
 
 
 class Hub:
@@ -187,7 +188,28 @@ class ControllerTest(unittest.TestCase):
         self.assertIn("优先复用项目已有且适用的测试入口", payload)
         self.assertIn("实现、自测和本轮必要说明由同一执行者", payload)
         self.assertIn("原作者修正", payload)
+        self.assertIn(file_link_guidance(), payload)
         self.assertEqual(len(t["workers"]), 1)
+
+    def test_file_link_guidance_matches_platform_in_templates_and_each_managed_message(self):
+        t = self.active()
+        tid, w = self.worker(t, write_scope=["art"])
+        for session in (t["host"], tid):
+            instructions = self.hub.sessions[session]["developer_instructions"]
+            self.assertIn(file_link_guidance(), instructions)
+            self.assertNotIn("[报告](</mnt/e/" if os.name == "nt" else "[报告](<E:/", instructions)
+        for windows_mode in (True, False):
+            rule = file_link_guidance(windows=windows_mode)
+            self.assertIn("[报告](<E:/" if windows_mode else "[报告](</mnt/e/", rule)
+            self.assertNotIn("[报告](</mnt/e/" if windows_mode else "[报告](<E:/", rule)
+            with patch("controllers.file_link_guidance", return_value=rule):
+                self.c.do_send(t["host"], "继续核对文件", "paths-" + str(windows_mode))
+                self.assertIn(rule, self.hub.sent[-1][1])
+                self.c.launch(t, tid, w)
+                self.assertIn(rule, self.hub.sent[-1][1])
+                w["state"] = "idle"
+                self.c.dispatch(t, "续接原执行者", session_id=tid, write_scope=["art"])
+        self.assertEqual(len(self.hub.sessions), 2)
 
     def test_creation_only_needs_project_and_name_and_cannot_start(self):
         result = self.c.do_create(str(self.root), "先商量")
@@ -629,6 +651,11 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(rt["outbox"], {})
         self.assertEqual(rt["hostTurn"], result["turnId"])
         self.assertEqual(len(self.hub.sent), 1)
+        before = copy.deepcopy(self.hub.histories[t["host"]])
+        resumed.do_send(rt["host"], "恢复后继续核对", "after-recovery")
+        self.assertIn(file_link_guidance(), self.hub.sent[-1][1])
+        self.assertEqual(self.hub.histories[t["host"]][:-1], before)
+        self.assertEqual(len(self.hub.sent), 2)
 
     def test_uncertain_send_is_not_retried_after_restart(self):
         t = self.active()
@@ -1094,6 +1121,30 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(c.worker_cwd(c.tasks[t["id"]], w), t["cwd"])
         self.assertFalse(self.hub.sent)
 
+    @unittest.skipUnless(os.name == "nt", "Windows path aliases")
+    def test_artifact_aliases_count_once_and_keep_retention_when_cleaned(self):
+        t = self.task()
+        root = self.c.ensure_scratch(t)
+        (root / "sample.txt").write_bytes(b"hello")
+        t["scratchCwds"] += [t["cwd"].replace("\\", "/"), t["cwd"].upper()]
+        alias = str(root / "sample.txt").replace("\\", "/")
+        t["retained"][alias] = "旧列表中的保留理由"
+        inventory = self.c.do_artifacts(t["id"])
+        self.assertEqual((inventory["count"], inventory["bytes"]), (1, 5))
+        self.assertEqual(inventory["files"][0]["path"], "sample.txt")
+        self.assertEqual(inventory["files"][0]["retained"], "旧列表中的保留理由")
+        self.c.do_artifacts(t["id"], "clean", ["sample.txt"], "本测试创建，已核对")
+        self.assertFalse((root / "sample.txt").exists())
+        self.assertEqual(t["retained"], {})
+
+    def test_scratch_identity_preserves_first_spelling_and_posix_case(self):
+        t = {"cwd": "E:/Project", "scratchCwds": ["e:\\project", "E:/Project-two"], "workers": {}}
+        self.assertEqual(self.c.scratch_cwds(t), ["E:/Project", "E:/Project-two"])
+        with patch("paths.os") as platform:
+            platform.name = "posix"
+            t.update(cwd="/work/Case", scratchCwds=["/work/Case/", "/work/case"])
+            self.assertEqual(self.c.scratch_cwds(t), ["/work/Case", "/work/case"])
+
     def test_multiroot_artifacts_remain_manageable_after_revocation(self):
         t = self.cross_task(); shared = self.root / "shared"; self.grant(t, shared)
         t["status"] = "running"; _, w = self.worker(t, cwd=str(shared)); w["state"] = "idle"; t["status"] = "paused"
@@ -1158,6 +1209,26 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual([r["usage"]["cachedInputTokens"] for r in stats["sessions"][0]["turns"]], [50, 50])
         self.assertEqual(stats["roles"][0]["usage"]["totalTokens"], 240)
         self.assertEqual(len(self.hub.sent), 2)
+
+    def test_session_activity_uses_own_explicit_turn_times_not_task_or_estimates(self):
+        t = self.task()
+        host = t["host"]
+        t["formerHosts"] = ["former"]
+        t["workers"]["worker"] = {"name": "worker", "state": "idle"}
+        t["updatedAt"] = 9000
+        self.c.record_turn(t, host, {"id": "h", "status": "completed", "startedAt": 200, "completedAt": 250})
+        self.c.record_turn(t, "worker", {"id": "w", "status": "completed", "startedAt": 700, "completedAt": 800})
+        self.c.record_turn(t, "former", {"id": "f", "status": "completed"})
+        # A delayed real start must not legitimize an earlier estimated finish.
+        self.c.record_turn(t, "former", {"id": "f", "startedAt": 100})
+        self.c.publish()
+        self.assertEqual(self.c.activity_times(), {host: 250, "worker": 800, "former": None})
+        self.now[0] = 20_000
+        self.c.publish()
+        self.assertEqual(self.c.activity_times()[host], 250)
+        restored = Controllers(self.hub, self.root / "data", clock=lambda: self.now[0])
+        self.assertEqual(restored.activity_times(), self.c.activity_times())
+        self.assertEqual(len(self.hub.sent), 0)
 
     def test_finish_records_settling_tokens_and_time_without_another_turn(self):
         t = self.task(start=True); turn = t["hostTurn"]

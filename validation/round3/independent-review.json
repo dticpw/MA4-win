@@ -1,0 +1,48 @@
+{
+  "result": "accepted",
+  "reviewer": "MA4 task controller",
+  "sourceHashes": {
+    "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
+    "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+    "tools/ui_check.mjs": "cce6a2c174991c3898e325ed8d23f41a86ac990576950744f1821b1517a9f3d5",
+    "tools/smoke_test.py": "0b0636d5db06d1a0194b011ab6e9f86b523755beaa48839ec85f9571e2031f40",
+    "tools/verify.py": "6dc54a7ae6c2d1ffef881a22fbf309c5051e12de400322e01e9291a0f049a3a2",
+    "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
+    "test_verify.py": "5c4ef8c33665019b5abe92b7823490cfbb65c8aa4e6b6085c93a7c3ca03b689b",
+    "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
+    "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
+    "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+    "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+    "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
+    "web/index.html": "0307c52ff886b91a5b3e29a6eb0faa1de73a77db5914e9645a897e0dccdc483a",
+    "web/style.css": "fbf19f26fceade51d9f98e946977e7a2306840379d3576e6af8cd977ed6a4847"
+  },
+  "newChecks": [
+    "Independently reproduced duplicate-message locator failure with real CLI; 2 mock requests; then verified preserved original five files byte-identical",
+    "Read final source for identity/session ownership, per-turn/item selectors, wait pairing, direct open full reload and restored default compatibility",
+    "Verified final implementation/source hashes, JSON steps, exact 400 vs unexpected errors, history 2+1 turns, cleanup flags, tooling logs, CLI refusal record and map current",
+    "Viewed actual controlled-failure, duplicate-message failure, final cross-session refresh images",
+    "Ran session_inventory.py since 2026-11-07T06:07:00Z"
+  ],
+  "reused": [
+    "Root independent final 16-step retry, same source hash 06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8; report read and all steps passed",
+    "Worker 17 Python and 11 final Node checks; default live-ui compatibility and repeated-message run; existing unchanged second-round tasks/reports coverage only"
+  ],
+  "expectedFailures": "Real nonexistent cwd HTTP400; no injected failure or automatic resend",
+  "limits": [
+    "Linux, real supplier, other browsers not tested",
+    "Standalone read-only screenshot mode restored by source review, not separately run"
+  ],
+  "cleanup": "Five original audit files preserved byte-identically in implementation/repeated-initial; exact nine audit files cleaned with ma4_artifacts; final list count 0/bytes 0, worker empty.",
+  "resume": {
+    "targetRevision": 1,
+    "deadline": 1794033464.608924,
+    "worker": "01a1b49f-a9cc-7cb0-a3a6-42472f41caa5",
+    "lastReportTurn": "01a1b4b5-69bb-7631-9ac2-84043e75b6a2",
+    "programStatus": "running",
+    "pendingReports": 0,
+    "sourceHashesUnchanged": true,
+    "evidencePresent": true,
+    "noNewDispatchOrTests": true
+  }
+}

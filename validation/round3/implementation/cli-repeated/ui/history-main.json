@@ -1,0 +1,49 @@
+{
+  "turns": [
+    {
+      "id": "01a1b4b0-770c-7820-8a5f-25ccfc94c8a4",
+      "status": "completed",
+      "startedAt": 1794032826,
+      "completedAt": 1794032826,
+      "durationMs": 671,
+      "error": null,
+      "items": [
+        {
+          "id": "01a1b4b0-785a-7f13-95c3-11607928ef30",
+          "type": "userMessage",
+          "text": "中控独立重复文本验证",
+          "attachments": []
+        },
+        {
+          "id": "msg_705d1e97ba964f91b0ddd561b0e5cf59",
+          "type": "agentMessage",
+          "text": "本机模拟回复：Windows 共享会话连接成功。",
+          "phase": null
+        }
+      ]
+    },
+    {
+      "id": "01a1b4b0-7b57-7c93-b273-321511154b8a",
+      "status": "completed",
+      "startedAt": 1794032827,
+      "completedAt": 1794032827,
+      "durationMs": 365,
+      "error": null,
+      "items": [
+        {
+          "id": "01a1b4b0-7b6a-74c0-bad6-353f91d4c759",
+          "type": "userMessage",
+          "text": "中控独立重复文本验证",
+          "attachments": []
+        },
+        {
+          "id": "msg_59bee84006724c8ead631c7e4b0b4366",
+          "type": "agentMessage",
+          "text": "本机模拟回复：Windows 共享会话连接成功。",
+          "phase": null
+        }
+      ]
+    }
+  ],
+  "older": null
+}

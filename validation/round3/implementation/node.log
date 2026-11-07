@@ -1,0 +1,16 @@
+✔ full identity is required and each identity component must match (3.1781ms)
+✔ live port, remote URLs and disconnected backends are refused (0.3076ms)
+✔ plans use local aliases and reject arbitrary IDs, cwd, code and unknown actions (0.4144ms)
+✔ unowned session fails before any page access (0.1273ms)
+✔ unexpected action failure stops later actions and does not retry (2.0309ms)
+✔ history summary preserves item IDs and detects duplicate turns (0.2142ms)
+✔ CLI parses different compositions and rejects unknown flags/messages (0.2873ms)
+✔ CLI output refuses project root, existing files and escaping paths (0.4245ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 79.0831

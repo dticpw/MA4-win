@@ -17,7 +17,9 @@ from urllib.parse import urlsplit
 
 SERVICES = (("texas", "德州扑克", "在线玩家", 15),
             ("ace21", "王牌21点", "在线玩家", 15),
+            ("xiangqi-assist", "中象辅助", "近 5 分钟活跃浏览器", 60),
             ("chat", "Chat / 代理", "近 5 分钟活跃 IP", 60))
+# Xiangqi lobby parsing/download remain available, but are not scheduled or shown.
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -78,6 +80,23 @@ def chat_activity(data, now):
     return {"count": total, "visitors": rows, "truncated": data["truncated"], "observed_at": generated}
 
 
+def assist_activity(data, now):
+    """Accept only the public aggregate contract; never retain visitor identifiers."""
+    if (not isinstance(data, dict) or data.get("service") != "xiangqi-assist"
+            or type(data.get("window_seconds")) is not int or data["window_seconds"] != 300
+            or type(data.get("count")) is not int or not 0 <= data["count"] <= 2**53 - 1
+            or type(data.get("complete_window")) is not bool):
+        raise ValueError("invalid aggregate")
+    generated = number(data.get("generated_at")) / 1000
+    since = number(data.get("observed_since")) / 1000
+    if not 0 < since <= generated or abs(now - generated) > 120:
+        raise ValueError("outdated aggregate")
+    if data["complete_window"] != (generated - since >= 300):
+        raise ValueError("inconsistent window")
+    return {"count": data["count"], "observed_at": generated, "observed_since": since,
+            "complete_window": data["complete_window"]}
+
+
 class ActivityPoller:
     def __init__(self, config, fetch=None, clock=time.time, start=True):
         self.config, self.clock = config or {}, clock
@@ -111,9 +130,13 @@ class ActivityPoller:
         parsed = urlsplit(base)
         if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
             raise ValueError("HTTPS endpoint without credentials required")
-        url = base + "?view=active" if key == "chat" else base.rstrip("/") + "/tables/" + key
-        token = self.credential() if key == "chat" else self.observer
-        request = urllib.request.Request(url, headers={"User-Agent": "MA4-service-activity/1.0", "Authorization": "Bearer " + token})
+        headers = {"User-Agent": "MA4-service-activity/1.0"}
+        if key == "xiangqi-assist":
+            url = base.rstrip("/") + "/activity/xiangqi-assist"
+        else:
+            url = base + "?view=active" if key == "chat" else base.rstrip("/") + "/tables/" + key
+            headers["Authorization"] = "Bearer " + (self.credential() if key == "chat" else self.observer)
+        request = urllib.request.Request(url, headers=headers)
         opener = urllib.request.build_opener(NoRedirect())
         try:
             with opener.open(request, timeout=10) as response:
@@ -129,7 +152,10 @@ class ActivityPoller:
     def collect(self, key):
         try:
             raw = self.fetch(key)
-            value = chat_activity(raw, self.clock()) if key == "chat" else game_activity(raw, key)
+            if key == "xiangqi-assist":
+                value = assist_activity(raw, self.clock())
+            else:
+                value = chat_activity(raw, self.clock()) if key == "chat" else game_activity(raw, key)
             value.update(fetched_at=self.clock(), error=None)
             with self.lock:
                 self.values[key] = value
@@ -148,7 +174,7 @@ class ActivityPoller:
         for key, _, _, interval in SERVICES:
             if key in due:
                 self.due[key] = now + interval
-        with ThreadPoolExecutor(max_workers=3) as pool:
+        with ThreadPoolExecutor(max_workers=len(SERVICES)) as pool:
             futures = [pool.submit(self.collect, key) for key in due]
             for future in as_completed(futures):
                 future.result()
@@ -161,12 +187,16 @@ class ActivityPoller:
         rows = []
         for key, label, metric, interval in SERVICES:
             value = values.get(key, {})
-            stale = bool(value.get("error")) or self.clock() - value.get("fetched_at", 0) > interval * 2 + 15
+            pending = not value
+            stale = pending or bool(value.get("error")) or self.clock() - value.get("fetched_at", 0) > interval * 2 + 15
+            if key == "xiangqi-assist" and "observed_at" in value:
+                stale = stale or abs(self.clock() - value["observed_at"]) > 120
             if stale:
                 value["count"] = None
                 value.pop("visitors", None)
                 value.pop("truncated", None)
-            rows.append(dict(value, key=key, label=label, metric=metric, stale=stale))
+            status = "pending" if pending else "unknown" if stale else "collecting" if value.get("complete_window") is False else "ok"
+            rows.append(dict(value, key=key, label=label, metric=metric, stale=stale, status=status))
         return rows
 
     def loop(self):

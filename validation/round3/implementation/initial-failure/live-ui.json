@@ -1,0 +1,35 @@
+{
+  "result": "failed",
+  "browserExitCode": 1,
+  "instance": {
+    "url": "http://127.0.0.1:2817",
+    "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\live-check\\process-temp\\session-runtime-r793zunc\\smoke-a7n7h6o6",
+    "verification": {
+      "instance": "1223c2c5e9434622a4f14f52dfa608a6",
+      "ownerPid": 20200,
+      "backendPid": 9532,
+      "endpoint": "ws://127.0.0.1:2814",
+      "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\live-check\\process-temp\\session-runtime-r793zunc\\smoke-a7n7h6o6\\codex-home",
+      "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\live-check\\process-temp\\session-runtime-r793zunc\\smoke-a7n7h6o6\\state"
+    },
+    "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) dumb (ma4; 0.1)"
+  },
+  "journeys": [],
+  "argv": [
+    "node",
+    "E:\\PG\\MA4-win\\tools\\ui_check.mjs",
+    "",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\live-check\\ui",
+    "http://127.0.0.1:2817",
+    "--exercise"
+  ],
+  "modelRequests": 1,
+  "model": "local mock; no external model calls; excludes the real executor's model use",
+  "ui_report": "ui/report.json",
+  "cleanup": {
+    "backendExited": true,
+    "ownWebClosed": true,
+    "scratchRemoved": true,
+    "runtimeRemoved": true
+  }
+}

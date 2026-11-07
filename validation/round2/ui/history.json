@@ -1,0 +1,27 @@
+{
+  "turns": [
+    {
+      "id": "01a1b15a-9830-70e1-b359-460c8a32129a",
+      "status": "completed",
+      "startedAt": 1793976866,
+      "completedAt": 1793976867,
+      "durationMs": 599,
+      "error": null,
+      "items": [
+        {
+          "id": "01a1b15a-994b-7333-b466-c19fbc039817",
+          "type": "userMessage",
+          "text": "浏览器发送验证 mw53i9c0",
+          "attachments": []
+        },
+        {
+          "id": "msg_2ba2ba316d66410389e04ed0b637156b",
+          "type": "agentMessage",
+          "text": "本机模拟回复：Windows 共享会话连接成功。",
+          "phase": null
+        }
+      ]
+    }
+  ],
+  "older": null
+}

@@ -128,6 +128,33 @@ class ServerTest(unittest.TestCase):
             self.assertEqual(self.request("GET", "/api/side", {"Origin": "https://elsewhere.test"})[0], 403)
             activity.snapshot.assert_not_called()
 
+    def test_side_exposes_typed_health_and_aggregate_without_new_polls(self):
+        from activity import ActivityPoller
+        from health import HealthPoller
+        now = 2_000_000_000
+        fetch = Mock(return_value={"service": "xiangqi-assist", "window_seconds": 300, "count": 0,
+                                   "generated_at": now * 1000, "observed_since": (now - 300) * 1000,
+                                   "complete_window": True, "visitorId": "SIMULATED-ONLY"})
+        activity = ActivityPoller({"enabled": True}, fetch=fetch, clock=lambda: now, start=False)
+        activity.collect("xiangqi-assist")
+        tcp = Mock(return_value={"ok": True, "ms": 8})
+        health = HealthPoller([{"name": "VPS", "type": "tcp", "host": "192.0.2.1", "port": 22}],
+                              start=False, tcp_check=tcp)
+        health.tick()
+        with patch.object(self.server, "activity", activity), patch.object(self.server, "health", health):
+            for path in ("/api/side", "/api/state", "/api/side"):
+                status, body = self.request("GET", path)
+                self.assertEqual(status, 200)
+                data = json.loads(body)
+                side = data["side"] if path == "/api/state" else data
+                row = next(r for r in side["activity"] if r["key"] == "xiangqi-assist")
+                self.assertEqual((row["count"], row["status"]), (0, "ok"))
+                self.assertNotIn("visitorId", body.decode())
+                self.assertEqual(side["health"][0]["type"], "tcp")
+                self.assertNotIn("url", side["health"][0])
+        fetch.assert_called_once_with("xiangqi-assist")
+        tcp.assert_called_once_with("192.0.2.1", 22)
+
     def test_file_open_requires_local_post_and_preserves_path(self):
         body = json.dumps({"id": "a", "path": "目录/a & b.html:12"})
         headers = {"X-MA4-Request": "1", "Content-Type": "application/json"}

@@ -57,3 +57,18 @@ test("file links cannot inject markup, activate schemes or format code examples"
   assert.ok(!renderMarkdown('`[README](README.md)`').includes('<button'));
   assert.ok(renderMarkdown('[x](/a/**keep**.txt)').includes('data-file-path="/a/**keep**.txt"'));
 });
+
+test("shared-drive references reach file-open unchanged, including URI and extra slash", () => {
+  for (const drive of "cdefCDEF") {
+    for (const prefix of [`${drive}:/`, `/${drive}:/`, `/mnt/${drive}/`, `file:///${drive}:/`, `file:///mnt/${drive}/`]) {
+      for (const suffix of ["", ":12:3", "#L2-L4"]) {
+        const path = `${prefix}中文 目录/报告%2520.txt${suffix}`;
+        assert.ok(renderMarkdown(`[报告](<${path}>)`).includes(`data-file-path="${path}"`), path);
+        if (!prefix.startsWith("file:")) {
+          const backslashes = path.replaceAll("/", "\\");
+          assert.ok(renderMarkdown(`[报告](<${backslashes}>)`).includes(`data-file-path="${backslashes}"`), backslashes);
+        }
+      }
+    }
+  }
+});

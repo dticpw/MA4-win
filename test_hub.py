@@ -1,13 +1,16 @@
 import tempfile
+import os
 import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from urllib.parse import quote
 
 from appserver import RpcError
 from hub import Hub, describe, normalize_item, permissions, status_of
 from controllers import HOST_INSTRUCTIONS, HOST_TOOL_SETTINGS
 from os_adapters import linux as linux_adapter
+from os_adapters import windows as windows_adapter
 
 
 class FakeClient:
@@ -172,6 +175,157 @@ class HubTest(unittest.TestCase):
             launch.return_value.wait.return_value = 3
             with self.assertRaisesRegex(ValueError, "默认应用"):
                 self.hub.open_file("a", str(root))
+
+    def test_file_links_preserve_literals_before_decoding_and_citations(self):
+        root = Path(self.dir.name)
+        self.hub.threads["a"] = {"cwd": str(root)}
+        names = ["中文 空格.txt", "literal%20name.txt", "literal name.txt", "invalid%FF.txt",
+                 "report.txt", "report.txt#L12", "report.txt#L12C2-L15C4", "percent%2520.txt"]
+        if os.name != "nt":
+            names += ["report.txt:12", r"literal\name.txt"]
+        for name in names:
+            (root / name).write_text("safe text", encoding="utf-8")
+        with patch("hub.os_adapter") as adapter:
+            for name in names:
+                expected = root / name
+                for ref in (name, str(expected), expected.as_uri(), name + "#L30"):
+                    with self.subTest(ref=ref):
+                        self.hub.open_file("a", ref)
+                        self.assertEqual(adapter.return_value.open_file.call_args.args[0], expected)
+            for ref in (quote("中文 空格.txt") + ":3", "report.txt:2:3", "report.txt#L2-L4"):
+                self.hub.open_file("a", ref)
+                expected = root / ("中文 空格.txt" if ref.startswith("%") else "report.txt")
+                self.assertEqual(adapter.return_value.open_file.call_args.args[0], expected)
+            # URI decoding is exactly once; encoded #L is a real filename suffix.
+            for ref in ((root / "literal%2520name.txt").as_uri(), (root / "report.txt#L99").as_uri()):
+                with self.subTest(ref=ref), self.assertRaises(ValueError):
+                    self.hub.open_file("a", ref)
+        self.assertEqual(self.client.calls, [])
+
+    def test_file_links_reject_encoded_network_controls_and_script_targets(self):
+        root = Path(self.dir.name)
+        self.hub.threads["a"] = {"cwd": str(root)}
+        with patch("hub.os_adapter", return_value=windows_adapter), patch.object(os, "startfile", create=True) as start:
+            for extension in (".py", ".cmd", ".lnk", ".exe", ".ps1", ".url"):
+                target = root / ("拒绝样例" + extension)
+                target.write_text("inert text only", encoding="utf-8")
+                for ref in (str(target) + ":12", target.as_uri() + "#L2"):
+                    with self.subTest(ref=ref), self.assertRaisesRegex(ValueError, "不通过文件链接"):
+                        self.hub.open_file("a", ref)
+            for ref in (r"\\server\share", r"/\server/share", "file:////server/share", "file://remote/x",
+                        "%2F%2Fserver/share", "file:///%5C%5Cserver/share", "%00bad", "file:///a%0Ab",
+                        "file:///a?query", "https://example.com/x", "E:", "/E:", "E:relative"):
+                with self.subTest(ref=ref), self.assertRaises(ValueError):
+                    self.hub.open_file("a", ref)
+            start.assert_not_called()
+
+    @unittest.skipUnless(os.name == "nt", "Windows native file-link resolution")
+    def test_windows_file_links_resolve_drive_mount_uri_and_relative_spellings(self):
+        root = Path(self.dir.name)
+        target = root / "中文 空格.txt"
+        target.write_text("safe text", encoding="utf-8")
+        self.hub.threads["a"] = {"cwd": str(root)}
+        absolute = target.as_posix()
+        refs = [absolute, "/" + absolute, "\\" + str(target), absolute[0].lower() + absolute[1:],
+                target.as_uri(), target.as_uri().replace("file:///", "file://LOCALHOST/"), target.name,
+                "./" + target.name, ".\\" + target.name, str(root.parent / root.name / target.name)]
+        if target.drive[0].lower() in "cdef":
+            mount = "/mnt/" + absolute[0].lower() + absolute[2:]
+            refs += [mount, mount.replace("/", "\\"), "file://" + quote(mount)]
+        with patch("hub.os_adapter") as adapter:
+            for ref in refs:
+                for suffix in ("", ":12:3", "#L2-L4"):
+                    with self.subTest(ref=ref, suffix=suffix):
+                        self.hub.open_file("a", ref + suffix)
+                        self.assertEqual(adapter.return_value.open_file.call_args.args[0], target)
+            for ref in (target.anchor, "/" + target.anchor):
+                self.hub.open_file("a", ref)
+                self.assertEqual(adapter.return_value.open_file.call_args.args[0], Path(target.anchor))
+            for ref in ("/home/user/x", "/tmp/x", "file:///home/user/x"):
+                with self.subTest(ref=ref), self.assertRaisesRegex(ValueError, "Linux 绝对路径"):
+                    self.hub.open_file("a", ref)
+            self.hub.threads["a"].pop("cwd")
+            self.hub.threads["a"]["id"] = "a"
+            self.hub.open_file("a", "/" + absolute)
+            with self.assertRaisesRegex(ValueError, "没有项目目录"):
+                self.hub.open_file("a", target.name)
+
+    def test_activity_time_tracks_turns_and_survives_old_metadata_and_status(self):
+        self.client.threads = [thread("host", updated=100), thread("worker", updated=150)]
+        self.hub.refresh()
+        self.hub.on_notification("turn/started", {"threadId": "host", "turn": {"id": "t", "startedAt": 200}})
+        self.assertEqual(self.names()["host"]["updatedAt"], 200)
+        with patch("hub.time.time", return_value=900):
+            self.hub.update_status("host", {"type": "active"})
+        self.hub.subscribed.add("host")
+        self.assertEqual(self.names()["host"]["updatedAt"], 200)
+        self.hub.refresh()
+        self.assertEqual(self.names()["host"]["updatedAt"], 200)
+        self.hub.on_notification("turn/completed", {"threadId": "host", "turn": {"id": "t", "startedAt": 200, "completedAt": 250}})
+        self.hub.refresh()
+        self.assertEqual(self.names()["host"]["updatedAt"], 250)
+        self.assertEqual(self.names()["worker"]["updatedAt"], 150)
+        self.assertTrue(self.names()["host"]["unread"])
+        self.assertEqual([row["id"] for row in self.hub.thread_list()], ["host", "worker"])
+        self.hub.open("host")
+        self.assertFalse(self.names()["host"]["unread"])
+
+    def test_unknown_activity_stays_unknown_without_trustworthy_times(self):
+        self.client.threads = [thread("a", updated=None)]
+        self.hub.refresh()
+        for value in (None, 0, -1, True, "300", float("nan"), float("inf")):
+            with self.subTest(value=value), patch("hub.time.time", return_value=900):
+                self.hub.on_notification("turn/started", {"threadId": "a", "turn": {"id": "t", "startedAt": value}})
+                self.hub.update_status("a", {"type": "idle"})
+                self.assertIsNone(self.names()["a"]["updatedAt"])
+                self.assertFalse(self.names()["a"]["unread"])
+        self.hub.open("a")  # unknown time still supports marking seen/opening
+
+    def test_turn_during_list_read_and_reconnect_cannot_regress_activity(self):
+        self.client.threads = [thread("a", updated=100)]
+        self.hub.refresh()
+        original = self.client.call
+        def race(method, params, timeout=30):
+            result = original(method, params, timeout)
+            if method == "thread/list":
+                self.hub.on_notification("turn/completed", {"threadId": "a", "turn": {"id": "t", "completedAt": 500}})
+            return result
+        self.client.call = race
+        self.hub.refresh()
+        self.assertEqual(self.names()["a"]["updatedAt"], 500)
+        self.hub.on_disconnect("simulated")
+        self.hub.connect_factory = lambda *args, **kwargs: FakeClient([thread("a", updated=100)])
+        self.hub.try_connect()
+        self.hub.refresh()
+        self.assertEqual(self.names()["a"]["updatedAt"], 500)
+
+    def test_saved_controller_session_times_recover_without_cross_session_leak(self):
+        self.hub.controllers.view = {"tasks": [{"host": "host", "formerHosts": ["former"], "status": "paused",
+            "hostBusy": False, "workers": {"worker": {"state": "idle"}}, "updatedAt": 9000,
+            "statistics": {"sessions": [{"threadId": "host", "updatedAt": 300},
+                                         {"threadId": "worker", "updatedAt": 800},
+                                         {"threadId": "former", "updatedAt": None}]}}]}
+        self.client.threads = [thread("host", updated=100), thread("worker", updated=100),
+                               thread("former", updated=None), thread("ordinary", updated=200)]
+        self.hub.refresh()
+        self.assertEqual({id: row["updatedAt"] for id, row in self.names().items()},
+                         {"host": 300, "worker": 800, "former": None, "ordinary": 200})
+        self.assertFalse(any(row["unread"] for row in self.names().values()))
+        self.assertFalse(any(method == "thread/turns/list" for method, _ in self.client.calls))
+
+    def test_current_turn_only_uses_explicit_time_on_recovery(self):
+        self.client.threads = [thread("a", updated=None)]
+        self.hub.refresh()
+        self.client.turns["a"] = [{"id": "t", "status": "inProgress"}]
+        with patch("hub.time.time", return_value=900):
+            self.hub.current_turn("a")
+        self.assertIsNone(self.names()["a"]["updatedAt"])
+        self.assertIsNone(self.hub.live["a"]["run"]["startedAt"])
+        self.client.turns["a"] = [{"id": "t", "status": "completed", "completedAt": 450}]
+        self.hub.current_turn("a")
+        self.assertEqual(self.names()["a"]["updatedAt"], 450)
+        self.assertTrue(all(p["limit"] == 1 and p["itemsView"] == "notLoaded"
+                            for method, p in self.client.calls if method == "thread/turns/list"))
 
     def test_status_mapping(self):
         self.assertEqual(status_of(thread("a", {"type": "active", "activeFlags": ["waitingOnApproval"]})), "approval")

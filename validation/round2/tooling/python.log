@@ -1,0 +1,20 @@
+test_automatic_output_is_removed_and_explicit_output_survives (test_verify.VerifyTest) ... ok
+test_child_environment_cannot_select_live_or_partial_ui (test_verify.VerifyTest) ... ok
+test_doctor_refuses_wrong_http_identity_dead_backend_and_live_port (test_verify.VerifyTest) ... ok
+test_failure_exits_nonzero_and_does_not_run_later_checks (test_verify.VerifyTest) ... ok
+test_missing_executable_is_a_failure (test_verify.VerifyTest) ... ok
+test_output_refuses_escape_and_existing_material (test_verify.VerifyTest) ... ok
+test_plan_creates_no_output_and_does_not_execute (test_verify.VerifyTest) ... ok
+test_python_skips_are_explicit_and_zero_tests_fail (test_verify.VerifyTest) ... ok
+test_shared_checks_run_once_and_sensitive_suites_are_opt_in (test_verify.VerifyTest) ... ok
+test_static_server_only_exposes_assets_and_closes (test_verify.VerifyTest) ... ok
+test_changed_source_recipe_or_evidence_needs_review (test_feature_map.FeatureMapTest) ... ok
+test_current_does_not_claim_unverified_coverage_or_write_record (test_feature_map.FeatureMapTest) ... ok
+test_missing_anchor_and_unregistered_feature_are_invalid (test_feature_map.FeatureMapTest) ... ok
+test_missing_link_is_invalid (test_feature_map.FeatureMapTest) ... ok
+test_missing_review_or_outside_input_cannot_be_current (test_feature_map.FeatureMapTest) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 2.729s
+
+OK

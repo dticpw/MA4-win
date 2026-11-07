@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-07T06:27:09.871Z",
+  "argv": [
+    "--output",
+    ".agent-tmp/ma4-1dda5fb483a146eb/worker/rework-repeat",
+    "--message",
+    "中控独立重复文本验证",
+    "--actions",
+    "create,send,wait,send,wait,reopen,refresh,history"
+  ],
+  "python": "D:/python/anaconda/envs/th123/python.exe",
+  "childArgv": [
+    "-B",
+    "-X",
+    "utf8",
+    "tools/smoke_test.py",
+    "--ui-output",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-repeat\\ui",
+    "--output",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-repeat\\session.json",
+    "--scratch-root",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-repeat\\runtime",
+    "--session-plan",
+    "[{\"op\":\"create\",\"session\":\"main\"},{\"op\":\"send\",\"session\":\"main\"},{\"op\":\"wait\",\"session\":\"main\"},{\"op\":\"send\",\"session\":\"main\"},{\"op\":\"wait\",\"session\":\"main\"},{\"op\":\"reopen\",\"session\":\"main\"},{\"op\":\"refresh\",\"session\":\"main\"},{\"op\":\"history\",\"session\":\"main\"}]",
+    "--message",
+    "中控独立重复文本验证"
+  ],
+  "exitCode": 0
+}

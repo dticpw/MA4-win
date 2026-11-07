@@ -1,0 +1,21 @@
+{
+  "atUtc": "2026-11-07T06:24:07.837071+00:00",
+  "argv": [
+    "node",
+    "tools/session_cli.mjs",
+    "--output",
+    "E:\\PG\\MA4-win\\.agent-tmp\\round3-orchestrator-20261107\\repeat-text",
+    "--message",
+    "重复文本复用验证",
+    "--actions",
+    "create,send,wait,send,wait,reopen,refresh,history"
+  ],
+  "exitCode": 1,
+  "sha256": {
+    "tools/session_actions.mjs": "89a33f68d8e9fa9d6949181c3be4132b73514812a056023eef7b8be577786aa7",
+    "tools/session_cli.mjs": "de96dc4eb956282a45dec8948847cfa74d5071fc841b57dbb07b5e8be0302cd6",
+    "tools/ui_check.mjs": "f6eadd177d2d6ce16362f15828bb0f6c9c6554ab46a7831537b6340743b4327a",
+    "tools/smoke_test.py": "417c9ee48b2604d636125ebda8285c8eb6fd8a31710fbee7bbd7fb8036b707de"
+  },
+  "sourceUnchangedDuringRun": true
+}

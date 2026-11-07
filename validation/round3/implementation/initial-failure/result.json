@@ -1,0 +1,31 @@
+{
+  "result": "failed",
+  "at_utc": "2026-11-07T06:13:42.999421+00:00",
+  "platform": "win32",
+  "python": "3.10.19",
+  "profiles": [
+    "live-ui"
+  ],
+  "ui_requested": false,
+  "checks": [
+    {
+      "check": "live-ui",
+      "argv": [
+        "D:\\python\\anaconda\\envs\\th123\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "tools/smoke_test.py",
+        "--ui-output",
+        "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\live-check\\ui",
+        "--output",
+        "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\live-check\\live-ui.json"
+      ],
+      "status": "failed",
+      "exit_code": 1,
+      "log": "live-ui.log",
+      "seconds": 6.234
+    }
+  ],
+  "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+}

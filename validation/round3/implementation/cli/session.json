@@ -1,0 +1,243 @@
+{
+  "result": "passed",
+  "browserExitCode": 0,
+  "instance": {
+    "url": "http://127.0.0.1:11536",
+    "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\cli-final\\runtime-_x9x401o\\smoke-_kdfy_41",
+    "verification": {
+      "instance": "db1bc9cd01284581b8aa56c7c06c9be9",
+      "ownerPid": 21856,
+      "backendPid": 33188,
+      "endpoint": "ws://127.0.0.1:11533",
+      "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\cli-final\\runtime-_x9x401o\\smoke-_kdfy_41\\codex-home",
+      "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\cli-final\\runtime-_x9x401o\\smoke-_kdfy_41\\state"
+    },
+    "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) dumb (ma4; 0.1)"
+  },
+  "journeys": [
+    {
+      "feature": "sessions",
+      "result": "passed",
+      "steps": [
+        {
+          "index": 1,
+          "action": {
+            "op": "create",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:17:04.969Z",
+          "result": {
+            "threadId": "01a1b4a7-4c97-79c2-ab5f-210889395d2d"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 2,
+          "action": {
+            "op": "open",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:17:05.738Z",
+          "result": {
+            "threadId": "01a1b4a7-4c97-79c2-ab5f-210889395d2d",
+            "turnCount": 0,
+            "itemCount": 0,
+            "summary": []
+          },
+          "status": "passed"
+        },
+        {
+          "index": 3,
+          "action": {
+            "op": "history",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:17:05.757Z",
+          "result": {
+            "threadId": "01a1b4a7-4c97-79c2-ab5f-210889395d2d",
+            "turnCount": 0,
+            "itemCount": 0,
+            "summary": []
+          },
+          "status": "passed"
+        },
+        {
+          "index": 4,
+          "action": {
+            "op": "send",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:17:05.763Z",
+          "result": {
+            "message": "独立入口第二种组合：先查空历史再发送",
+            "turnId": "01a1b4a7-4e5d-7811-b4e9-c0ee5aa8d01d",
+            "requestId": "00dcdcf0-212d-410f-ad0b-8e2bd9c78422",
+            "screenshot": "04-before-send-1.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 5,
+          "action": {
+            "op": "wait",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:17:05.904Z",
+          "result": {
+            "threadId": "01a1b4a7-4c97-79c2-ab5f-210889395d2d",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4a7-4e5d-7811-b4e9-c0ee5aa8d01d",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4a7-4f66-7920-8e96-47f1aa8d7dcf",
+                    "type": "userMessage",
+                    "text": "独立入口第二种组合：先查空历史再发送"
+                  },
+                  {
+                    "id": "msg_0a76c78b6a7c493faa12c0166860542c",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "05-reply.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 6,
+          "action": {
+            "op": "refresh",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:17:06.624Z",
+          "result": {
+            "threadId": "01a1b4a7-4c97-79c2-ab5f-210889395d2d",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4a7-4e5d-7811-b4e9-c0ee5aa8d01d",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4a7-4f66-7920-8e96-47f1aa8d7dcf",
+                    "type": "userMessage",
+                    "text": "独立入口第二种组合：先查空历史再发送"
+                  },
+                  {
+                    "id": "msg_0a76c78b6a7c493faa12c0166860542c",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "06-refreshed.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 7,
+          "action": {
+            "op": "reopen",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:17:06.803Z",
+          "result": {
+            "threadId": "01a1b4a7-4c97-79c2-ab5f-210889395d2d",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4a7-4e5d-7811-b4e9-c0ee5aa8d01d",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4a7-4f66-7920-8e96-47f1aa8d7dcf",
+                    "type": "userMessage",
+                    "text": "独立入口第二种组合：先查空历史再发送"
+                  },
+                  {
+                    "id": "msg_0a76c78b6a7c493faa12c0166860542c",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "07-reopened.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 8,
+          "action": {
+            "op": "history",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:17:06.991Z",
+          "result": {
+            "threadId": "01a1b4a7-4c97-79c2-ab5f-210889395d2d",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4a7-4e5d-7811-b4e9-c0ee5aa8d01d",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4a7-4f66-7920-8e96-47f1aa8d7dcf",
+                    "type": "userMessage",
+                    "text": "独立入口第二种组合：先查空历史再发送"
+                  },
+                  {
+                    "id": "msg_0a76c78b6a7c493faa12c0166860542c",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ]
+          },
+          "status": "passed"
+        }
+      ],
+      "sessions": [
+        {
+          "alias": "main",
+          "threadId": "01a1b4a7-4c97-79c2-ab5f-210889395d2d",
+          "sends": [
+            {
+              "message": "独立入口第二种组合：先查空历史再发送",
+              "turnId": "01a1b4a7-4e5d-7811-b4e9-c0ee5aa8d01d",
+              "requestId": "00dcdcf0-212d-410f-ad0b-8e2bd9c78422"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "argv": [
+    "node",
+    "E:\\PG\\MA4-win\\tools\\ui_check.mjs",
+    "",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\cli-final\\ui",
+    "http://127.0.0.1:11536",
+    "--exercise"
+  ],
+  "modelRequests": 1,
+  "model": "local mock; no external model calls; excludes the real executor's model use",
+  "ui_report": "ui/report.json",
+  "cleanup": {
+    "backendExited": true,
+    "ownWebClosed": true,
+    "scratchRemoved": true,
+    "runtimeRemoved": true
+  }
+}

@@ -1,0 +1,477 @@
+{
+  "version": 1,
+  "limits": "人工记录；current 仅表示登记内容未变化。未登记依赖、环境或语义正确性仍需人工判断。",
+  "features": {
+    "sessions": {
+      "source_reviewed_at": "2026-11-07T06:34:21.748412+00:00",
+      "recipe_sha256": "1a4df63bf1747ab53095b0d173d96c939e2f560137ebe76ac104b7a9268ab37d",
+      "inputs": {
+        "tools/verify.py": "6dc54a7ae6c2d1ffef881a22fbf309c5051e12de400322e01e9291a0f049a3a2",
+        "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
+        "test_verify.py": "5c4ef8c33665019b5abe92b7823490cfbb65c8aa4e6b6085c93a7c3ca03b689b",
+        "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
+        "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "controllers.py": "a3721f50b9727ca05d481484b6a9ed4804600c06869d194fc3bd62ff61833bcc",
+        "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
+        "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
+        "web/controllers.js": "2a4d86623646b0d852431c6a02de3f288c325ed6644910c1a393d27c48465f80",
+        "web/index.html": "0307c52ff886b91a5b3e29a6eb0faa1de73a77db5914e9645a897e0dccdc483a",
+        "web/style.css": "fbf19f26fceade51d9f98e946977e7a2306840379d3576e6af8cd977ed6a4847",
+        "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+        "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276",
+        "os_adapters/__init__.py": "0146c232416cb9ef79ca466205c3020f5245c6d5da028ee92c5a54416a273c5f",
+        "os_adapters/windows.py": "ff3f102cdf8a4e0c4c95710f254b49a7182435d581d52b8bdd873550dfc76344",
+        "os_adapters/linux.py": "a0cd10a39e3298c5b838c63cfe68f0418641a5bd43ee9789d1d085da3dc6dfaf",
+        "tools/smoke_test.py": "0b0636d5db06d1a0194b011ab6e9f86b523755beaa48839ec85f9571e2031f40",
+        "tools/ui_check.mjs": "cce6a2c174991c3898e325ed8d23f41a86ac990576950744f1821b1517a9f3d5",
+        "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
+        "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b"
+      },
+      "evidence": [
+        {
+          "path": "validation/round3/implementation/cli/invocation.json",
+          "sha256": "2f5d9c1c664fc026794c4a31b6a6ddbc87ef893f15362887bd879e04f93305f0"
+        },
+        {
+          "path": "validation/round3/implementation/cli/session.json",
+          "sha256": "9bff8c7c4c98a56d8c2b9e6dccc6f8e5e3ed572970083cb08e257ccf79fc2e5a"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/04-before-send-1.png",
+          "sha256": "5082938e22da339a7e4f4e3f5838360c15a43b46500984e873fd7e93d642d0be"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/05-reply.png",
+          "sha256": "abed20c3774630bfcd5c8476a3341c9190ecd3ba66183a9a493d7a14c7f6d4b7"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/06-refreshed.png",
+          "sha256": "660404d07afc029d45ee00881ee9ec72186ddb19f9de32ef17c1790cdfa0cbac"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/07-reopened.png",
+          "sha256": "0b72d8f873366b79be02fcd7523a6d0dc752fd44cccda8ef82634506fb03f05a"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/history-main.json",
+          "sha256": "edd63880f4c4e1c0e7821f333b6f7d2c0ed86d23b6e3bc780f0f968dfc355c10"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/report.json",
+          "sha256": "77c0130f1057893e85f1722c037915b5bf2f815e4f0645c22974927a2aa519d7"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/w1024.png",
+          "sha256": "f82e37225ab57de828801b5aa9617c30b3b423c033be7e385f2644baa4c92a37"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/w1440.png",
+          "sha256": "353dc110a154e976947e6ebac6db5732a2ea916e0f386185e88d672ea2e9e0d3"
+        },
+        {
+          "path": "validation/round3/implementation/cli/ui/w390.png",
+          "sha256": "65ad15ae06fa8ae4c1a852413c20596e32504f0f487c68644a3a61a7b2b7d55c"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/invocation.json",
+          "sha256": "9d165df95ad0ba5e4b3b460f33e07805bd395c88139b11d69657796282636639"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/session.json",
+          "sha256": "16a865df9c3c6d609881980240a6098c4f5bd93f493f35e3013c018d769b9b0e"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/02-before-send-1.png",
+          "sha256": "1d6f449663088c73d09bc0ac4b5d3c042574936495f6aa404f7fc0888d5ad647"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/03-reply.png",
+          "sha256": "58f0a5a01aa00957c434cbd6e9edbe0cd23616aa0aad53d6f1afced6382063d7"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/04-before-send-2.png",
+          "sha256": "f4ce9ce254ed4ad12d6f6b92a8468a30ac1ce807b733e0c6160d42f7766c4fa0"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/05-reply.png",
+          "sha256": "02a3b4f7789e8f0354e823f0d39108acb98ac895a145c7758e20f5874adb3c07"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/06-reopened.png",
+          "sha256": "370ca10ec905939ce9e763d4fe650807e91d2ba0d5f8fd2526382b30ca2310e3"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/07-refreshed.png",
+          "sha256": "30e92b0dc0cce8492e2e9da5d096d03c1840b693b527a8838e51305ee1e6ebe3"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/history-main.json",
+          "sha256": "de3af9170650768eac124c4da1871584e10b62e5397bccc69c29a6cfa44fa058"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/report.json",
+          "sha256": "f1dcc1b034e2a4cd3a70fa2f70559c5162158a5ac815e8b1b1fe6e22550da14c"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/w1024.png",
+          "sha256": "ab11b6b6569fe054072db15d54efb662a0aa753d14664b9a84cef5828e7f1664"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/w1440.png",
+          "sha256": "973531c184cc8083473222cf45558a19ebda1fc7666841a158c3a9a33f1e679b"
+        },
+        {
+          "path": "validation/round3/implementation/cli-repeated/ui/w390.png",
+          "sha256": "d376e23f9b96bb33bfa8b04888508ce151350a14407ee85b02757e5b14408718"
+        },
+        {
+          "path": "validation/round3/implementation/compatibility-initial/live-ui.json",
+          "sha256": "a7905d79944e9544c708d7602795c12501549d48476c0e05bb665163fd735f96"
+        },
+        {
+          "path": "validation/round3/implementation/compatibility-initial/live-ui.log",
+          "sha256": "22e6ae5948acc00b328288506b841ca97c9485ebe3c293879a9313dbc6475ca0"
+        },
+        {
+          "path": "validation/round3/implementation/compatibility-initial/result.json",
+          "sha256": "960e74a7357f31c1dd4c5314ba7220694e7c1f9e7f5f79e16735ff371cbb52f0"
+        },
+        {
+          "path": "validation/round3/implementation/compatibility-initial/ui/failure.png",
+          "sha256": "694fb4a6e6257e5a3aef1409100df401216c83c09c063c2e685521df94f756ff"
+        },
+        {
+          "path": "validation/round3/implementation/compatibility-initial/ui/report.json",
+          "sha256": "595e1ecee35bc18a98529b6a39b424df1340ce1ef616005235831f43fee87a4a"
+        },
+        {
+          "path": "validation/round3/implementation/cross-open/invocation.json",
+          "sha256": "6fa33528cca9c3b06a59918e65bb91ecffff4be6a7da5639db2eaf7af1329f0a"
+        },
+        {
+          "path": "validation/round3/implementation/cross-open/node.log",
+          "sha256": "3b465c0b5684bdfdf4003b0635ceef5beff6514a4c1b878fadd638318248dfd0"
+        },
+        {
+          "path": "validation/round3/implementation/cross-open/session.json",
+          "sha256": "54f0b5b8431b328e7f0609316480c9d1d0fa7a1b06bc86245a22c75632e40167"
+        },
+        {
+          "path": "validation/round3/implementation/cross-open/ui/14-refreshed.png",
+          "sha256": "09596f3467e11809a73efeef65340dc1926d7e006e0bae2f68da3864ede9f113"
+        },
+        {
+          "path": "validation/round3/implementation/cross-open/ui/history-alpha.json",
+          "sha256": "0c90e91a00e5ead8ab85a302f2c1e313a778cc615649a2c3945da713f7f77f07"
+        },
+        {
+          "path": "validation/round3/implementation/cross-open/ui/history-beta.json",
+          "sha256": "f700fc73775e8f82c9ff48076608673e6aef50c96decd3a38d37a394fcc8d883"
+        },
+        {
+          "path": "validation/round3/implementation/cross-open/ui/report.json",
+          "sha256": "987ffa0249dfd233f1ac7604fec3f5b6941851463adc350c4a059a408d6dc105"
+        },
+        {
+          "path": "validation/round3/implementation/evidence.json",
+          "sha256": "d2789dbe8a0e9ee676eec4cdcae59edc9bb09631c14e11902c6dc40f2ecc3fa8"
+        },
+        {
+          "path": "validation/round3/implementation/initial-failure/live-ui.json",
+          "sha256": "dffbfb313cb26c72d24778a9b8eb8fd288d2783df333c034f5bf814955d7e588"
+        },
+        {
+          "path": "validation/round3/implementation/initial-failure/live-ui.log",
+          "sha256": "db815f1404a369b52a6254afb091dd55395b934bb3cf2dd244afdc4c2f87cfd0"
+        },
+        {
+          "path": "validation/round3/implementation/initial-failure/result.json",
+          "sha256": "42874c1d4ffe82b35233c808dd2863258b56f53b3d4fd64dd55617d9b05f6ebc"
+        },
+        {
+          "path": "validation/round3/implementation/initial-failure/ui/failure.png",
+          "sha256": "a64b04ea435242bd9427888db83e957f09a8ffb934ce5e2dcd145e5db042fb64"
+        },
+        {
+          "path": "validation/round3/implementation/initial-failure/ui/report.json",
+          "sha256": "d8e209f262bea2e5b7f38a15c64ee9215a4079f71ae7aa288f52652ac3d9d445"
+        },
+        {
+          "path": "validation/round3/implementation/live-ui.json",
+          "sha256": "21d8eddecb891c2a4c8b06da2e10b4cf0273c312767095ffefb34c8ffe40ec93"
+        },
+        {
+          "path": "validation/round3/implementation/live-ui.log",
+          "sha256": "e15bff79189615f62382ecf8426fca19c9a6b963c3049428c4792a7dea3189c9"
+        },
+        {
+          "path": "validation/round3/implementation/node.log",
+          "sha256": "d84c1411daec6e4b4c89d7ce2996d66babc96fcb69efcd754531da83b1dd70a9"
+        },
+        {
+          "path": "validation/round3/implementation/python.log",
+          "sha256": "22c71bc9c9b3fa00bb9fc58ebff47d1b4317aa69bb2b42e0359d6e372532bae2"
+        },
+        {
+          "path": "validation/round3/implementation/repeated-initial/invocation.json",
+          "sha256": "74dc1069c711dab8f59386d41dcecebcfc5bfa796a4187e5450b5ef164bea196"
+        },
+        {
+          "path": "validation/round3/implementation/repeated-initial/session.json",
+          "sha256": "0e4f1911fcd5a273c91e6675505c8ac1d814c85b7646a418354bff2a3cb6125c"
+        },
+        {
+          "path": "validation/round3/implementation/repeated-initial/ui/failure.png",
+          "sha256": "6f368f1eeaa9a3aede7272e6e12f7f5e0f3fa380f9bf49337eaab0ddc4735a40"
+        },
+        {
+          "path": "validation/round3/implementation/repeated-initial/ui/history-main.json",
+          "sha256": "b99230c9a67ad2605c88125a769be934f1a9dd831be35cda1fa020993d9a8abd"
+        },
+        {
+          "path": "validation/round3/implementation/repeated-initial/ui/report.json",
+          "sha256": "9645183f943b68d4bccc9dab1b7d530b07849ce51d9e052b563779a0ae2a473f"
+        },
+        {
+          "path": "validation/round3/implementation/result.json",
+          "sha256": "e4466e647277b86e8300bdbfbaa3b8f7d8a91462fd681b80e91ef79ec4187769"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/node.log",
+          "sha256": "41bcef02735ea829616831253cae8fdf2675d4083d6a3873b49f4969797699f4"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/python.log",
+          "sha256": "0747db16b8216ce878e6140d7aac6a1f758ddb882c7552bde2f6dbba1ab4d38f"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/result.json",
+          "sha256": "8713cc737e696ec8843572795bb154c8cd446d98d740dd49f1bff0b1ee5f5765"
+        },
+        {
+          "path": "validation/round3/implementation/ui/01-controlled-failure.png",
+          "sha256": "945b96709b33370c736744c6ac1474f86412ad57d5b0d6e1e015d4df26abc635"
+        },
+        {
+          "path": "validation/round3/implementation/ui/03-before-send-1.png",
+          "sha256": "5889d1dcd00b00fd87096a169b0c220ff186ff623364397a8bc8c37121a1e6ac"
+        },
+        {
+          "path": "validation/round3/implementation/ui/04-reply.png",
+          "sha256": "6ce830643df7aa736dbecbcb6874227a6b577d52f531bc21af58b55e2f57d492"
+        },
+        {
+          "path": "validation/round3/implementation/ui/05-reopened.png",
+          "sha256": "cba7b6ff5e52510f8392cb710c8fb009bcb7b0c116803f72f0f289a4f11743be"
+        },
+        {
+          "path": "validation/round3/implementation/ui/06-refreshed.png",
+          "sha256": "e0d1dabf9939d778a6e2162978a4e70ed769e9dc7b523c013859466169ebb6b3"
+        },
+        {
+          "path": "validation/round3/implementation/ui/08-compatibility-help.png",
+          "sha256": "ef39e64d1a17723ba5c6edcd743edf237cbef7bfe488ea1c511ff459dabf6ce6"
+        },
+        {
+          "path": "validation/round3/implementation/ui/08-reply.png",
+          "sha256": "d11da21644f5440def1d7f7ab06565cf5dbedf0ecbc462f839ea73ddbfdb40b3"
+        },
+        {
+          "path": "validation/round3/implementation/ui/history-compat.json",
+          "sha256": "2a15ccab34334c9ad9bbd94e19b9d174109d93285960e065fa08af001038ffd0"
+        },
+        {
+          "path": "validation/round3/implementation/ui/history-main.json",
+          "sha256": "4eaab4c87f0e020e50372707960bb5f08c0ad841fe893ed917bd1c595c96d8bd"
+        },
+        {
+          "path": "validation/round3/implementation/ui/report.json",
+          "sha256": "bed2539ca25634de9988df1775a71aa7d2b5e1a1ef32cdd3bca0f52bcb0d3008"
+        },
+        {
+          "path": "validation/round3/implementation/ui/w1024.png",
+          "sha256": "b08e5e472077fbad697b84adb6cd542ff1b76e0bbfa5f9633e66ff59ee4b2022"
+        },
+        {
+          "path": "validation/round3/implementation/ui/w1440.png",
+          "sha256": "45c61d387cbde5c30034a3b678d45e8387aa36eb3dcd086712d4cad72bdf848d"
+        },
+        {
+          "path": "validation/round3/implementation/ui/w390.png",
+          "sha256": "0172d175e894734e2dfefbea2b33bed18e701dc0e6a560f025075016e935248f"
+        },
+        {
+          "path": "validation/round3/implementation/unpaired.json",
+          "sha256": "d22981827cb27d54b34c31586e7a42b1b369c1e518063b17af04f70d508487d7"
+        }
+      ],
+      "coverage": "Windows；17 Python/10 Node；真实故障恢复主路径1轮＋默认旧功能兼容会话1轮；独立CLI重复文本2轮/4消息重开刷新通过；未配对wait在fixture启动前拒绝。 最终 direct open 始终文档加载；双会话16步与11项Node通过，Python及旧兼容仅按原覆盖复用。",
+      "unverified": [
+        "Linux 实机",
+        "真实供应商/模型",
+        "审批/Skill/插话等的真实浏览器链路",
+        "其他浏览器与手机真机"
+      ],
+      "review_note": "按独立验收三点返工后核对源码、实际命令与证据/实图；current仅代表已登记内容未变。"
+    },
+    "tasks": {
+      "source_reviewed_at": "2026-11-07T06:42:43.767663+00:00",
+      "recipe_sha256": "35fc1f65f216213b74118fbdeba946341afefeb1f092ca99a2cb7a88141a8527",
+      "inputs": {
+        "tools/verify.py": "6dc54a7ae6c2d1ffef881a22fbf309c5051e12de400322e01e9291a0f049a3a2",
+        "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
+        "test_verify.py": "5c4ef8c33665019b5abe92b7823490cfbb65c8aa4e6b6085c93a7c3ca03b689b",
+        "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
+        "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "controllers.py": "a3721f50b9727ca05d481484b6a9ed4804600c06869d194fc3bd62ff61833bcc",
+        "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
+        "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
+        "web/controllers.js": "2a4d86623646b0d852431c6a02de3f288c325ed6644910c1a393d27c48465f80",
+        "web/index.html": "0307c52ff886b91a5b3e29a6eb0faa1de73a77db5914e9645a897e0dccdc483a",
+        "web/style.css": "fbf19f26fceade51d9f98e946977e7a2306840379d3576e6af8cd977ed6a4847",
+        "test_controllers.py": "c43df514f3b6fdf8e2e22258a3eaf4e027ae03c474772c75b50392c5a5fffdfe",
+        "test_controllers.mjs": "9ad31ecd075c6ff858d14d52eba0f4decdf8a1b43914e7d17dfd7bbc989d4a1a",
+        "tools/controller_discussion_check.mjs": "d665808a45471f691c315e29107593e4ac26ed4024ecb9c634844fa300d48c0e",
+        "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
+        "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b"
+      },
+      "evidence": [
+        {
+          "path": "validation/round2/result.json",
+          "sha256": "0c9a520edc3d00a05f5aa0a41cef2a71894be6055ed08d405840c58f90816f8e"
+        },
+        {
+          "path": "validation/round2/python.log",
+          "sha256": "0e19ff96f4b5b5e71398d544c0149d0d6c27f620a9936b459a667c6a1ac50a82"
+        },
+        {
+          "path": "validation/round2/node.log",
+          "sha256": "08102f597545c551e1c1313b8b8d5b2b13e93bc7290edd7041a2c51fb498cf6e"
+        },
+        {
+          "path": "validation/round2/controller_discussion_check.log",
+          "sha256": "d8ea0687ea4457f9a878e5a7efc912fff316ca0b6f7e230da848ebb5eaf97bef"
+        },
+        {
+          "path": "validation/round2/materials-before.log",
+          "sha256": "5ec509eab4f5cba8679040407f640005a6592308f50fee1a7e342d60d72c1fbb"
+        },
+        {
+          "path": "validation/round2/tooling/result.json",
+          "sha256": "faa8f5798fe8ed53e398478f4d312ba7afe8b880b65c11bdcb50bd18526bbcf5"
+        },
+        {
+          "path": "validation/round2/tooling/python.log",
+          "sha256": "52db49f223521aa3d4de1ca6f304447da3e9bc3f4ab544a71d39d0f9a592aa93"
+        },
+        {
+          "path": "validation/round2/online-loaded.json",
+          "sha256": "e51faf10ef1ca2b280ce009f68565f5d7d221eac9fa44e8e4166cbf7f4c9453c"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/result.json",
+          "sha256": "8713cc737e696ec8843572795bb154c8cd446d98d740dd49f1bff0b1ee5f5765"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/python.log",
+          "sha256": "0747db16b8216ce878e6140d7aac6a1f758ddb882c7552bde2f6dbba1ab4d38f"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/node.log",
+          "sha256": "41bcef02735ea829616831253cae8fdf2675d4083d6a3873b49f4969797699f4"
+        },
+        {
+          "path": "validation/round3/control-live.json",
+          "sha256": "1db2441d8345c078e53bb970a527fa4962a9ad41ee87dc7ad5925de9038fa04e"
+        }
+      ],
+      "coverage": "Windows；目标确认、预算、派工与材料管理的逻辑检查，讨论/确认模拟页面三种宽度通过；Python 4 项符号链接权限跳过。源码与页面入口已核对。 2026-11-07 Windows 现有 8764 已加载，真实材料列表计数/字节与完整磁盘只读统计一致；不外推派工全链路。 第三轮真实8764经HTTP确认后，一个真实中控与一个真实执行者完成三轮工作；目标/预算/授权与原四任务保持，最终completed。",
+      "unverified": [
+        "页面真实模型讨论→用户确认完整路径",
+        "Windows 跳过的符号链接检查",
+        "Linux 实机"
+      ],
+      "review_note": "第三轮人工核对源码、命令和实际证据；原业务源码/任务与报告测试方法未变，旧证据可读且摘要相同。tooling 与临时范围变化由新检查覆盖；current 不代表语义通过或真实恢复完成。"
+    },
+    "reports": {
+      "source_reviewed_at": "2026-11-07T06:42:43.767663+00:00",
+      "recipe_sha256": "fbfbd7a2d50e06430dfa5916c3da51334b9c7330fe89e2692fdbe101f3461241",
+      "inputs": {
+        "tools/verify.py": "6dc54a7ae6c2d1ffef881a22fbf309c5051e12de400322e01e9291a0f049a3a2",
+        "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
+        "test_verify.py": "5c4ef8c33665019b5abe92b7823490cfbb65c8aa4e6b6085c93a7c3ca03b689b",
+        "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
+        "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "controllers.py": "a3721f50b9727ca05d481484b6a9ed4804600c06869d194fc3bd62ff61833bcc",
+        "paths.py": "f3abf6e7b9ea1d4900264a2dac552c237b7bc1f132fe3841a1d47834e9b0e6a9",
+        "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
+        "web/controllers.js": "2a4d86623646b0d852431c6a02de3f288c325ed6644910c1a393d27c48465f80",
+        "web/index.html": "0307c52ff886b91a5b3e29a6eb0faa1de73a77db5914e9645a897e0dccdc483a",
+        "web/style.css": "fbf19f26fceade51d9f98e946977e7a2306840379d3576e6af8cd977ed6a4847",
+        "test_controllers.py": "c43df514f3b6fdf8e2e22258a3eaf4e027ae03c474772c75b50392c5a5fffdfe",
+        "test_controllers.mjs": "9ad31ecd075c6ff858d14d52eba0f4decdf8a1b43914e7d17dfd7bbc989d4a1a",
+        "tools/controller_details_check.mjs": "d42b008a6c49896b539281e34f8add3c0ca3ed13578233ef46b89831e042b675",
+        "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
+        "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+        "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b"
+      },
+      "evidence": [
+        {
+          "path": "validation/round2/result.json",
+          "sha256": "0c9a520edc3d00a05f5aa0a41cef2a71894be6055ed08d405840c58f90816f8e"
+        },
+        {
+          "path": "validation/round2/python.log",
+          "sha256": "0e19ff96f4b5b5e71398d544c0149d0d6c27f620a9936b459a667c6a1ac50a82"
+        },
+        {
+          "path": "validation/round2/node.log",
+          "sha256": "08102f597545c551e1c1313b8b8d5b2b13e93bc7290edd7041a2c51fb498cf6e"
+        },
+        {
+          "path": "validation/round2/controller_details_check.log",
+          "sha256": "612a9b97483617258d8621c554e561bb74b9c2c02f0af06890ec1c73ffc81a3a"
+        },
+        {
+          "path": "validation/round2/tooling/result.json",
+          "sha256": "faa8f5798fe8ed53e398478f4d312ba7afe8b880b65c11bdcb50bd18526bbcf5"
+        },
+        {
+          "path": "validation/round2/tooling/python.log",
+          "sha256": "52db49f223521aa3d4de1ca6f304447da3e9bc3f4ab544a71d39d0f9a592aa93"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/result.json",
+          "sha256": "8713cc737e696ec8843572795bb154c8cd446d98d740dd49f1bff0b1ee5f5765"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/python.log",
+          "sha256": "0747db16b8216ce878e6140d7aac6a1f758ddb882c7552bde2f6dbba1ab4d38f"
+        },
+        {
+          "path": "validation/round3/implementation/tooling/node.log",
+          "sha256": "41bcef02735ea829616831253cae8fdf2675d4083d6a3873b49f4969797699f4"
+        },
+        {
+          "path": "validation/round3/control-live.json",
+          "sha256": "1db2441d8345c078e53bb970a527fa4962a9ad41ee87dc7ad5925de9038fa04e"
+        }
+      ],
+      "coverage": "Windows；回传去重、等待、暂停、恢复、交接等逻辑及报告详情模拟页面三种宽度通过；源码与页面入口已核对。 第三轮真实模型任务三份执行报告各自动回传一次；空闲时暂停→同任务恢复→验收完成，未重复派工，截止不延长。",
+      "unverified": [
+        "在途暂停、断线恢复和中控交接",
+        "Linux 实机",
+        "其他浏览器与手机真机"
+      ],
+      "review_note": "第三轮人工核对源码、命令和实际证据；原业务源码/任务与报告测试方法未变，旧证据可读且摘要相同。tooling 与临时范围变化由新检查覆盖；current 不代表语义通过或真实恢复完成。"
+    }
+  }
+}

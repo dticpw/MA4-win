@@ -1,0 +1,27 @@
+{
+  "turns": [
+    {
+      "id": "01a1b4b1-26a5-73b1-b686-8acdc2147d13",
+      "status": "completed",
+      "startedAt": 1794032871,
+      "completedAt": 1794032871,
+      "durationMs": 700,
+      "error": null,
+      "items": [
+        {
+          "id": "01a1b4b1-2817-7791-8068-821fbf374b63",
+          "type": "userMessage",
+          "text": "第三轮浏览器有限动作验证",
+          "attachments": []
+        },
+        {
+          "id": "msg_35448cc1a8e6493e9e10d763df29cfe5",
+          "type": "agentMessage",
+          "text": "本机模拟回复：Windows 共享会话连接成功。",
+          "phase": null
+        }
+      ]
+    }
+  ],
+  "older": null
+}

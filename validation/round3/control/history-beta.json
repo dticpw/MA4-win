@@ -1,0 +1,27 @@
+{
+  "turns": [
+    {
+      "id": "01a1b4b6-3154-74a1-8e79-94ee0ce220d1",
+      "status": "completed",
+      "startedAt": 1794033201,
+      "completedAt": 1794033202,
+      "durationMs": 637,
+      "error": null,
+      "items": [
+        {
+          "id": "01a1b4b6-3279-7041-ac26-e5d33b236cbe",
+          "type": "userMessage",
+          "text": "第二个会话独立验收",
+          "attachments": []
+        },
+        {
+          "id": "msg_a55cff955fc94b0b9cf4ab274ec4e480",
+          "type": "agentMessage",
+          "text": "本机模拟回复：Windows 共享会话连接成功。",
+          "phase": null
+        }
+      ]
+    }
+  ],
+  "older": null
+}

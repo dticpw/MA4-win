@@ -1,0 +1,16 @@
+{
+  "result": "passed",
+  "backend": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) WindowsTerminal (ma4_smoke_terminal; 0.1)",
+  "tests": [
+    "empty_thread",
+    "http_send_history",
+    "send_deduplication",
+    "shared_stream",
+    "steer",
+    "interrupt",
+    "rename_pin",
+    "reconnect_preserves_backend",
+    "http_sse"
+  ],
+  "model": "local mock; no external model calls"
+}

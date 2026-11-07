@@ -13,11 +13,11 @@ import subprocess
 import threading
 import time
 import uuid
-from urllib.parse import unquote, urlsplit
 
 from appserver import AppServer, DEFAULT_SOCKET, Disconnected, RpcError
-from controllers import Controllers, HOST_INSTRUCTIONS, HOST_TOOL_SETTINGS
+from controllers import Controllers, HOST_INSTRUCTIONS, HOST_TOOL_SETTINGS, activity_timestamp
 from os_adapters import current as os_adapter
+from paths import resolve_file_reference
 from runtime import ensure_daemon, open_terminal as launch_terminal
 
 LIST_LIMIT = 80
@@ -342,13 +342,19 @@ class Hub:
                      and not t.get("parentThreadId") and not t.get("ephemeral")}
             seen_dirty = False
             summaries = {}
+            # Existing per-session turn metrics recover trustworthy times after a
+            # restart. No history scan or new persistent activity index is needed.
+            for tid, at in self.controllers.activity_times().items():
+                live = self.live.setdefault(tid, {})
+                live["updatedAt"] = max(activity_timestamp(live.get("updatedAt")), activity_timestamp(at))
             for tid, t in fresh.items():
-                updated = t.get("updatedAt") or 0
+                summary = self.summarize(t)
                 if tid not in self.prefs.seen:
                     # First sighting is quiet: only later activity counts as unread.
-                    self.prefs.seen[tid] = updated
+                    self.prefs.seen[tid] = summary["updatedAt"] or 0
                     seen_dirty = True
-                summaries[tid] = self.summarize(t)
+                    summary["unread"] = False
+                summaries[tid] = summary
             if seen_dirty:
                 self.prefs.save()
             if summaries != self.threads:
@@ -370,9 +376,12 @@ class Hub:
     def summarize(self, t):
         tid = t["id"]
         state = status_of(t)
-        updated = t.get("updatedAt") or 0
+        updated = max(activity_timestamp(t.get("updatedAt")),
+                      activity_timestamp(self.threads.get(tid, {}).get("updatedAt")),
+                      activity_timestamp(self.live.get(tid, {}).get("updatedAt")))
+        self.live.setdefault(tid, {})["updatedAt"] = updated
         return {"id": tid, "name": t.get("name") or "", "preview": (t.get("preview") or "")[:120],
-                "cwd": t.get("cwd") or "", "status": state, "updatedAt": updated,
+                "cwd": t.get("cwd") or "", "status": state, "updatedAt": updated or None,
                 "source": t.get("source") if isinstance(t.get("source"), str) else "other",
                 "model": t.get("model"), "effort": t.get("reasoningEffort"),
                 "branch": (t.get("gitInfo") or {}).get("branch"), "pinned": tid in self.prefs.pinned,
@@ -386,7 +395,24 @@ class Hub:
                 # Settings reported by the daemon for a loaded thread beat the list snapshot.
                 rows.append(dict(r, **live.get("settings", {}), tokens=live.get("tokens"),
                                  run=live.get("run") if r["status"] in ("running", "approval", "input") else None))
-        return sorted(rows, key=lambda r: -r["updatedAt"])
+        return sorted(rows, key=lambda r: -(r["updatedAt"] or 0))
+
+    def observe_turn_activity(self, tid, turn):
+        """Only explicit turn timestamps advance activity; status/refresh never do."""
+        at = max(activity_timestamp(turn.get("startedAt")), activity_timestamp(turn.get("completedAt")))
+        if not tid or not at:
+            return
+        with self.lock:
+            if tid in self.removed_threads:
+                return
+            live = self.live.setdefault(tid, {})
+            live["updatedAt"] = max(activity_timestamp(live.get("updatedAt")), at)
+            row = self.threads.get(tid)
+            if not row or at <= activity_timestamp(row.get("updatedAt")):
+                return
+            row["updatedAt"] = at
+            row["unread"] = row["status"] in ("idle", "offline", "error") and at > self.prefs.seen.get(tid, 0)
+        self.emit("threads", threads=self.thread_list())
 
     def set_run(self, tid, run):
         """Track the in-progress turn (start time and current activity) for lists and headers."""
@@ -401,7 +427,7 @@ class Hub:
                 self.refresh_soon.set()
                 return
             new = self.summarize({"id": tid, "status": status, "name": row["name"], "preview": row["preview"],
-                                  "cwd": row["cwd"], "updatedAt": max(row["updatedAt"], int(time.time())),
+                                  "cwd": row["cwd"], "updatedAt": row["updatedAt"],
                                   "source": row["source"], "model": row["model"],
                                   "reasoningEffort": row["effort"], "gitInfo": {"branch": row["branch"]}})
             self.threads[tid] = new
@@ -437,13 +463,15 @@ class Hub:
             self.refresh_soon.set()
         elif method == "turn/started":
             turn = params["turn"]
+            self.observe_turn_activity(tid, turn)
             with self.lock:
                 self.live.setdefault(tid, {})["turn"] = turn["id"]
-            self.set_run(tid, {"turnId": turn["id"], "startedAt": turn.get("startedAt") or int(time.time()),
+            self.set_run(tid, {"turnId": turn["id"], "startedAt": activity_timestamp(turn.get("startedAt")) or None,
                                "activity": None})
             self.emit("turn", threadId=tid, turnId=turn["id"], state="started", startedAt=turn.get("startedAt"))
         elif method == "turn/completed":
             turn = params.get("turn") or {}
+            self.observe_turn_activity(tid, turn)
             with self.lock:
                 self.live.setdefault(tid, {})["turn"] = None
             self.set_run(tid, None)
@@ -574,12 +602,14 @@ class Hub:
                 return None  # brand-new thread: no turns before the first message
             raise
         turns = page.get("data") or []
+        if turns:
+            self.observe_turn_activity(tid, turns[0])
         if turns and turns[0].get("status") == "inProgress":
             with self.lock:
                 known_run = self.live.get(tid, {}).get("run")
             if not known_run:
                 self.set_run(tid, {"turnId": turns[0]["id"], "activity": None,
-                                   "startedAt": turns[0].get("startedAt") or int(time.time())})
+                                   "startedAt": activity_timestamp(turns[0].get("startedAt")) or None})
             return turns[0]["id"]
         return None
 
@@ -596,7 +626,7 @@ class Hub:
         with self.lock:
             row = self.threads.get(tid)
             if row:
-                self.prefs.seen[tid] = max(row["updatedAt"], int(time.time()))
+                self.prefs.seen[tid] = max(row["updatedAt"] or 0, int(time.time()))
                 self.prefs.save()
                 row["unread"] = False
         if row and row["status"] != "offline":
@@ -745,6 +775,7 @@ class Hub:
                 if override.get("effort"):
                     params["effort"] = override["effort"]
             started = self.call("turn/start", params)
+            self.observe_turn_activity(tid, started.get("turn") or {})
             result = {"mode": "start", "turnId": (started.get("turn") or {}).get("id")}
         with self.lock:
             self.sent[request_id] = result
@@ -895,46 +926,7 @@ class Hub:
             row = self.threads.get(tid)
         if not row:
             raise ValueError("未知会话")
-        if not isinstance(reference, str) or not reference.strip() or len(reference) > 8192:
-            raise ValueError("文件路径无效")
-        path = reference.strip()
-        if any(ord(c) < 32 for c in path):
-            raise ValueError("文件路径含无效字符")
-        if path.lower().startswith("file://"):
-            uri = urlsplit(path)
-            if uri.netloc not in ("", "localhost") or uri.query:
-                raise ValueError("只支持本机文件")
-            path = unquote(uri.path) + ("#" + uri.fragment if uri.fragment else "")
-            if os.name == "nt" and re.match(r"^/[a-zA-Z]:/", path):
-                path = path[1:]
-        elif re.match(r"^[a-zA-Z]:[\\/]", path):
-            if os.name != "nt":
-                path = "/mnt/" + path[0].lower() + "/" + path[3:].replace("\\", "/")
-        elif (re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", path)
-              and not re.fullmatch(r"[^:]+:\d+(?::\d+)?(?:-\d+)?", path)):
-            raise ValueError("只支持本地文件路径")
-        if path.startswith(("//", "\\\\")):
-            raise ValueError("只支持本机文件")
-
-        def local(value):
-            candidate = Path(value).expanduser()
-            if not candidate.is_absolute():
-                if not row.get("cwd"):
-                    raise ValueError("会话没有项目目录，无法解析相对路径")
-                candidate = Path(row["cwd"]) / candidate
-            return candidate.resolve()
-
-        # Preserve actual filenames first; :line[:column] and #Lline are citations.
-        target = local(path)
-        if not target.exists():
-            path = re.sub(r"(?::\d+(?::\d+)?(?:-\d+)?|#L\d+(?:C\d+)?(?:-L?\d+(?:C\d+)?)?)$", "", path)
-            target = local(path)
-        if not target.exists() and "%" in path:
-            target = local(unquote(path))
-        if not target.exists():
-            raise ValueError("文件不存在，可能已移动或清理：" + str(target))
-        if not (target.is_file() or target.is_dir()):
-            raise ValueError("只能打开普通文件或目录")
+        target = resolve_file_reference(reference, row.get("cwd"))
         os_adapter().open_file(target)
         return {"opened": True}
 

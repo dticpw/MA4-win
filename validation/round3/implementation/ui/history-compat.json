@@ -1,0 +1,27 @@
+{
+  "turns": [
+    {
+      "id": "01a1b4b1-2d90-7202-a83a-e5caa07eee60",
+      "status": "completed",
+      "startedAt": 1794032872,
+      "completedAt": 1794032873,
+      "durationMs": 633,
+      "error": null,
+      "items": [
+        {
+          "id": "01a1b4b1-2eac-7f21-9ef7-c748acb2cca7",
+          "type": "userMessage",
+          "text": "默认兼容检查：创建时带首条消息",
+          "attachments": []
+        },
+        {
+          "id": "msg_7d2b93d14d8f469bb738b4c93fe378c3",
+          "type": "agentMessage",
+          "text": "本机模拟回复：Windows 共享会话连接成功。",
+          "phase": null
+        }
+      ]
+    }
+  ],
+  "older": null
+}

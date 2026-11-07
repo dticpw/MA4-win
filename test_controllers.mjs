@@ -1,6 +1,30 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { dynamicToolHtml, statisticsHtml, ordinarySessionGroups, messagePresentation, userMessageHtml, workspaceHtml, reportDeliveryHtml } from "./web/controllers.js";
+import { dynamicToolHtml, statisticsHtml, ordinarySessionGroups, messagePresentation, userMessageHtml, workspaceHtml, reportDeliveryHtml, sessionActivityAt, mergeThreadTimes } from "./web/controllers.js";
+
+test("session dates use only that session's trustworthy activity, including former hosts", () => {
+  const task = { updatedAt: 9000, host: "host", formerHosts: ["former"], statistics: { sessions: [
+    { threadId: "host", turns: [{ startedAt: 200, completedAt: 250 }] },
+    { threadId: "worker", updatedAt: 800 },
+    { threadId: "former", turns: [{ startedAt: 100 }] },
+    { threadId: "estimated", turns: [{ completedAt: 1000, timeEstimated: true }] },
+  ] } };
+  assert.equal(sessionActivityAt(task, "host"), 250);
+  assert.equal(sessionActivityAt(task, "worker"), 800);
+  assert.equal(sessionActivityAt(task, "former"), 100);
+  assert.equal(sessionActivityAt(task, "missing"), null);
+  assert.equal(sessionActivityAt(task, "estimated"), null);
+});
+
+test("old lists and reconnects cannot regress dates or mix normal/managed sessions", () => {
+  const before = [{ id: "host", updatedAt: 400 }, { id: "normal", updatedAt: 700 }];
+  const rows = [{ id: "host", updatedAt: 100, status: "idle" }, { id: "normal", updatedAt: 800 }, { id: "new", updatedAt: null }];
+  assert.deepEqual(mergeThreadTimes(rows, before).map(row => row.updatedAt), [400, 800, null]);
+  assert.equal(mergeThreadTimes(rows, before)[0].status, "idle");
+  for (const updatedAt of [null, undefined, 0, -1, true, "100", NaN, Infinity])
+    assert.equal(mergeThreadTimes([{ id: "unknown", updatedAt }], before)[0].updatedAt, null);
+  assert.deepEqual(rows.map(row => row.updatedAt), [100, 800, null]);
+});
 
 test("program envelopes distinguish user, automatic and worker-report messages", () => {
   for (const [source, label] of [["user", "你的消息"], ["automatic", "MA4 自动通知"], ["worker_report", "执行者回报"]]) {

@@ -1,0 +1,442 @@
+{
+  "atUtc": "2026-11-07T06:17:44.820779+00:00",
+  "result": "passed",
+  "tooling": {
+    "python": 17,
+    "node": 10,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "liveUi": {
+    "steps": 7,
+    "mainSends": 1,
+    "mainTurns": 1,
+    "compatibilityNewSessionTurns": 1,
+    "modelRequests": 2,
+    "exitCode": 0,
+    "compatibility": "Escape closed; first message on create; composer aria-label; pin UI/state; /help; home; reopen"
+  },
+  "cli": {
+    "steps": 8,
+    "sends": 1,
+    "modelRequests": 1,
+    "exitCode": 0
+  },
+  "controlledFailure": {
+    "http": 400,
+    "cause": "nonexistent cwd rejected by real Hub.new_thread",
+    "injection": false,
+    "retry": false,
+    "uiEvidence": "ui/01-controlled-failure.png"
+  },
+  "initialFailure": "initial-failure/ui/report.json: checker classified own refresh SSE abort as unexpected; fixed by matching the exact prior SSE request object, not by ignoring network errors",
+  "reused": {
+    "sessions": {
+      "changedInputs": [
+        "tools/verify.py",
+        "test_verify.py",
+        "test_feature_map.py",
+        "tools/smoke_test.py",
+        "tools/ui_check.mjs"
+      ],
+      "oldEvidenceReadableAndHashMatched": true,
+      "checkedEvidence": [
+        {
+          "path": "validation/round2/live-ui.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/ui/report.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/ui/history.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/ui/before-send.png",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/ui/reply.png",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/ui/reopened.png",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/ui/w390.png",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/transport.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/tooling/result.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/tooling/python.log",
+          "matches": true
+        }
+      ]
+    },
+    "tasks": {
+      "changedInputs": [
+        "tools/verify.py",
+        "test_verify.py",
+        "test_feature_map.py"
+      ],
+      "oldEvidenceReadableAndHashMatched": true,
+      "checkedEvidence": [
+        {
+          "path": "validation/round2/result.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/python.log",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/node.log",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/controller_discussion_check.log",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/materials-before.log",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/tooling/result.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/tooling/python.log",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/online-loaded.json",
+          "matches": true
+        }
+      ]
+    },
+    "reports": {
+      "changedInputs": [
+        "tools/verify.py",
+        "test_verify.py",
+        "test_feature_map.py"
+      ],
+      "oldEvidenceReadableAndHashMatched": true,
+      "checkedEvidence": [
+        {
+          "path": "validation/round2/result.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/python.log",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/node.log",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/controller_details_check.log",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/tooling/result.json",
+          "matches": true
+        },
+        {
+          "path": "validation/round2/tooling/python.log",
+          "matches": true
+        }
+      ]
+    }
+  },
+  "inputs": {
+    "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
+    "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+    "tools/ui_check.mjs": "cce6a2c174991c3898e325ed8d23f41a86ac990576950744f1821b1517a9f3d5",
+    "tools/smoke_test.py": "0b0636d5db06d1a0194b011ab6e9f86b523755beaa48839ec85f9571e2031f40",
+    "tools/verify.py": "6dc54a7ae6c2d1ffef881a22fbf309c5051e12de400322e01e9291a0f049a3a2",
+    "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
+    "test_verify.py": "5c4ef8c33665019b5abe92b7823490cfbb65c8aa4e6b6085c93a7c3ca03b689b",
+    "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
+    "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
+    "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+    "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+    "web/app.js": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
+    "web/index.html": "0307c52ff886b91a5b3e29a6eb0faa1de73a77db5914e9645a897e0dccdc483a",
+    "web/style.css": "fbf19f26fceade51d9f98e946977e7a2306840379d3576e6af8cd977ed6a4847"
+  },
+  "limits": [
+    "Linux not run",
+    "No real supplier calls in fixtures; real executor model usage is separate",
+    "Controller pause/resume evidence belongs to dispatcher control-live.json; not claimed here",
+    "No production Python/frontend changes in this execution"
+  ],
+  "evidenceReading": "Start with this summary and tooling/result.json; inspect ui/report.json and cli/session.json for steps, IDs, errors and cleanup; open images only as needed.",
+  "iterationRuns": [
+    {
+      "run": "live-check",
+      "result": "failed",
+      "browserExitCode": 1,
+      "modelRequests": 1,
+      "instance": "1223c2c5e9434622a4f14f52dfa608a6",
+      "url": "http://127.0.0.1:2817",
+      "cleanup": {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    },
+    {
+      "run": "verified",
+      "result": "passed",
+      "browserExitCode": 0,
+      "modelRequests": 1,
+      "instance": "642ff3fe36174dd7b47b74a33fa9d9e5",
+      "url": "http://127.0.0.1:14759",
+      "cleanup": {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    },
+    {
+      "run": "cli-distinct",
+      "result": "passed",
+      "browserExitCode": 0,
+      "modelRequests": 1,
+      "instance": "b3e2243834504fc185d836e54579632e",
+      "url": "http://127.0.0.1:1734",
+      "cleanup": {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    },
+    {
+      "run": "final-check",
+      "result": "passed",
+      "browserExitCode": 0,
+      "modelRequests": 1,
+      "instance": "5017efb8c73042648fdd78e8cc5c7c3f",
+      "url": "http://127.0.0.1:10936",
+      "cleanup": {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    },
+    {
+      "run": "cli-final",
+      "result": "passed",
+      "browserExitCode": 0,
+      "modelRequests": 1,
+      "instance": "db1bc9cd01284581b8aa56c7c06c9be9",
+      "url": "http://127.0.0.1:11536",
+      "cleanup": {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    },
+    {
+      "run": "rework-default",
+      "result": "failed",
+      "browserExitCode": 1,
+      "modelRequests": 2,
+      "instance": "5e54cc1ce71e448f8a4389350499aebc",
+      "url": "http://127.0.0.1:7429",
+      "cleanup": {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    },
+    {
+      "run": "rework-repeat",
+      "result": "passed",
+      "browserExitCode": 0,
+      "modelRequests": 2,
+      "instance": "ca4e59f3b9724463a93e015894b269a6",
+      "url": "http://127.0.0.1:8856",
+      "cleanup": {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    },
+    {
+      "run": "rework-default-fixed",
+      "result": "passed",
+      "browserExitCode": 0,
+      "modelRequests": 2,
+      "instance": "400e64abd3314da0b2fe02b0d1213564",
+      "url": "http://127.0.0.1:3920",
+      "cleanup": {
+        "backendExited": true,
+        "ownWebClosed": true,
+        "scratchRemoved": true,
+        "runtimeRemoved": true
+      }
+    }
+  ],
+  "totalLocalMockRequests": 14,
+  "review": {
+    "sourceAndCommands": "Manually read session_actions/session_cli/ui_check/smoke/verify and relevant tests; checked plan guards, ownership, exact SSE cancellation, stop-on-failure, cleanup and actual arguments against saved reports.",
+    "newEvidence": "Final live-ui 7 steps and independent CLI 8 steps; all step screenshots and history files checked for existence.",
+    "oldEvidence": "All recorded round2 source/evidence hashes compared before updating review; changed inputs limited to current tooling and scratch routing; tasks/reports production sources, test modules and page methods unchanged.",
+    "visual": "Viewed controlled-failure, reopened, w390 from verified run; final action code change only step-number screenshot naming and plan-order guard. No new UI design.",
+    "rework": "Manually checked scoped ID locators, complete-plan validation before spawn, default-only compatibility, source/argv/reports and the two actual new images; latest map hashes refreshed only afterward."
+  },
+  "cleanup": {
+    "removedOutputs": [
+      {
+        "name": "live-check",
+        "files": 11,
+        "bytes": 1713681
+      },
+      {
+        "name": "verified",
+        "files": 15,
+        "bytes": 2048491
+      },
+      {
+        "name": "cli-distinct",
+        "files": 11,
+        "bytes": 1850125
+      },
+      {
+        "name": "final-check",
+        "files": 15,
+        "bytes": 2049999
+      },
+      {
+        "name": "tooling-final",
+        "files": 3,
+        "bytes": 3325
+      },
+      {
+        "name": "cli-final",
+        "files": 11,
+        "bytes": 1850434
+      }
+    ],
+    "filesRemoved": 66,
+    "bytesRemoved": 9516055,
+    "workerRemainingFiles": 0,
+    "fixtureRuntimeCleanup": "All five run summaries have all four cleanup flags true",
+    "preserved": "formal evidence, source/tests/docs; dispatcher/audit, old tasks and native logs untouched",
+    "newPersistentMechanisms": false
+  },
+  "inventory": {
+    "command": [
+      "D:/python/anaconda/envs/th123/python.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "C:/Users/DTICPW/agent-workflows/skills/project-file-lifecycle/scripts/session_inventory.py",
+      "--since",
+      "2026-11-07T06:07:00Z",
+      "--root",
+      "E:/PG/MA4-win",
+      "--top",
+      "35",
+      "--json"
+    ],
+    "exitCode": 0,
+    "ownFiles": "12 source/test/document/review files plus validation/round3/implementation evidence; worker empty",
+    "excludedOwnership": "Only the five expressly allowed audit files read/copied; other dispatcher metadata appeared in mandatory inventory only. No dispatcher files altered.",
+    "backupNameFalsePositives": [
+      "ui/03-before-send-1.png",
+      "cli/ui/04-before-send-1.png"
+    ],
+    "backupExplanation": "before-send PNGs are UI evidence, not backup archives",
+    "encoding": "12 scoped text files UTF-8 without BOM, LF",
+    "reworkCommand": "same --since/--root, --top 4 --json; exit 0"
+  },
+  "repeatedCli": {
+    "steps": 8,
+    "sends": 2,
+    "turns": 2,
+    "items": 4,
+    "modelRequests": 2,
+    "exitCode": 0,
+    "evidence": "cli-repeated/session.json"
+  },
+  "rework": {
+    "reason": "independent review failed: duplicate text strict-mode ambiguity, removed compatibility coverage, unpaired send accepted",
+    "fixed": "scope UI matches by turn+item IDs; restore default-only compatibility; reject unpaired sends before fixture startup",
+    "borrowedFailure": "repeated-initial (five files copied byte-identically from permitted audit paths; audit untouched)",
+    "additionalFailure": "compatibility-initial: same-hash goto after home kept composer hidden; reload only when composer hidden, default live-ui retested successfully",
+    "unpaired": "unpaired.json; actual CLI exit 1; no output/fixture",
+    "visual": "Viewed cli-repeated/ui/07-refreshed.png and ui/08-compatibility-help.png",
+    "readOnlyMode": "Restored .turn wait, composer aria-label and HTTP-error listener; standalone read-only mode not separately run"
+  },
+  "borrowedAuditMockRequests": 2,
+  "reworkCleanup": {
+    "removedOutputs": [
+      {
+        "name": "rework-default",
+        "files": 16,
+        "bytes": 2399627
+      },
+      {
+        "name": "rework-repeat",
+        "files": 13,
+        "bytes": 2526408
+      },
+      {
+        "name": "rework-default-fixed",
+        "files": 16,
+        "bytes": 2755380
+      },
+      {
+        "name": "rework-tooling",
+        "files": 3,
+        "bytes": 3492
+      }
+    ],
+    "filesRemoved": 48,
+    "bytesRemoved": 7684907,
+    "workerRemainingFiles": 0,
+    "audit": "Only five explicitly authorized failure files copied; originals not modified or cleaned"
+  },
+  "crossOpen": {
+    "result": "passed",
+    "plan": "root provided 16-step plan; captured verbatim in cross-open/invocation.json --plan",
+    "steps": 16,
+    "modelRequests": 3,
+    "alphaTurns": 2,
+    "betaTurns": 1,
+    "nodeTests": 11,
+    "nodeExitCode": 0,
+    "cliExitCode": 0,
+    "fix": "direct open always reloads target hash document; list reopen still clicks list; visibility never substitutes session identity",
+    "evidence": "cross-open/session.json",
+    "visual": "Viewed cross-open/ui/14-refreshed.png",
+    "cleanup": {
+      "filesRemoved": 18,
+      "bytesRemoved": 3485416,
+      "workerEmpty": true
+    },
+    "screenshots": "Only 14-refreshed.png retained; other per-step screenshots intentionally removed after report/history validation",
+    "limits": "Root failure evidence owned by root; no claim of whole-goal acceptance; Python/default compatibility not rerun for this isolated direct-open change"
+  }
+}

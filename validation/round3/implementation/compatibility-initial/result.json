@@ -1,0 +1,66 @@
+{
+  "result": "failed",
+  "at_utc": "2026-11-07T06:27:03.048809+00:00",
+  "platform": "win32",
+  "python": "3.10.19",
+  "profiles": [
+    "tooling",
+    "live-ui"
+  ],
+  "ui_requested": false,
+  "checks": [
+    {
+      "check": "python",
+      "argv": [
+        "D:\\python\\anaconda\\envs\\th123\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "unittest",
+        "-v",
+        "test_verify",
+        "test_feature_map"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "log": "python.log",
+      "counts": {
+        "total": 17,
+        "skipped": 0
+      },
+      "seconds": 3.062
+    },
+    {
+      "check": "node",
+      "argv": [
+        "node",
+        "--test",
+        "test_session_actions.mjs"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "log": "node.log",
+      "seconds": 0.188
+    },
+    {
+      "check": "live-ui",
+      "argv": [
+        "D:\\python\\anaconda\\envs\\th123\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "tools/smoke_test.py",
+        "--ui-output",
+        "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-default\\ui",
+        "--output",
+        "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-default\\live-ui.json"
+      ],
+      "status": "failed",
+      "exit_code": 1,
+      "log": "live-ui.log",
+      "seconds": 37.812
+    }
+  ],
+  "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+}

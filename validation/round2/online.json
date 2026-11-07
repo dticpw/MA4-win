@@ -1,0 +1,60 @@
+{
+  "at_utc": "2026-11-06T15:00:47.937542+00:00",
+  "action": "read-only; no stop/start",
+  "result": "reload_deferred_active_session",
+  "daemon": {
+    "connected": true,
+    "error": null,
+    "version": "codex-tui/0.167.0 (Windows 10.0.26200; x86_64) WindowsTerminal (ma4; 0.1)"
+  },
+  "web_identity": {
+    "pid": 5972,
+    "created": 134383623932480234
+  },
+  "busy_sessions": [
+    {
+      "id": "01a1ac9f-7f79-7c33-a429-a2618115c593",
+      "page_status": "running",
+      "native_status": {
+        "type": "active",
+        "activeFlags": []
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "e65cd30e77cb455d",
+      "status": "completed",
+      "hostBusy": false,
+      "worker_states": [
+        "idle"
+      ]
+    },
+    {
+      "id": "06d898324d4744be",
+      "status": "attention",
+      "hostBusy": false,
+      "worker_states": [
+        "idle"
+      ]
+    },
+    {
+      "id": "54e0ee423c2d4b79",
+      "status": "completed",
+      "hostBusy": false,
+      "worker_states": [
+        "idle"
+      ]
+    },
+    {
+      "id": "4724144705094629",
+      "status": "completed",
+      "hostBusy": false,
+      "worker_states": [
+        "idle"
+      ]
+    }
+  ],
+  "approvals": 0,
+  "limitation": "业务修复尚未在线加载；不停止现有会话。"
+}

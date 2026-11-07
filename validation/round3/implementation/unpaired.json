@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "node",
+    "tools/session_cli.mjs",
+    "--output",
+    ".agent-tmp/ma4-1dda5fb483a146eb/worker/rework-unpaired-should-not-exist",
+    "--actions",
+    "create,send"
+  ],
+  "exitCode": 1,
+  "stderr": "every send requires a matching wait before plan end; no automatic wait is added\n\n1 !== 0\n\n",
+  "outputCreated": false,
+  "fixtureStarted": false,
+  "basis": "CLI parseArgs validates entire plan before checkedOutput/mkdir/spawnSync"
+}

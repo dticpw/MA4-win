@@ -1,0 +1,19 @@
+{
+  "atUtc": "2026-11-07T06:31:39.741904+00:00",
+  "argv": [
+    "node",
+    "tools/session_cli.mjs",
+    "--output",
+    "E:\\PG\\MA4-win\\.agent-tmp\\round3-orchestrator-20261107\\final-composition",
+    "--plan",
+    "[{\"op\": \"fail-create\"}, {\"op\": \"fail-create\"}, {\"op\": \"create\", \"session\": \"alpha\"}, {\"op\": \"send\", \"session\": \"alpha\", \"message\": \"同文两轮独立验收\"}, {\"op\": \"wait\", \"session\": \"alpha\"}, {\"op\": \"send\", \"session\": \"alpha\", \"message\": \"同文两轮独立验收\"}, {\"op\": \"wait\", \"session\": \"alpha\"}, {\"op\": \"create\", \"session\": \"beta\"}, {\"op\": \"send\", \"session\": \"beta\", \"message\": \"第二个会话独立验收\"}, {\"op\": \"wait\", \"session\": \"beta\"}, {\"op\": \"open\", \"session\": \"alpha\"}, {\"op\": \"history\", \"session\": \"alpha\"}, {\"op\": \"reopen\", \"session\": \"alpha\"}, {\"op\": \"refresh\", \"session\": \"alpha\"}, {\"op\": \"open\", \"session\": \"beta\"}, {\"op\": \"history\", \"session\": \"beta\"}]"
+  ],
+  "exitCode": 1,
+  "sha256": {
+    "tools/session_actions.mjs": "e16f0095eac265f77ffc81285441cace38f571d845aba81dbeb8eb3d6296785a",
+    "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+    "tools/ui_check.mjs": "cce6a2c174991c3898e325ed8d23f41a86ac990576950744f1821b1517a9f3d5",
+    "tools/smoke_test.py": "0b0636d5db06d1a0194b011ab6e9f86b523755beaa48839ec85f9571e2031f40"
+  },
+  "sourceUnchangedDuringRun": true
+}

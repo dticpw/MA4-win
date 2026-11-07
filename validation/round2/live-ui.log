@@ -1,0 +1,90 @@
+{
+  "result": "passed",
+  "identity": {
+    "url": "http://127.0.0.1:2851",
+    "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\smoke-jaylxc6s",
+    "verification": {
+      "instance": "affa10e261144fe99061fd32752edb85",
+      "ownerPid": 46432,
+      "backendPid": 46892,
+      "endpoint": "ws://127.0.0.1:2848",
+      "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\smoke-jaylxc6s\\codex-home",
+      "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\smoke-jaylxc6s\\state"
+    },
+    "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) WindowsTerminal (ma4; 0.1)"
+  },
+  "checks": [
+    "1440x900 light: rendered, no horizontal overflow",
+    "new dialog / Escape / create+send / streamed reply / pin / help / overview",
+    "1024x800 dark: rendered, no horizontal overflow",
+    "390x844 light: rendered, no horizontal overflow"
+  ],
+  "journeys": [
+    {
+      "feature": "sessions",
+      "entry": "browser/new-dialog",
+      "threadId": "01a1b15a-971a-7350-a5f3-8e01a85c0d2f",
+      "result": "passed",
+      "checks": [
+        "create",
+        "send",
+        "reply",
+        "persisted-history",
+        "reopen-without-resend",
+        "reload-history"
+      ],
+      "evidence": [
+        "before-send.png",
+        "reply.png",
+        "reopened.png",
+        "history.json"
+      ]
+    }
+  ],
+  "problems": []
+}
+{
+  "result": "passed",
+  "instance": {
+    "url": "http://127.0.0.1:2851",
+    "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\smoke-jaylxc6s",
+    "verification": {
+      "instance": "affa10e261144fe99061fd32752edb85",
+      "ownerPid": 46432,
+      "backendPid": 46892,
+      "endpoint": "ws://127.0.0.1:2848",
+      "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\smoke-jaylxc6s\\codex-home",
+      "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\smoke-jaylxc6s\\state"
+    },
+    "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) WindowsTerminal (ma4; 0.1)"
+  },
+  "journeys": [
+    {
+      "feature": "sessions",
+      "entry": "browser/new-dialog",
+      "threadId": "01a1b15a-971a-7350-a5f3-8e01a85c0d2f",
+      "result": "passed",
+      "checks": [
+        "create",
+        "send",
+        "reply",
+        "persisted-history",
+        "reopen-without-resend",
+        "reload-history"
+      ],
+      "evidence": [
+        "before-send.png",
+        "reply.png",
+        "reopened.png",
+        "history.json"
+      ]
+    }
+  ],
+  "model": "local mock; no external model calls",
+  "ui_report": "ui/report.json",
+  "cleanup": {
+    "backendExited": true,
+    "ownWebClosed": true,
+    "scratchRemoved": true
+  }
+}

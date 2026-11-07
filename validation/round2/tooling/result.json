@@ -1,0 +1,35 @@
+{
+  "result": "passed",
+  "at_utc": "2026-11-06T15:03:24.875515+00:00",
+  "platform": "win32",
+  "python": "3.10.19",
+  "profiles": [
+    "tooling"
+  ],
+  "ui_requested": false,
+  "checks": [
+    {
+      "check": "python",
+      "argv": [
+        "D:\\python\\anaconda\\envs\\th123\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "unittest",
+        "-v",
+        "test_verify",
+        "test_feature_map"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "log": "python.log",
+      "counts": {
+        "total": 15,
+        "skipped": 0
+      },
+      "seconds": 2.937
+    }
+  ],
+  "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+}

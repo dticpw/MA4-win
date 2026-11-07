@@ -1,0 +1,100 @@
+{
+  "at_utc": "2026-11-06T16:09:19.646533+00:00",
+  "result": "passed",
+  "stage": "loaded_and_verified",
+  "current_session_identified": true,
+  "current_session_unmanaged": true,
+  "old_web": {
+    "pid": 5972,
+    "created": 134383623932480234
+  },
+  "daemon_processes": [
+    {
+      "pid": 19152,
+      "created": 134384062312394050
+    },
+    {
+      "pid": 4928,
+      "created": 134384062324846809
+    }
+  ],
+  "loaded_before": [
+    "01a181f9-eab5-7040-913d-0188b7e0d91d",
+    "01a18217-6442-78f0-9fd6-09424716175f",
+    "01a1828e-5d70-7e60-82e8-edc855a77cd4",
+    "01a182d0-eec4-7743-9003-15ebe4c6b555",
+    "01a18c60-b51a-7db0-9fbc-621b81471d1f",
+    "01a1ab09-98f1-7f51-ba4a-d3cb912c646a",
+    "01a1ac8f-93ad-79f1-afb0-6d38dd0f84bf",
+    "01a1ac9f-7f79-7c33-a429-a2618115c593",
+    "01a1acdc-8b8a-7600-9748-c1d10e6a7148",
+    "01a1acfb-3eaa-76d0-9eb8-b78514fcf2d5",
+    "01a1ad46-48ca-70f1-a006-1e119b895dfe",
+    "01a1ad53-459a-7740-8bab-827cab7511a3",
+    "01a1af46-fae3-7263-877e-97d21d237fe2",
+    "01a1af57-3022-7e03-9f36-7001e26de655",
+    "01a1af65-b688-7242-9f88-17c609f66450",
+    "01a1af6b-9ba5-7f51-bd4d-e746789f11a9",
+    "01a1af77-8ad6-7070-9236-81dbfbdef841",
+    "01a1afb1-b43a-79d2-ab52-9a5bb3015a75",
+    "01a1b078-2712-7020-827e-171a6ef0a379",
+    "01a1b0e4-4f6f-7c02-97c2-db767627a158",
+    "01a1b197-e1d7-73b0-9d42-c69d76c839d4"
+  ],
+  "task_invariants_before_sha256": "012d6f134388cd755ade4b286341eae74d00441b97f18dccefe138d2db2a7012",
+  "artifacts_before": {
+    "reported_count": 485,
+    "reported_bytes": 35999560,
+    "unique_count": 466,
+    "unique_bytes": 34158073,
+    "unique_inventory_sha256": "91144caa8dc1d90c9275769d1c0619a601ea4fd6ca7e4e03c82b9d6bb89eaace",
+    "root_spellings": 8,
+    "display_truncated": true,
+    "displayed_rows": 200
+  },
+  "prior_attempt": "Stopped before stop/start because API display inventory was truncated at 200 rows; corrected check to read full on-disk inventory without modifying files.",
+  "new_web": {
+    "pid": 2700,
+    "created": 134384549629470600
+  },
+  "daemon_connections_preserved": true,
+  "daemon_processes_preserved": true,
+  "loaded_after": [
+    "01a181f9-eab5-7040-913d-0188b7e0d91d",
+    "01a18217-6442-78f0-9fd6-09424716175f",
+    "01a1828e-5d70-7e60-82e8-edc855a77cd4",
+    "01a182d0-eec4-7743-9003-15ebe4c6b555",
+    "01a18c60-b51a-7db0-9fbc-621b81471d1f",
+    "01a1ab09-98f1-7f51-ba4a-d3cb912c646a",
+    "01a1ac8f-93ad-79f1-afb0-6d38dd0f84bf",
+    "01a1ac9f-7f79-7c33-a429-a2618115c593",
+    "01a1acdc-8b8a-7600-9748-c1d10e6a7148",
+    "01a1acfb-3eaa-76d0-9eb8-b78514fcf2d5",
+    "01a1ad46-48ca-70f1-a006-1e119b895dfe",
+    "01a1ad53-459a-7740-8bab-827cab7511a3",
+    "01a1af46-fae3-7263-877e-97d21d237fe2",
+    "01a1af57-3022-7e03-9f36-7001e26de655",
+    "01a1af65-b688-7242-9f88-17c609f66450",
+    "01a1af6b-9ba5-7f51-bd4d-e746789f11a9",
+    "01a1af77-8ad6-7070-9236-81dbfbdef841",
+    "01a1afb1-b43a-79d2-ab52-9a5bb3015a75",
+    "01a1b078-2712-7020-827e-171a6ef0a379",
+    "01a1b0e4-4f6f-7c02-97c2-db767627a158",
+    "01a1b197-e1d7-73b0-9d42-c69d76c839d4"
+  ],
+  "task_invariants_after_sha256": "012d6f134388cd755ade4b286341eae74d00441b97f18dccefe138d2db2a7012",
+  "artifacts_after": {
+    "reported_count": 466,
+    "reported_bytes": 34158073,
+    "unique_count": 466,
+    "unique_bytes": 34158073,
+    "unique_inventory_sha256": "91144caa8dc1d90c9275769d1c0619a601ea4fd6ca7e4e03c82b9d6bb89eaace",
+    "root_spellings": 7,
+    "display_truncated": true,
+    "displayed_rows": 200
+  },
+  "backend_version": "codex-tui/0.167.0 (Windows 10.0.26200; x86_64) WindowsTerminal (ma4; 0.1)",
+  "user_files_deleted": 0,
+  "model_turns_created": 0,
+  "scope": "Existing launcher stopped/started web only; native daemon and this external session stayed active."
+}

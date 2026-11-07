@@ -1,0 +1,42 @@
+{
+  "result": "current",
+  "errors": [],
+  "features": [
+    {
+      "feature": "sessions",
+      "status": "current",
+      "changes": [],
+      "coverage": "Windows；真实 Chrome 页面→MA4 HTTP/Hub→独立 Codex 0.167.0→本机模拟模型。创建、发送、回复、列表重开、刷新与真实历史一致性通过。三种宽度；非全部会话功能。",
+      "unverified": [
+        "Linux 实机",
+        "真实供应商/模型",
+        "审批/Skill/插话等的真实浏览器链路",
+        "其他浏览器与手机真机"
+      ]
+    },
+    {
+      "feature": "tasks",
+      "status": "current",
+      "changes": [],
+      "coverage": "Windows；目标确认、预算、派工与材料管理的逻辑检查，讨论/确认模拟页面三种宽度通过；Python 4 项符号链接权限跳过。源码与页面入口已核对。",
+      "unverified": [
+        "真实模型讨论→确认→实际派工完整链路",
+        "Windows 跳过的符号链接检查",
+        "Linux 实机",
+        "材料计数修复在现有 8764 的在线加载"
+      ]
+    },
+    {
+      "feature": "reports",
+      "status": "current",
+      "changes": [],
+      "coverage": "Windows；回传去重、等待、暂停、恢复、交接等逻辑及报告详情模拟页面三种宽度通过；源码与页面入口已核对。",
+      "unverified": [
+        "真实模型执行→报告回传→恢复/交接完整链路",
+        "Linux 实机",
+        "其他浏览器与手机真机"
+      ]
+    }
+  ],
+  "limits": "current 仅表示已登记的操作说明、源码和证据未变化，不证明描述正确或未覆盖的功能已通过。此命令不会更新核对记录。"
+}

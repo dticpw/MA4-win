@@ -1,0 +1,268 @@
+{
+  "result": "failed",
+  "browserExitCode": 1,
+  "instance": {
+    "url": "http://127.0.0.1:7429",
+    "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-default\\process-temp\\session-runtime-73wx_j50\\smoke-5qqjknxm",
+    "verification": {
+      "instance": "5e54cc1ce71e448f8a4389350499aebc",
+      "ownerPid": 31384,
+      "backendPid": 32964,
+      "endpoint": "ws://127.0.0.1:9832",
+      "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-default\\process-temp\\session-runtime-73wx_j50\\smoke-5qqjknxm\\codex-home",
+      "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-default\\process-temp\\session-runtime-73wx_j50\\smoke-5qqjknxm\\state"
+    },
+    "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) dumb (ma4; 0.1)"
+  },
+  "journeys": [
+    {
+      "feature": "sessions",
+      "result": "passed",
+      "steps": [
+        {
+          "index": 1,
+          "action": {
+            "op": "fail-create",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:26:27.172Z",
+          "result": {
+            "status": 400,
+            "error": "工作目录不存在：E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-default\\process-temp\\session-runtime-73wx_j50\\smoke-5qqjknxm\\nonexistent-5e54cc1ce71e448f8a4389350499aebc",
+            "screenshot": "01-controlled-failure.png",
+            "injection": false,
+            "retry": false
+          },
+          "status": "passed"
+        },
+        {
+          "index": 2,
+          "action": {
+            "op": "create",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:26:27.793Z",
+          "result": {
+            "threadId": "01a1b4af-e191-76b2-83b3-ae85316f1c94"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 3,
+          "action": {
+            "op": "send",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:26:28.370Z",
+          "result": {
+            "message": "第三轮浏览器有限动作验证",
+            "turnId": "01a1b4af-e432-7422-ae9c-b93aa1b8dc05",
+            "requestId": "14a12026-643f-4631-956b-b399540c5504",
+            "screenshot": "03-before-send-1.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 4,
+          "action": {
+            "op": "wait",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:26:28.580Z",
+          "result": {
+            "threadId": "01a1b4af-e191-76b2-83b3-ae85316f1c94",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4af-e432-7422-ae9c-b93aa1b8dc05",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4af-e5e1-7993-9044-2f7046fc7700",
+                    "type": "userMessage",
+                    "text": "第三轮浏览器有限动作验证"
+                  },
+                  {
+                    "id": "msg_d06df24954e84cee9018d387582f040e",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "04-reply.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 5,
+          "action": {
+            "op": "reopen",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:26:29.587Z",
+          "result": {
+            "threadId": "01a1b4af-e191-76b2-83b3-ae85316f1c94",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4af-e432-7422-ae9c-b93aa1b8dc05",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4af-e5e1-7993-9044-2f7046fc7700",
+                    "type": "userMessage",
+                    "text": "第三轮浏览器有限动作验证"
+                  },
+                  {
+                    "id": "msg_d06df24954e84cee9018d387582f040e",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "05-reopened.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 6,
+          "action": {
+            "op": "refresh",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:26:29.785Z",
+          "result": {
+            "threadId": "01a1b4af-e191-76b2-83b3-ae85316f1c94",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4af-e432-7422-ae9c-b93aa1b8dc05",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4af-e5e1-7993-9044-2f7046fc7700",
+                    "type": "userMessage",
+                    "text": "第三轮浏览器有限动作验证"
+                  },
+                  {
+                    "id": "msg_d06df24954e84cee9018d387582f040e",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ],
+            "screenshot": "06-refreshed.png"
+          },
+          "status": "passed"
+        },
+        {
+          "index": 7,
+          "action": {
+            "op": "history",
+            "session": "main"
+          },
+          "startedAt": "2026-11-07T06:26:29.989Z",
+          "result": {
+            "threadId": "01a1b4af-e191-76b2-83b3-ae85316f1c94",
+            "turnCount": 1,
+            "itemCount": 2,
+            "summary": [
+              {
+                "id": "01a1b4af-e432-7422-ae9c-b93aa1b8dc05",
+                "status": "completed",
+                "items": [
+                  {
+                    "id": "01a1b4af-e5e1-7993-9044-2f7046fc7700",
+                    "type": "userMessage",
+                    "text": "第三轮浏览器有限动作验证"
+                  },
+                  {
+                    "id": "msg_d06df24954e84cee9018d387582f040e",
+                    "type": "agentMessage",
+                    "text": "本机模拟回复：Windows 共享会话连接成功。"
+                  }
+                ]
+              }
+            ]
+          },
+          "status": "passed"
+        }
+      ],
+      "sessions": [
+        {
+          "alias": "main",
+          "threadId": "01a1b4af-e191-76b2-83b3-ae85316f1c94",
+          "sends": [
+            {
+              "message": "第三轮浏览器有限动作验证",
+              "turnId": "01a1b4af-e432-7422-ae9c-b93aa1b8dc05",
+              "requestId": "14a12026-643f-4631-956b-b399540c5504"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "argv": [
+    "node",
+    "E:\\PG\\MA4-win\\tools\\ui_check.mjs",
+    "",
+    "E:\\PG\\MA4-win\\.agent-tmp\\ma4-1dda5fb483a146eb\\worker\\rework-default\\ui",
+    "http://127.0.0.1:7429",
+    "--exercise"
+  ],
+  "compatibility": {
+    "result": "running",
+    "checks": [
+      "new-dialog Escape closed",
+      "create with first message",
+      "completed reply",
+      "composer aria-label",
+      "pin UI and persisted state",
+      "/help visible",
+      "home recent cards"
+    ],
+    "modelTurns": 1,
+    "threadId": "01a1b4af-ea69-78e3-a0c5-8a9d9d662fde",
+    "history": {
+      "threadId": "01a1b4af-ea69-78e3-a0c5-8a9d9d662fde",
+      "turnCount": 1,
+      "itemCount": 2,
+      "summary": [
+        {
+          "id": "01a1b4af-eb9b-7ed0-b265-c78c94bf8192",
+          "status": "completed",
+          "items": [
+            {
+              "id": "01a1b4af-ece7-71b0-b938-8f09197ca7a3",
+              "type": "userMessage",
+              "text": "默认兼容检查：创建时带首条消息"
+            },
+            {
+              "id": "msg_4c750a3f082948bb95af59c051c72626",
+              "type": "agentMessage",
+              "text": "本机模拟回复：Windows 共享会话连接成功。"
+            }
+          ]
+        }
+      ],
+      "screenshot": "08-reply.png"
+    },
+    "screenshot": "08-compatibility-help.png"
+  },
+  "modelRequests": 2,
+  "model": "local mock; no external model calls; excludes the real executor's model use",
+  "ui_report": "ui/report.json",
+  "cleanup": {
+    "backendExited": true,
+    "ownWebClosed": true,
+    "scratchRemoved": true,
+    "runtimeRemoved": true
+  }
+}

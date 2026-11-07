@@ -24,6 +24,17 @@ RUNNING = ACTIVE | {"closing"}
 BUSY = {"running", "sending"}
 TERMINAL = {"completed", "stopped"}
 TOKEN_KEYS = ("totalTokens", "inputTokens", "cachedInputTokens", "outputTokens")
+
+
+def activity_timestamp(value):
+    """Unix seconds from explicit session/turn metadata, never task operation time."""
+    return value if (type(value) in (int, float) and math.isfinite(value) and value > 0) else 0
+
+
+def turn_activity_at(turns):
+    # Legacy estimated timing can include recovery time, so is not activity evidence.
+    return max((activity_timestamp(row.get(key)) for row in turns if not row.get("timeEstimated")
+                for key in ("startedAt", "completedAt")), default=0)
 DEFAULT_DURATION_MINUTES = 120
 REPORT_LIMIT = 3000
 DRAFT_PREFIX = "[MA4 目标草案]\n"
@@ -34,8 +45,17 @@ DISPATCH_PREFIX = "[MA4 工作目录] "
 HOST_TOOL_SETTINGS = {"sandboxPolicy": {"type": "dangerFullAccess"}, "approvalPolicy": "never"}
 
 
+def file_link_guidance(windows=None):
+    windows = os.name == "nt" if windows is None else windows
+    example = "E:/PG/项目/中文 报告.md" if windows else "/mnt/e/PG/项目/中文 报告.md"
+    return ("本地文件 Markdown 链接使用当前系统真实路径；含空格用尖括号，如 "
+            f"[报告](<{example}:12>)；相对路径按会话 cwd。"
+            "盘符前不要加 /；行号可用 :12 或 #L12，点击只打开文件。")
+
+
 def message_envelope(message, request_id, source="automatic", context=""):
-    return f"[MA4 message:{request_id}]\n[MA4 source:{source}]\n{context}\n[MA4 content]\n{message}"
+    # Every managed turn, including reused/recovered hosts and workers.
+    return f"[MA4 message:{request_id}]\n[MA4 source:{source}]\n{context}\n{file_link_guidance()}\n[MA4 content]\n{message}"
 
 
 def confirmed(t):
@@ -212,13 +232,13 @@ HOST_INSTRUCTIONS = """你是 MA4 中控，首要职责是维护目标和独立�
 系统已经提供的目标、预算、执行状态和空目录信息不必再调工具查询。连续尝试无进展时改变方法或暂停说明，不无限重复。
 交接只传用户决定、产物位置、未解决问题和必要事实；旧判断不自动成为已认可目标。
 finish 只提交结论和验收证据；最终用时与 token 由程序更新，不为补数字另派或续开一轮。
-"""
+""" + file_link_guidance() + "\n"
 
 WORKER_INSTRUCTIONS = """你是 MA4 执行会话，完成中控给你的具体工作。禁止自行派生子 Agent 或新 Codex 会话。
 遵守本次任务的读写范围。正式源码/素材留在项目；临时材料使用消息指定的任务目录，不向项目外存放产物。
 结束时用简短最终回答说明产物位置、实际验证结果、剩余问题及临时文件去向，不声称未做过的验证。
 用户未批评的部分不等于认可；需要推翻原方案时直接说明。不要自动提交、推送或扩展部署范围。
-"""
+""" + file_link_guidance() + "\n"
 
 
 class Controllers:
@@ -268,6 +288,10 @@ class Controllers:
                 ids.add(t["host"])
             ids.update(tid for tid, w in t["workers"].items() if w["state"] in BUSY or w["state"] == "queued")
         return ids
+
+    def activity_times(self):
+        return {s["threadId"]: s.get("updatedAt") for t in self.view.get("tasks", [])
+                for s in t.get("statistics", {}).get("sessions", [])}
 
     def owner(self, tid):
         for t in self.tasks.values():
@@ -419,7 +443,9 @@ class Controllers:
         if live_start and "startedAt" not in row:
             row["startedAt"] = self.clock()
             row["timeEstimated"] = True
-        if turn.get("startedAt") is not None:
+        # A delayed real start cannot make an estimated completion trustworthy.
+        # Keep the existing conservative marker until all stored bounds are known.
+        if turn.get("startedAt") is not None and ("completedAt" not in row or turn.get("completedAt") is not None):
             row.pop("timeEstimated", None)
         status = turn.get("status")
         if status and (status != "inProgress" or row.get("status") in (None, "inProgress")):
@@ -450,7 +476,7 @@ class Controllers:
             attributed = {k: sum((r["usage"] or {}).get(k, 0) for r in rows) for k in TOKEN_KEYS}
             sessions.append({"threadId": tid, "role": "worker" if tid in t["workers"] else "host",
                              "name": t["workers"][tid]["name"] if tid in t["workers"] else "当前中控" if tid == t["host"] else "前任中控",
-                             "usage": total, "turns": rows,
+                             "usage": total, "turns": rows, "updatedAt": turn_activity_at(rows) or None,
                              "durationMs": sum(r.get("durationMs", 0) for r in rows) if any("durationMs" in r for r in rows) else None,
                              "unattributedTokens": max(0, total["totalTokens"] - attributed["totalTokens"])})
         roles = []
@@ -577,8 +603,11 @@ class Controllers:
                 "目标、预算和相关执行状态已列出；只有需要未列出的历史执行者时才调用 ma4_control(action=status)，不要轮询。\n")
 
     def scratch_cwds(self, t):
-        return list(dict.fromkeys([t["cwd"], *t.get("scratchCwds", []),
-                                   *(w.get("cwd", t["cwd"]) for w in t["workers"].values())]))
+        roots = {}
+        for cwd in [t["cwd"], *t.get("scratchCwds", []),
+                    *(w.get("cwd", t["cwd"]) for w in t["workers"].values())]:
+            roots.setdefault(path_key(cwd), cwd)
+        return list(roots.values())
 
     def scratch(self, t, cwd=None):
         return Path(cwd or t["cwd"]) / ".agent-tmp" / ("ma4-" + t["id"])
@@ -611,7 +640,7 @@ class Controllers:
                     raise ValueError("项目尚未忽略 .agent-tmp/；请先将该目录加入项目 Git 忽略规则")
             root.mkdir(parents=True)
             (root / ".ma4-owner.json").write_text(json.dumps({"task": t["id"]}) + "\n", encoding="utf-8", newline="\n")
-        if cwd not in t.get("scratchCwds", []):
+        if path_key(cwd) not in {path_key(p) for p in t.get("scratchCwds", [])}:
             t.setdefault("scratchCwds", []).append(cwd)
             self.publish()
         return root
@@ -1301,6 +1330,11 @@ class Controllers:
     def do_artifacts(self, task_id, action="list", paths=None, reason=""):
         t = self.get(task_id)
         roots = {cwd: self.scratch(t, cwd) for cwd in self.scratch_cwds(t)}
+        retained = {}
+        for key in t["retained"]:
+            p = Path(key)
+            identity = path_key(p if p.is_absolute() else self.scratch(t) / p)
+            retained.setdefault(identity, []).append(key)
         files, total = [], 0
         for cwd, root in roots.items():
             if not root.exists() and not is_link(root):
@@ -1318,7 +1352,8 @@ class Controllers:
                     s = p.lstat()
                     total += s.st_size
                     files.append({"path": key, "cwd": cwd, "bytes": s.st_size, "symlink": is_link(p),
-                                  "retained": t["retained"].get(key)})
+                                  "retained": "; ".join(dict.fromkeys(t["retained"][k]
+                                      for k in retained.get(path_key(p), []))) or None})
         if action == "list":
             return {"root": str(self.scratch(t)), "roots": [str(p) for p in roots.values()],
                     "files": files[:200], "count": len(files), "bytes": total,
@@ -1345,7 +1380,9 @@ class Controllers:
                 raise ValueError("只清理本任务的普通独立文件：" + rel)
             selected.append((key, p, s, root))
         if action == "keep":
-            for rel, _, _, _ in selected:
+            for rel, p, _, _ in selected:
+                for old in retained.get(path_key(p), []):
+                    t["retained"].pop(old, None)
                 t["retained"][rel] = reason
         elif action == "clean":
             for rel, p, before, root in selected:
@@ -1353,7 +1390,8 @@ class Controllers:
                 if (now.st_ino, now.st_mtime_ns, now.st_size) != (before.st_ino, before.st_mtime_ns, before.st_size):
                     raise ValueError("文件发生变化，停止清理：" + rel)
                 p.unlink()
-                t["retained"].pop(rel, None)
+                for old in retained.get(path_key(p), []):
+                    t["retained"].pop(old, None)
                 parent = p.parent
                 while parent != root:
                     try:
