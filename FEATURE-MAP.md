@@ -2,7 +2,7 @@
 
 用途：接到改动时，先找到用户流程、负责代码及相关检查。这里只记录当前实现；运行状态、实测结论与接续仍以 [README](README.md#现状与接续) 为入口。检查分组由 [tools/verify.py](tools/verify.py) 维护，不另建测试框架。
 
-先运行 `run map` 核对登记输入是否变化，再选择下面相关流程。最新人工核对范围保存在 [核对记录](validation/feature-map-review.json)，实际结果见 [第三轮验证](validation/shared-source.md#第三轮有限工具优化2026-11-07)。地图提供操作依据，不授予创建真实会话、派工或消耗模型额度的权限。
+先运行 `run map` 核对登记输入是否变化，再选择下面相关流程。最新人工核对范围保存在 [核对记录](validation/feature-map-review.json)，本轮实际结果见 [迭代试验](validation/iteration-pilot.json)，当前运行状态以 README 为准。地图提供操作依据，不授予创建真实会话、派工或消耗模型额度的权限。
 
 ## 从改动选择检查
 
@@ -16,6 +16,8 @@
 | 文件链接、跨系统路径、启动/停止 | [paths.py](paths.py)、[os_adapters](os_adapters)、[runtime.py](runtime.py)、[desktop.py](desktop.py) | `run sessions platform` | 实际本机与模拟另一系统分开；部分链接测试可能因权限跳过 |
 | 服务活动、健康、额度 | [activity.py](activity.py)、[health.py](health.py)、[quota.py](quota.py)、app.js | `run side --ui` | 模拟来源、未知/0/过期语义；不探测真实远端 |
 | HTTP/SSE 与原生协议兼容 | [appserver.py](appserver.py)、server.py、hub.py | `run transport` | 启动独立 TCP Codex 后台和本机模拟模型；不连接现有 daemon |
+| 中控核心流程的原生复验 | [tools/task_actions.py](tools/task_actions.py)、[tools/task_scenarios.py](tools/task_scenarios.py) | `run task-flows`；按场景可直接调用 task_scenarios | 真实 HTTP/独立 Codex 动态工具＋本机模拟模型；不连接真实 8764 |
+| 检查失败转有限维护任务 | [tools/maintenance.py](tools/maintenance.py)、[test_maintenance.py](test_maintenance.py) | `run tooling`；显式 capture/plan/start/status/ack | 逻辑测试使用假 API；只有 start 会在真实 MA4 创建并确认任务 |
 | 浏览器创建、发送、回复和重开历史 | [tools/session_actions.mjs](tools/session_actions.mjs)、[tools/session_cli.mjs](tools/session_cli.mjs)、[tools/ui_check.mjs](tools/ui_check.mjs)、[tools/smoke_test.py](tools/smoke_test.py) | `run live-ui` 或 session_cli | 真实页面/后端/独立原生 CLI，本机模拟模型；不代表真实供应商 |
 | 验证命令及地图检测自身 | [tools/verify.py](tools/verify.py)、[test_verify.py](test_verify.py)、[tools/feature_map.py](tools/feature_map.py)、[test_feature_map.py](test_feature_map.py) | `run tooling` | 去重、跳过/失败传播、实例身份、输出范围及地图变化检测 |
 | PR 轻量自动检查 | [workflow](.github/workflows/verify.yml)、[开发约定](AGENTS.md)、[PR 模板](.github/pull_request_template.md) | `run ci` | 逻辑/工具测试＋地图检查；无 Codex/浏览器/凭据；详见 [README](README.md#pr-自动检查与同步维护) |
@@ -123,6 +125,23 @@
 
 **可重复检查：** `test_controllers` 的一次回传、忙时等待、暂停保留、发送回复丢失、重启恢复、交接和明确验收用例；`test_hub` 的相关通知与权限；`controller_details_check.mjs` 的等待原因、工具失败详情、统计、收尾状态及实时更新。
 
+**原生流程检查：** `run task-flows` 通过 [动作层](tools/task_actions.py)组合创建、草案/确认、派工、等待、暂停、恢复、交接、历史和报告核对。五个具名场景为 `confirmation`、`dispatch-report`、`pause-resume`、`handoff`、`reconnect-dedup`；`failure-cleanup` 是单独选择的故意失败场景，不在 `all` 中。使用真实 HTTP、独立 Codex 和动态工具，本机模型只返回固定文本或限定的任务工具调用。接受原生发送后丢应答是逻辑边界注入，不等于重现供应商故障。工具拒绝 8764、外来实例/任务/会话及任意代码入口；每次结束回收自有实例。界面点击仍由模拟页面与普通会话 live-ui 分别验证。
+
+<a id="maintenance"></a>
+## 流程四：检查失败 → 有限维护 → 独立审查
+
+这是按需调用的本地事件入口，不是持续扫描服务。只有明确授权后的 `start` 会调用真实模型；`capture` 使用既有轻量验证，`plan` 只读生成任务单，`status/reconcile` 只读核对 MA4。远程 GitHub webhook、云端日志下载和运行异常自动修复未接入。
+
+1. 开发者或获授权的 Agent 执行 `tools/maintenance.py capture tasks architecture`。工具读取 Git HEAD、索引及工作区文件指纹，运行检查，再核对源码未变；成功/跳过不派工，检查中代码变化或结果不明则停止。指纹不证明外部依赖、环境或业务语义正确。
+2. 用 `plan --scope task_policy.py --minutes 30` 阅读任务单。范围只能是明确的现有源码文件；检查器、测试、配置、凭据、整个目录和链接路径受到保护。实际范围需依据当前失败选择，示例不构成长期修改授权。
+3. 明确获授权后以相同参数执行 `start`。先检查重叠写入，保存请求意图，再经现有 create/confirm 接口创建中控任务；固定截止时间，最多一个执行者、一个修复回合。范围是协作约定，不是 OS 沙箱。禁止通过删检查、自动续期、重复派工、自动提交/推送或合并凑成完成。
+4. `status`/`reconcile` 按请求标识查回同一任务。create 结果不明先查回；confirm 发送后不自动重发，状态无法确认就停止。重复 start 不重复创建或确认。
+5. 派发者核对代码、复现检查和实际成果后，执行 `ack --review "实际审查说明"`。只有同一任务终态、所有关联会话明确空闲且无待回传/发送/交接才能关闭当前事件；自报 completed 不会自动关闭。之后可捕获新的源码状态，同一未变化失败仍不重新派工。
+
+负责代码为 [maintenance.py](tools/maintenance.py)；业务状态仍由 Controllers 管理，不直接写 controllers.json。本轮只在 Windows 启用，每个项目只保存 `.ma4/maintenance/current.json`，另有短时写锁和原子替换文件，不建立事件历史库；验证临时输出自动清理。Linux 接入前须先分开两系统事件存储并验证，不复用 Windows 记录。capture 沿用验证入口，没有整个检查过程的统一硬超时；任务时限不限制 capture。用法、故障注入与边界见 [维护入口说明](validation/maintenance/usage.md)。自动派工前必须审查来源和范围，日志仅作数据；未知状态和范围不足均转人工处理。
+
+**检查与限度：** `test_maintenance` 验证源码过期、路径/范围、重叠任务、请求去重、超时后的只读核对、并发锁和关闭条件；纳入 `run tooling`/`run ci`，使用假 API，不自动连接真实 MA4。真实开发派工、隔离工作区修复演练与其未完成项见 [迭代试验](validation/iteration-pilot.json)，不能由单元测试推断真实修复或持续迭代收益。
+
 ## 验证入口怎么用
 
 在项目目录运行；也可用绝对脚本路径从其他目录调用，入口会固定子进程的工作目录为源码根目录。
@@ -135,6 +154,8 @@
 & 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py run tasks --ui
 # 真实页面链路，保留本次证据；checks 必须尚不存在
 & 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py run live-ui --output .agent-tmp/<本任务>/checks
+# 中控任务核心流程；独立原生后台和本机模拟模型，输出默认回收
+& 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py run task-flows
 # 只读检查地图是否需要复核，不启动浏览器或后台
 & 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py run map
 ```
@@ -148,7 +169,7 @@
 
 将 `<本任务>` 换成自己的任务目录名。Linux 命令是对应入口，第二轮尚未在 Linux 实机运行。
 
-`core` 合并 sessions/tasks/side/platform/tooling，`--ui` 才加跑五个模拟页面脚本；不包含 transport、live-ui、map 或图片预览。适合入口首次验收或确实跨模块的改动；小改先选择相关分组，必要时直接用原测试命令定位到具体用例。不为每个小改重复全量运行。
+`core` 合并 sessions/tasks/side/platform/tooling/architecture，`--ui` 才加跑五个模拟页面脚本；不包含 transport、live-ui、task-flows、map 或图片预览。适合入口首次验收或确实跨模块的改动；小改先选择相关分组，必要时直接用原测试命令定位到具体用例。不为每个小改重复全量运行。
 
 `transport` 单独选择，运行现有 `tools/smoke_test.py`，会启动独立 CODEX_HOME、随机本机 TCP 后台和模拟模型，结束后关闭自己创建的进程。不调用真实供应商、不读取用户会话凭据、不使用 `--serve`；它不包含在 core 中。
 
@@ -162,10 +183,10 @@
 
 开发 Agent 在同一改动/PR 中同步维护受影响的地图、测试和验证方法；无需修改时说明依据。PR 更新后 CI 执行 `run ci`，发现测试失败、失效引用或登记内容变化就失败，不自动改写材料。完整触发条件和检查边界见 [README](README.md#pr-自动检查与同步维护)。
 
-- `run map` 检查本地图本地链接/锚点、三个流程的操作说明，以及核对记录中登记的源码、验证方法与证据的 SHA256。`current` 只表示这些输入未变化；`needs_review` 表示相关内容变了或核对记录不全；`invalid` 表示引用/记录有问题。后两者使统一入口失败，详细原因在 map.json 和日志中。
+- `run map` 检查本地图本地链接/锚点、已登记流程的操作说明，以及核对记录中登记的源码、验证方法与证据的 SHA256。`current` 只表示这些输入未变化；`needs_review` 表示相关内容变了或核对记录不全；`invalid` 表示引用/记录有问题。后两者使统一入口失败，详细原因在 map.json 和日志中。
 - 它不检查外部网页是否可达，不自动理解文档语义，也不能发现未登记的间接依赖或运行环境变化；CLI/浏览器/系统升级后即使 current，也要按影响复验。引用存在不证明描述正确，人工仍需核对操作和代码。
 - 更新流程：先读变化源码及用户入口 → 修正本地图 → 运行受影响检查 → 核对实际结果并将必要证据转入 validation → 人工更新 `validation/feature-map-review.json` 中对应流程的说明摘要、输入摘要、源码核对时间、证据摘要、覆盖与未测项 → 再运行 `run map`。不得仅刷新摘要消除提示；工具没有自动“更新为通过”的开关。
-- 只有逻辑/模拟页面覆盖的流程也可登记“描述已核对”，但 coverage 和 unverified 必须保留真实范围；不能将 tasks/reports 写成真实全链路通过。`run tooling` 用临时小项目检查引用失效、源码/说明/证据变动能被发现，并验证恢复内容后状态正确、核对记录不被改写。
+- 只有逻辑/模拟页面覆盖的流程也可登记“描述已核对”，但 coverage 和 unverified 必须保留真实范围；原生模拟模型检查、真实开发任务和真实供应商异常分别记证据，不能混称全功能通过。`run tooling` 用临时小项目检查引用失效、源码/说明/证据变动能被发现，并验证恢复内容后状态正确、核对记录不被改写。
 - 用户行为或接口变了：同步本地图相关流程和负责代码；测试分组变了：只改 verify.py 中的选择表，再运行 `run tooling`。
 - 重复故障先补复现检查，再修代码。现有目标确认、发送去重、预算和写入范围由程序执行；临时材料要求保留在既有管理工具中，不另叠提示词文件。
 - 跨系统差异继续放在 os_adapters/ 与系统配置，不拆公共业务副本。运行改动选 platform；另一系统没实测就明确留待检查。

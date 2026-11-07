@@ -4,9 +4,18 @@
 
 ## 现状与接续
 
-2026-11-07，**阶段 2 已补一次无历史上下文的真实维护与独立验收。** 新建的 MA4 执行会话按仓库说明复现并修复了“未知执行者状态仍可确认/恢复”的缺口。规则改在 `task_policy.py`，Controllers 继续复用原检查；未知状态不再当作空闲，草案仍可保存。相关检查 112 项 Python 中 108 通过、4 项权限跳过，14 项 Node 通过；派发者独立对照旧实现并抽查 2 项编排回归通过。见[独立执行者记录](validation/cold-start.json)。这是给定问题和文件范围的一次维护，未测修改耗时对照，不宣称已提高效率。
+2026-11-07，**五阶段计划本次接续：阶段 2 的真实维护试验、阶段 3 的任务流程工具、阶段 4 的有限维护入口已完成；阶段 5 已开始积累真实迭代记录。** 不整体重写架构，保留现有网页、任务接口与运行数据格式。当前分支为 `feat/task-workflows-20261107`，实现与观察统一见 [本轮记录](validation/iteration-pilot.json)。
 
-**当前接续：** 用户已明确授权本任务内创建任务和模型调用。阶段 3 的真实中控 `a4e72a99d4ae43e2` 正在制作隔离任务操作/复验工具；阶段 4 的独立执行者正在制作单次检查失败转维护任务的入口，不新增常驻扫描服务。两者与阶段 2 划分文件范围，原五任务不动。阶段 2 的本地 CI 逻辑检查通过，地图中的并行 `smoke_test.py` 变化由派发者在整合时审查；当前服务未重载，Linux 未新测，PR/本轮云 CI 仍待 GitHub 登录条件。当前开发分支为 `feat/task-workflows-20261107`。
+- **阶段 2：** 一名没有此前对话的新执行者按给定问题及文件范围，复现并修复“未知执行者状态仍可确认/恢复”。规则只改 `task_policy.py`，未知状态不当空闲，草案仍可保存；独立验收通过。这不是完全盲搜仓库，也没有修改前耗时对照，见 [独立执行者记录](validation/cold-start.json)。
+- **阶段 3：** `TaskActions` 提供确认、派工、等待、历史、报告、暂停/恢复、交接及重连组合；`run task-flows` 实际经过 HTTP 与独立原生 Codex 动态工具。五场景统一复验通过，共 34 次本机模拟模型请求，实例全部回收。初次统一运行发现会话登记时序问题；修复及独立注入验证后再通过，失败记录保留。不会操作真实 8764 或接纳外来会话，见 [任务流程证据](validation/task-flows/evidence.json)。
+- **阶段 4：** 显式 `capture → plan → start → status/reconcile → 独立审查 ack`。可靠检查失败绑定源码状态，任务固定时限、明确源码范围、不重复发送；仅保存当前事件，无持续扫描。独立工作区真实修复演练已完成并 ack：一个执行者一轮修复，无用户补充或派发方返工。演练复现的是已确认缺陷，不是生产事故；重复演练补丁不合入主源码，见 [维护用法](validation/maintenance/usage.md)。
+- **阶段 5：** 已记录首次失败、返工、实际用时、人工介入与模型边界。接下来在日常真实改动中使用这些入口，继续观察返工率和审查成本；当前数据不足以证明长期提速或视频中的 PR 吞吐，不再为凑数量制造实验。
+
+**当前接续：** 两个新中控已正常完成，原五任务保持。最终本地 CI：346 项 Python 中 342 通过、4 项链接权限跳过，37 项 Node 通过，地图 current。已仅重载 Windows web；首次载入会话列表即时核对失败，随后只读复查原 12 个会话和 7 任务保持，原生后台未重启；细节见本轮记录。功能地图已加入维护流程并按实际代码人工核对；普通会话页面未改，复用此前浏览器证据。Linux 按用户要求暂不实施；尤其维护事件存储尚未按两系统运行目录分开，Linux 接入前必须先处理并验证，不能复用 Windows 记录。PR 创建/本轮云 CI 仍待 GitHub 登录条件，未合并 main。
+
+**代价与边界：** 新增工具需要随接口、Codex 版本和相关行为维护，轻量 CI 自动检查不会自动改写地图、测试或业务代码。维护的“一名执行者/一轮修复/文件范围”是任务约束，不是 OS 隔离；capture 沿用验证入口，没有整个检查过程的统一硬超时。发现持续漏更或重复运行故障后再评估自动事件接入，不新增定时器或常驻维护 Agent。
+
+以下为先前阶段记录；当前状态与后续工作以上述本轮记录为准。
 
 2026-11-07，**阶段 2 的首条核心路径已拆分并在线加载：任务纯规则与副作用分开。** `task_policy.py` 集中预算、操作限制、报告等待及诊断判断，显式接收时间/连接快照；Controllers 保留兼容方法，仍串行执行状态写入、持久化及会话操作。原有 HTTP 接口、运行数据格式与页面未变。修改位置与具体样例见 [任务控制边界](ARCHITECTURE.md)；`run architecture` 检查规则层反向依赖、I/O 与动态调用入口，已纳入 `run ci`。检查用于约束日常实现，不是安全沙箱。
 
@@ -262,6 +271,23 @@ Linux 用同一 Node 入口；Python 默认选择 `/home/dticpw/conda/envs/py310
 
 参考原始资料：[创建验证技能](https://github.com/cursor/plugins/blob/main/pstack/skills/create-verification-skill/SKILL.md)、[功能地图示例](https://github.com/cursor/plugins/tree/main/pstack/skills/create-verification-skill/references/feature-map-example)、[维护验证技能](https://github.com/cursor/plugins/blob/main/pstack/skills/maintain-verification-skill/SKILL.md)。借鉴其可执行验证与持续校准原则；此次不安装或直接执行这些 Skill，也不据此扩大权限或自动开启其中的多 Agent 流程。
 
+## 核心任务流程与有限维护
+
+[任务动作层](tools/task_actions.py)及[具名场景入口](tools/task_scenarios.py)复用原生隔离环境，验证确认、派工/报告、在途暂停恢复、交接和重连。默认 CI 只跑这些工具的低成本测试；原生流程需显式选择，不读取真实会话或消耗供应商额度。
+
+```powershell
+# 查看可选场景，不启动实例
+& 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/task_scenarios.py list
+# 五项核心流程，结束后自动回收本次独立后台、网页和临时输出
+& 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py run task-flows
+# 只复测交接；证据留自己的临时区，验收后处理
+& 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/task_scenarios.py run handoff --scratch-root .agent-tmp/<本任务>/flows --output .agent-tmp/<本任务>/flows/result.json
+```
+
+[有限维护入口](tools/maintenance.py)把可靠的本地检查失败转成有限中控任务。先 `capture tasks architecture`，再 `plan --scope task_policy.py --minutes 30` 查看任务单；确认本次失败、范围和调用模型的授权后，才用同参数 `start`。`status/reconcile` 只读核对；源码变化、重叠写入和发送结果不明会阻止继续，confirm 不自动重发。任务最多一个执行者、一个修复回合，不自动提交、推送或合并；派发者独立验收后以 `ack --review "实际审查说明"` 关闭当前事件。范围按问题选择，示例不是长期写入授权。完整步骤与限制见[功能地图](FEATURE-MAP.md#maintenance)和[用法](validation/maintenance/usage.md)。
+
+维护代价：复用现有验证和任务接口，仅保留每个项目的当前事件及有界失败摘要，不复制源码/日志历史，不新增服务或定时扫描。capture 沿用验证工具，没有整组检查的统一硬超时；任务时限不等于检查时限。维护入口本轮仅在 Windows 启用，Linux 接续前需把事件存储与两侧运行实例分开，不能直接复用 Windows 记录。GitHub 事件直连、本机持续监控和供应商异常自动修复未接入；先看实际维护记录中的返工、人工介入和重复问题，再决定扩展。[本轮观察](validation/iteration-pilot.json)不能替代长期效率对照。
+
 ## PR 自动检查与同步维护
 
 开发者或开发 Agent 对本次改动负责：先按 [功能地图](FEATURE-MAP.md) 定位影响；用户行为、接口或验证条件变化时，同步更新相关说明、测试和验证方法，放在同一个 PR。已有检查足够或地图不受影响时，在 [PR 模板](.github/pull_request_template.md) 中说明依据即可，不要求为了形式修改每一类文件。地图摘要变化后先核对源码、操作步骤和实际证据，再更新 `validation/feature-map-review.json`，保留未测项；不能只刷新摘要让检查变绿。
@@ -296,7 +322,7 @@ CI 的持续代价主要是执行时间与上述少量配置维护；检查清�
 & 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py run tasks --ui
 ```
 
-分组为 `sessions`、`tasks`、`side`、`platform`、`tooling`，可组合并自动去重。`core` 合并以上组，已纳入原说明遗漏的 `test_health`；含 Windows 启动器隔离 TCP 进程测试，Linux 跳过 Windows 专属项。`transport` 另选本机模拟模型的原生协议检查，不使用真实模型额度或既有后台。
+分组为 `sessions`、`tasks`、`side`、`platform`、`tooling`、`architecture`，可组合并自动去重。`core` 合并以上组，已纳入原说明遗漏的 `test_health`；含 Windows 启动器隔离 TCP 进程测试，Linux 跳过 Windows 专属项。`transport`、`task-flows` 另选本机模拟模型的原生协议检查，不使用真实模型额度或既有后台。
 
 `--ui` 复用五个现有模拟页面脚本，入口创建随机本机静态端口并替换 MA4_URL，不连接 8764、不提供真实 API。未指定 `--output` 时临时日志/截图自动清理；需要审查时指定 `.agent-tmp/<本任务>/checks` 新目录，由本任务收尾。首项失败后停止后续检查；进程通过仍须查看日志中的系统/权限跳过。`test_model_image_preview` 的单独授权前提不变；真实会话检查不纳入默认命令。完整范围、输出与失败处理见功能地图。
 

@@ -1,0 +1,656 @@
+{
+  "version": 1,
+  "started_at_utc": "2026-11-07T12:45:11Z",
+  "status": "implementation_and_finite_trials_complete_long_term_observation_pending",
+  "base_commit": "46c5b90caf221a07cabe8ccb58c91687b08975ac",
+  "scope": "Five-stage continuation: bounded independent maintenance, core task actions, finite maintenance events, and observed iteration costs.",
+  "authorization": "User explicitly authorized creating tasks and calling models throughout this work; no token budget requested.",
+  "cold_start": {
+    "thread_id": "01a1b60e-3442-7781-8ea6-fbed6d47026d",
+    "context": "New MA4 ordinary thread, not a fork. Given the problem, acceptance criteria, repository entry points, and an explicit file allowlist. This tests constrained maintenance, not completely unaided repository discovery.",
+    "worker_evidence": "validation/cold-start.json",
+    "independent_review": {
+      "status": "passed",
+      "method": "Read the actual code/test/documentation diff; load historical policy from 46c5b90 beside current policy; independently exercise two Controllers regressions.",
+      "before": "paused diagnosis, confirmBlocker null for an unknown worker state",
+      "after": "unknown_work diagnosis with confirmation/resume blocked; input unchanged",
+      "source_sha256": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+      "checks": [
+        "test_controllers.ControllerTest.test_unknown_worker_blocks_confirm_and_resume_without_side_effects",
+        "test_controllers.ControllerTest.test_unknown_worker_still_allows_draft_save_then_requires_state_check"
+      ],
+      "result": "2 passed; no external model calls or live task mutations by these checks"
+    },
+    "human_clarifications_after_dispatch": 0,
+    "dispatcher_rework_requests": 0,
+    "started_at": 1794055747,
+    "completed_at": 1794056282,
+    "duration_ms": 535255,
+    "worker_temporary_cleanup": {
+      "files": 15,
+      "bytes": 130254,
+      "remaining": 0
+    }
+  },
+  "task_flows": {
+    "task_id": "a4e72a99d4ae43e2",
+    "host_thread_id": "01a1b60f-974d-7702-97bf-045c756a5b01",
+    "worker_thread_id": "01a1b610-ae4f-7912-a069-54699bd542f5",
+    "status": "unified_final_passed",
+    "unified_first_attempt": {
+      "result": "failed",
+      "source_sha256": {
+        "tools/task_actions.py": "f518629fd601e4351e3d5b64fbc24efba0efc7b7103ff1de077c579eacc27b8d",
+        "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+        "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+        "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+        "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+      },
+      "passed": [
+        "confirmation",
+        "dispatch-report",
+        "pause-resume"
+      ],
+      "failed": "handoff",
+      "error": "AssertionError: foreign session/workspace in fixture",
+      "not_run": [
+        "reconnect-dedup"
+      ],
+      "cleanup": "all four acquired fixtures reclaimed",
+      "followup": "Returned to original controller/worker for a bounded reproducer and fix without weakening foreign-session protection."
+    },
+    "unified_final": {
+      "python": "3.10.19",
+      "platform": "win32",
+      "sources": {
+        "tools/task_actions.py": "443f63313b8a47063f37b9d8915fe2423e4b5f0c34d81f837f9acdfe739fa17d",
+        "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+        "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+        "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+        "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+      },
+      "result": "passed",
+      "scenarios": [
+        {
+          "name": "confirmation",
+          "result": "passed",
+          "steps": 17,
+          "modelRequests": 5,
+          "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)",
+          "cleanup": {
+            "backendExited": true,
+            "webClosed": true,
+            "fixtureRemoved": true
+          },
+          "observations": [
+            {
+              "step": 14,
+              "operation": "handoff",
+              "task": "main",
+              "previous": "01a1b63c-9aa2-78b1-9be9-2ac94d9dc279",
+              "current": "01a1b63c-a17f-7473-abb1-0a09bd1ef125",
+              "retainedReports": []
+            }
+          ]
+        },
+        {
+          "name": "dispatch-report",
+          "result": "passed",
+          "steps": 7,
+          "modelRequests": 5,
+          "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)",
+          "cleanup": {
+            "backendExited": true,
+            "webClosed": true,
+            "fixtureRemoved": true
+          },
+          "observations": [
+            {
+              "step": 7,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-b2a8-7633-be81-4fa4142c2aa8:01a1b63c-b5db-7d32-9a2a-28035424389a": {
+                  "worker": "worker",
+                  "status": "completed",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "pause-resume",
+          "result": "passed",
+          "steps": 16,
+          "modelRequests": 10,
+          "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)",
+          "cleanup": {
+            "backendExited": true,
+            "webClosed": true,
+            "fixtureRemoved": true
+          },
+          "observations": [
+            {
+              "step": 9,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-c440-72f3-be13-fa01fc88f798:01a1b63c-c7ba-7c01-aa67-20e8b85dd8dd": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 0,
+                  "pending": 1,
+                  "contentMatchesNative": false
+                }
+              }
+            },
+            {
+              "step": 13,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-c440-72f3-be13-fa01fc88f798:01a1b63c-c7ba-7c01-aa67-20e8b85dd8dd": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": false
+                }
+              }
+            },
+            {
+              "step": 16,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-c440-72f3-be13-fa01fc88f798:01a1b63c-c7ba-7c01-aa67-20e8b85dd8dd": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": false
+                },
+                "01a1b63c-c440-72f3-be13-fa01fc88f798:01a1b63c-caee-7ea3-9a72-929a636134b8": {
+                  "worker": "worker",
+                  "status": "completed",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "handoff",
+          "result": "passed",
+          "steps": 16,
+          "modelRequests": 8,
+          "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)",
+          "cleanup": {
+            "backendExited": true,
+            "webClosed": true,
+            "fixtureRemoved": true
+          },
+          "observations": [
+            {
+              "step": 9,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-d9e6-7783-8e8c-30b09c877d12:01a1b63c-dd68-7763-8b1b-e638e6c0f951": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 0,
+                  "pending": 1,
+                  "contentMatchesNative": false
+                }
+              }
+            },
+            {
+              "step": 10,
+              "operation": "handoff",
+              "task": "main",
+              "previous": "01a1b63c-d429-7f92-83ae-3c96b94e8b6b",
+              "current": "01a1b63c-dee0-7513-aebd-dd53b8e6ebc5",
+              "retainedReports": [
+                "01a1b63c-d9e6-7783-8e8c-30b09c877d12:01a1b63c-dd68-7763-8b1b-e638e6c0f951"
+              ]
+            },
+            {
+              "step": 15,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-d9e6-7783-8e8c-30b09c877d12:01a1b63c-dd68-7763-8b1b-e638e6c0f951": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": false
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "reconnect-dedup",
+          "result": "passed",
+          "steps": 16,
+          "modelRequests": 6,
+          "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)",
+          "cleanup": {
+            "backendExited": true,
+            "webClosed": true,
+            "fixtureRemoved": true
+          },
+          "observations": [
+            {
+              "step": 7,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-f15d-7cb2-bf2b-cee74db63438:01a1b63c-f3f4-7111-80a0-4f927cdae50f": {
+                  "worker": "worker",
+                  "status": "completed",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": true
+                }
+              }
+            },
+            {
+              "step": 8,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-f15d-7cb2-bf2b-cee74db63438:01a1b63c-f3f4-7111-80a0-4f927cdae50f": {
+                  "worker": "worker",
+                  "status": "completed",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": true
+                }
+              }
+            },
+            {
+              "step": 10,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-f15d-7cb2-bf2b-cee74db63438:01a1b63c-f3f4-7111-80a0-4f927cdae50f": {
+                  "worker": "worker",
+                  "status": "completed",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": true
+                }
+              }
+            },
+            {
+              "step": 15,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b63c-f15d-7cb2-bf2b-cee74db63438:01a1b63c-f3f4-7111-80a0-4f927cdae50f": {
+                  "worker": "worker",
+                  "status": "completed",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": true
+                }
+              }
+            },
+            {
+              "step": 16,
+              "operation": "uncertain-send-reconciled",
+              "evidenceLayer": "logic injection after real native acceptance",
+              "httpStatus": 503,
+              "nativeTurns": 1,
+              "automaticResends": 0,
+              "requestId": "47bcdcd729524c67868dba4c16787d1a",
+              "turnId": "01a1b63c-f6dc-7f93-9254-94a0f2e14f74"
+            }
+          ]
+        }
+      ],
+      "command": "tools/verify.py run task-flows --output .agent-tmp/stage3-control-20261107/unified-final",
+      "model_boundary": "Real HTTP/native Codex dynamic tools; local scripted mock model; no supplier calls in this verification."
+    },
+    "followup_evidence": "validation/task-flows/evidence.json: historyFollowup and registrationFollowup; original failure did not capture transient session ID, registration timing is a supported explanation rather than proven identity of that first failure.",
+    "live_development": {
+      "id": "a4e72a99d4ae43e2",
+      "status": "completed",
+      "hostBusy": false,
+      "firstStartedAt": 1794055838.1984968,
+      "deadline": 1794059438.1984968,
+      "elapsedMs": 3039801.5031814575,
+      "elapsedBasis": "First task start to final host completion timestamp (second precision), including review and waiting.",
+      "usage": {
+        "01a1b60f-974d-7702-97bf-045c756a5b01": {
+          "totalTokens": 3669123,
+          "inputTokens": 3650366,
+          "cachedInputTokens": 3494144,
+          "outputTokens": 18757
+        },
+        "01a1b610-ae4f-7912-a069-54699bd542f5": {
+          "totalTokens": 8172708,
+          "inputTokens": 8101335,
+          "cachedInputTokens": 7929856,
+          "outputTokens": 71373
+        }
+      },
+      "reportDelivery": {
+        "count": 0,
+        "state": "none",
+        "reason": "",
+        "reports": []
+      },
+      "turns": {
+        "host": [
+          {
+            "id": "01a1b60f-9aec-79a0-8c39-7931bb800635",
+            "status": "completed",
+            "startedAt": 1794055838,
+            "completedAt": 1794055916,
+            "durationMs": 77554
+          },
+          {
+            "id": "01a1b623-c91e-7ef3-ae31-579daf35f166",
+            "status": "completed",
+            "startedAt": 1794057161,
+            "completedAt": 1794057312,
+            "durationMs": 151590
+          },
+          {
+            "id": "01a1b627-4c1d-77b0-b6e6-bc323d32c1fd",
+            "status": "completed",
+            "startedAt": 1794057391,
+            "completedAt": 1794057397,
+            "durationMs": 6122
+          },
+          {
+            "id": "01a1b629-de8a-7d23-97d1-8feefef30b6a",
+            "status": "completed",
+            "startedAt": 1794057559,
+            "completedAt": 1794057742,
+            "durationMs": 183021
+          },
+          {
+            "id": "01a1b62e-7f68-7d42-8e09-f4ff745ba18f",
+            "status": "completed",
+            "startedAt": 1794057863,
+            "completedAt": 1794057920,
+            "durationMs": 57247
+          },
+          {
+            "id": "01a1b638-7412-7b01-bd71-79524ea22d1b",
+            "status": "completed",
+            "startedAt": 1794058515,
+            "completedAt": 1794058698,
+            "durationMs": 183481
+          },
+          {
+            "id": "01a1b63d-59ce-7833-bef1-1a5879b88892",
+            "status": "completed",
+            "startedAt": 1794058836,
+            "completedAt": 1794058878,
+            "durationMs": 42072
+          }
+        ],
+        "worker": [
+          {
+            "id": "01a1b610-ca53-7d40-8a3e-97085aba98ae",
+            "status": "completed",
+            "startedAt": 1794055916,
+            "completedAt": 1794057160,
+            "durationMs": 1244896
+          },
+          {
+            "id": "01a1b626-19b2-7da3-91ac-9b12661d9172",
+            "status": "completed",
+            "startedAt": 1794057312,
+            "completedAt": 1794057559,
+            "durationMs": 246834
+          },
+          {
+            "id": "01a1b62f-5fa9-74f1-99cd-747b5574ecb2",
+            "status": "completed",
+            "startedAt": 1794057920,
+            "completedAt": 1794058515,
+            "durationMs": 594940
+          }
+        ]
+      },
+      "workersIdle": true,
+      "dispatcherReworkRequests": 1,
+      "controllerReworkTopics": [
+        "missing history combination entry",
+        "registration publication timing after first root unified failure"
+      ],
+      "clarificationsFromUser": 0,
+      "interpretation": "Elapsed task time includes review and waiting for dispatcher; no pre-change comparison and no throughput claim."
+    }
+  },
+  "maintenance": {
+    "thread_id": "01a1b611-880c-7ce1-850f-22868db74ae1",
+    "status": "live_repair_and_independent_ack_passed",
+    "decision": "One-shot local verification event ingress, not a new watcher. Keep only the current bounded event. Remote CI hooks and automatic runtime repair remain outside this implementation.",
+    "pilot_workspace": {
+      "path": "E:\\PG\\MA4-maintenance-pilot-20261107",
+      "base_commit": "46c5b90caf221a07cabe8ccb58c91687b08975ac",
+      "purpose": "Reproduce the confirmed unknown-worker defect using the new regressions against the old implementation; not a production outage",
+      "preparation": "Copied only the two new regression test files; old task_policy remains unchanged",
+      "checkout_bytes": 13918774,
+      "initial_failure": {
+        "test_methods": 112,
+        "failed_subtests": 54,
+        "skipped": 4,
+        "structured_skip_count_limit": "Existing verify parser reported skipped=0 on a FAILED suite; actual unittest footer was FAILED (failures=54, skipped=4).",
+        "request_id": "maintenance-248907188b2d1e9eff9d4dda9ff80f9d78d494b7daed5de7",
+        "source_stable": true
+      }
+    },
+    "implementation_review_requests": 1,
+    "implementation_source_sha256": "dc9ed86ece4ef65cd554bd094620212ebd81d6392ca26df69e374b88168b85f9",
+    "live_start": {
+      "result": "started",
+      "task_id": "d2a9ce527e4e4561",
+      "status": "running",
+      "deadline": 1794058991.7997248,
+      "review": "任务启动已确认；修复效果仍须独立审查"
+    },
+    "live_repeat_start": {
+      "result": {
+        "result": "started",
+        "task_id": "d2a9ce527e4e4561",
+        "status": "running",
+        "deadline": 1794058991.7997248,
+        "review": "任务启动已确认；修复效果仍须独立审查"
+      },
+      "post_calls": 0,
+      "method": "Real GET state with an API subclass that raises if start attempts any POST."
+    },
+    "live_pilot": {
+      "task_id": "d2a9ce527e4e4561",
+      "host": "01a1b624-41a4-7f22-aa85-195f1098dfca",
+      "workers": [
+        "01a1b626-8d4f-7291-9f52-f842554d5f73"
+      ],
+      "status": "completed",
+      "firstStartedAt": 1794057193.4824023,
+      "deadline": 1794058991.7997248,
+      "elapsedMs": 602517.5976753235,
+      "usage": {
+        "totalTokens": 1833764,
+        "inputTokens": 1815752,
+        "cachedInputTokens": 1647616,
+        "outputTokens": 18012
+      },
+      "turn_counts": {
+        "host": 2,
+        "worker": 1
+      },
+      "worker_report_delivery": {
+        "count": 0,
+        "state": "none",
+        "reason": "",
+        "reports": []
+      },
+      "human_clarifications_after_start": 0,
+      "dispatcher_rework_requests": 0,
+      "test_seed_commit": "a92e507bc96753959da958315502f4ad36270e56",
+      "policy_base_commit": "46c5b90caf221a07cabe8ccb58c91687b08975ac",
+      "policy_patch": "validation/maintenance/pilot-fix.patch",
+      "policy_sha256": "5c924d1abd159dde1e4ab5d0872ec3787e372b8cf6fd9d75321f75844c916fa8",
+      "original_tests_unchanged": true,
+      "independent_review": "Read full policy diff and state-mutation call order; verified only allowed source changed; tests match the seed; independently ran two confirmation/resume/draft regressions, both passed. Reused the verified worker group report and controller independent review; not a production incident.",
+      "worker_checks": [
+        {
+          "check": "python",
+          "status": "passed_with_skips",
+          "exit_code": 0,
+          "counts": {
+            "total": 112,
+            "skipped": 4
+          },
+          "seconds": 17.375
+        },
+        {
+          "check": "node",
+          "status": "passed",
+          "exit_code": 0,
+          "counts": {
+            "total": 14,
+            "passed": 14,
+            "failed": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          },
+          "seconds": 0.266
+        }
+      ],
+      "controller_additional_checks": "8 focused tests and 1440 known-state comparisons reported in the completed native task; root checked its actual tool history and implementation diff."
+    },
+    "live_ack": {
+      "result": "acknowledged",
+      "request_id": "maintenance-248907188b2d1e9eff9d4dda9ff80f9d78d494b7daed5de7",
+      "acknowledgement": {
+        "review": "派发者独立核对全部修复差异，确认只有授权的task_policy.py变化、两份预置回归未改；亲自运行两项确认/恢复/草案编排回归通过，复用并核对执行者112项Python（108通过、4权限跳过）与14项Node，以及中控8项抽查/1440组已知状态比较的实际工具结果。本次隔离工作区演练通过；未验证Linux、真实供应商故障或长期提速，不合并此重复演练补丁。",
+        "at": 1794057980.9694877,
+        "task_id": "d2a9ce527e4e4561",
+        "status": "completed"
+      },
+      "limits": "仅允许后续 capture 替换当前记录；不自动认定修复通过，不允许重派同一未变化失败。"
+    },
+    "cleanup": {
+      "inventory": "project-file-lifecycle/scripts/session_inventory.py executed before cleanup",
+      "formal_patch": "validation/maintenance/pilot-fix.patch",
+      "formal_results": "validation/iteration-pilot.json",
+      "task_logs_cleaned": {
+        "files": 3,
+        "bytes": 16173,
+        "method": "Existing MA4 artifacts API after independent review"
+      },
+      "temporary_checkout_files_removed": 220,
+      "checkout_payload_bytes_before_changes": 13918774,
+      "worktree_registration_removed": true,
+      "pilot_branch_removed": true,
+      "event_and_owner_metadata_removed": true,
+      "remaining": "Empty E:/PG/MA4-maintenance-pilot-20261107 directory; Windows denied removing the empty root after Git removed its files/registration. No forced deletion or alternate deletion method used.",
+      "recheck": "After the related native sessions release their directory handles or at the next maintenance session, verify it is still empty and unused before removing."
+    }
+  },
+  "limits": [
+    "No pre-change timing comparison; these observations cannot establish a speedup or sustained PR throughput.",
+    "Real models used by development agents are distinct from local mock models used by isolated verification tools.",
+    "Linux execution and remote PR/CI results must be reported separately."
+  ],
+  "verification_skip_fix": {
+    "observed": "Real failing pilot suite: FAILED (failures=54, skipped=4), original verifier reported skipped=0.",
+    "change": "Recognize skip counts in OK and FAILED summaries, while preserving failure status.",
+    "targeted_result": "Existing parser regression expanded with failing/skipped combinations; one test method with four cases passed."
+  },
+  "online": {
+    "atUtc": "2026-11-07T13:44:35Z",
+    "result": "passed_after_read_only_recheck",
+    "initial_check": {
+      "result": "failed",
+      "check": "immediate loaded-thread set equality",
+      "detail": "Web restart and exact comparison of all seven task protection fields succeeded. First native loaded-list equality assertion failed; the transient list was not saved. No second restart was performed."
+    },
+    "newWeb": {"pid": 32076, "created": 134385326768623948},
+    "protectedSevenTasksPreserved": true,
+    "loadedRecheck": {"before": 12, "after": 12, "sameIds": true, "method": "Separate native read-only connection after initial assertion; each thread/read status checked, only this root conversation active."},
+    "daemonProcessesPreserved": true,
+    "observerConnection": "Same observer returned loaded/list after web restart, then its equality assertion failed. No automatic reconnect exists. finally closed it; settled membership checked on a new read-only connection.",
+    "policySha256": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+    "limits": "Initial transient membership was not captured, so exact cause is not established. No new browser or Linux run; frontend unchanged.",
+    "oldWeb": {
+      "pid": 7816,
+      "created": 134385279359825525
+    },
+    "daemonProcesses": [
+      {
+        "pid": 14016,
+        "created": 134385010176718330
+      },
+      {
+        "pid": 7668,
+        "created": 134385010183479694
+      }
+    ],
+    "originalFiveTasksPreserved": true,
+    "modelCalls": 0
+  },
+  "ci": {
+    "command": "tools/verify.py run ci",
+    "at_utc": "2026-11-07T13:44:03.549340+00:00",
+    "result": "passed_with_skips",
+    "platform": "win32",
+    "python": "3.10.19",
+    "checks": [
+      {"check": "python", "total": 346, "passed": 342, "skipped": 4, "exit_code": 0, "seconds": 112.563},
+      {"check": "node", "total": 37, "passed": 37, "skipped": 0, "exit_code": 0, "seconds": 0.234},
+      {"check": "map", "result": "current", "exit_code": 0, "seconds": 0.297}
+    ],
+    "skips": "Windows symbolic-link privileges; existing four skipped cases. No native Codex/browser/provider calls in CI."
+  },
+  "final_review": {
+    "index_export": "18 staged files exported; feature-map current; changed source bytes match tested worktree; all UTF-8/LF. Original 34-line README additions excluded from staging.",
+    "diff_check": "Passed except the intentionally preserved single-space blank context line in pilot-fix.patch; git apply --numstat parses the historical patch as 15 additions / 4 deletions in task_policy.py.",
+    "cleanup": {
+      "inventory": "project-file-lifecycle session_inventory.py run with explicit 2026-11-07T12:45:11Z start and project root before cleanup",
+      "root_removed_files": 257,
+      "root_removed_bytes": 14690166,
+      "root_removed": [".agent-tmp/cold-start-20261107", ".agent-tmp/stage3-control-20261107", ".agent-tmp/maintenance-control-20261107", ".playwright-mcp/page-2026-11-07T13-08-30-710Z.yml"],
+      "controller_scratch": "Stage3 executor/controller outputs cleaned after evidence transfer; final task finish reclaimed its ownership root.",
+      "remaining": "Empty pilot directory E:/PG/MA4-maintenance-pilot-20261107 retained because Windows refused removal; see maintenance.cleanup. Existing MA4 runtime records retained. Old task materials and unrelated uncommitted changes preserved.",
+      "new_backups_or_scheduled_services": 0
+    },
+    "approval_review": "One combined metadata-update shell command was rejected with blocked by policy and did not execute. No detailed reason was supplied; scoped per-file patches succeeded. It was not a deletion command."
+  },
+  "publication": {
+    "branch": "feat/task-workflows-20261107",
+    "remote": "origin",
+    "status": "pending_push",
+    "pr": "not_created",
+    "cloud_ci": "not_run_for_this_branch",
+    "blocker": "GitHub browser not signed in; gh unavailable; earlier authorized API credential lookup found none.",
+    "compare_url": "https://github.com/dticpw/MA4-win/compare/main...feat/task-workflows-20261107?expand=1",
+    "title": "增强任务诊断、架构检查与可复用任务维护工具",
+    "body": "## 变化与原因\n\n任务判断集中到纯规则模块，未知执行者状态阻止确认/恢复但允许保存草案；保留原任务接口和数据格式。新增隔离任务动作与五场景复验，以及显式失败捕获、限时修复、只读查回、独立审查关闭的维护入口。分支继承此前尚未合并的验证工具、任务诊断和规则拆分。\n\n## 同步维护\n\n功能地图覆盖会话、确认/派工、报告/恢复、有限维护，登记对应源码和证据。CI纳入工具逻辑与架构检查；真实原生场景需显式运行。Windows本地run ci：346项Python（342通过、4项链接权限跳过），37项Node，地图current。run task-flows五场景通过，使用独立Codex与本机模拟模型。真实中控开发和一次真实修复演练经独立审查完成；网页加载后原12会话及7任务保持，原生后台未重启。首次失败和返工见validation/iteration-pilot.json。\n\n## 风险与回退\n\nLinux未实测，维护事件存储尚未按两系统分开；capture无整组硬超时，任务次数和文件范围不是OS沙箱。无新增定时器或扫描服务，未证明长期提速。前端未新改，复用既有浏览器证据。停用工具可回退入口；规则修复可独立回退，保留任务及会话数据。"
+  }
+}

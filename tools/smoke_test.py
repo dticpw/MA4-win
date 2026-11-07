@@ -42,8 +42,11 @@ class MockModel(BaseHTTPRequestHandler):
         pass
 
     def do_POST(self):
-        self.rfile.read(int(self.headers["Content-Length"]))
+        body = self.rfile.read(int(self.headers["Content-Length"]))
         self.server.request_count += 1
+        script = getattr(self.server, "script", None)
+        if script is not None:
+            return self.scripted_response(script, json.loads(body))
         message_id = "msg_" + uuid.uuid4().hex
         response_id = "resp_" + uuid.uuid4().hex
         text = "本机模拟回复：Windows 共享会话连接成功。"
@@ -87,6 +90,36 @@ class MockModel(BaseHTTPRequestHandler):
             pass
         self.close_connection = True
 
+    def scripted_response(self, script, payload):
+        """Opt-in local model hook; the ordinary smoke response is unchanged."""
+        response_id = "resp_" + uuid.uuid4().hex
+        item, gate = script.response(payload)
+        events = [
+            {"type": "response.created", "response": {"id": response_id,
+                "object": "response", "status": "in_progress", "output": []}},
+            {"type": "response.output_item.added", "output_index": 0,
+                "item": dict(item, status="in_progress")},
+            {"type": "response.output_item.done", "output_index": 0, "item": item},
+            {"type": "response.completed", "response": {"id": response_id,
+                "object": "response", "status": "completed", "output": [item],
+                "usage": {"input_tokens": 1, "output_tokens": 8, "total_tokens": 9}}},
+        ]
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Connection", "close")
+        self.end_headers()
+        try:
+            for event in events:
+                self.wfile.write(("event: " + event["type"] + "\ndata: " +
+                    json.dumps(event, ensure_ascii=False) + "\n\n").encode("utf-8"))
+                self.wfile.flush()
+                if event["type"] == "response.created" and gate is not None:
+                    if not gate.wait(45):
+                        return
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            pass
+        self.close_connection = True
+
 
 class Side:
     def __init__(self, value):
@@ -96,15 +129,26 @@ class Side:
         return self.value
 
 
+def stop_owned_process(process):
+    """Only the Popen handle created by this fixture; never discover other PIDs."""
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+
+
 @contextlib.contextmanager
-def fixture(port=0):
+def fixture(port=0, *, model_script=None):
     temp_parent = Path(os.environ.get("MA4_TEST_SCRATCH", ROOT / ".agent-tmp")).resolve()
     if not temp_parent.is_relative_to((ROOT / ".agent-tmp").resolve()):
         raise ValueError("fixture scratch must stay under project .agent-tmp")
     if port == 8764:
         raise ValueError("fixture refuses live port 8764")
     temp_parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="smoke-", dir=temp_parent) as directory:
+    with tempfile.TemporaryDirectory(prefix="smoke-", dir=temp_parent) as directory, contextlib.ExitStack() as resources:
         work = Path(directory).resolve()
         assert work.is_relative_to(temp_parent.resolve())
         home = work / "codex-home"
@@ -112,11 +156,14 @@ def fixture(port=0):
         model = ThreadingHTTPServer(("127.0.0.1", 0), MockModel)
         model.daemon_threads = True
         model.request_count = 0
+        model.script = model_script
         model.delay = .04
         model.request_started = threading.Event()
         model.release_response = threading.Event()
         model.release_response.set()
         threading.Thread(target=model.serve_forever, daemon=True).start()
+        resources.callback(model.server_close)
+        resources.callback(model.shutdown)
         (home / "config.toml").write_text(
             'model = "gpt-5"\nmodel_provider = "mock"\napproval_policy = "never"\n'
             'sandbox_mode = "read-only"\n[features]\nplugins = false\napps = false\ncode_mode_host = false\n[model_providers.mock]\nname = "MA4 local test"\n'
@@ -127,16 +174,30 @@ def fixture(port=0):
             endpoint = "ws://127.0.0.1:%d" % free.getsockname()[1]
         binary = find_codex()
         with (work / "backend.log").open("w", encoding="utf-8", newline="\n") as log:
-            options = {"env": child_environment(binary, home), "stdin": subprocess.DEVNULL,
+            env = child_environment(binary, home)
+            # Opt-in task scenarios must not inherit credentials or global homes.
+            if model_script is not None:
+                env = {k: v for k, v in env.items() if k.upper() in {
+                    "PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT",
+                    "PROCESSOR_ARCHITECTURE", "NUMBER_OF_PROCESSORS"}}
+                profile = work / "profile"
+                profile.mkdir()
+                env.update(CODEX_HOME=str(home), HOME=str(profile), USERPROFILE=str(profile),
+                           APPDATA=str(profile / "AppData/Roaming"),
+                           LOCALAPPDATA=str(profile / "AppData/Local"),
+                           TEMP=str(work), TMP=str(work), TMPDIR=str(work))
+            options = {"env": env, "stdin": subprocess.DEVNULL,
                        "stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
             if os.name == "nt":
                 options["creationflags"] = subprocess.CREATE_NO_WINDOW
             process = subprocess.Popen([binary, "app-server", "--listen", endpoint], **options)
+            resources.callback(stop_owned_process, process)
             client = hub = web = None
             try:
                 for _ in range(100):
                     try:
                         client = AppServer(endpoint, client_name="ma4_smoke_terminal")
+                        resources.callback(client.close)
                         break
                     except OSError:
                         if process.poll() is not None:
@@ -145,6 +206,7 @@ def fixture(port=0):
                 if client is None:
                     raise RuntimeError("test backend did not start")
                 hub = Hub(work / "state", binary, endpoint, poll_seconds=.1, codex_home=str(home))
+                resources.callback(hub.close)
                 hub.start()
                 wait_for(lambda: hub.daemon["connected"])
                 web = Server(("127.0.0.1", port), hub,
@@ -155,6 +217,8 @@ def fixture(port=0):
                                                        "backendPid": process.pid, "endpoint": endpoint,
                                                        "codexHome": str(home), "dataDir": str(work / "state")}})
                 threading.Thread(target=web.serve_forever, daemon=True).start()
+                resources.callback(web.server_close)
+                resources.callback(web.shutdown)
                 opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
                 base = "http://127.0.0.1:%d" % web.server_port
 
@@ -173,17 +237,8 @@ def fixture(port=0):
                        "process": process}
             finally:
                 model.release_response.set()
-                if web:
-                    web.shutdown()
-                    web.server_close()
-                if hub:
-                    hub.close()
-                if client:
-                    client.close()
-                process.terminate()
-                process.wait(timeout=10)
-                model.shutdown()
-                model.server_close()
+                if model_script is not None:
+                    model_script.release_all()
 
 
 def checks(f):

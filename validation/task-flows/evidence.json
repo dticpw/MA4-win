@@ -1,0 +1,3001 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-11-07T13:10:23.903608+00:00",
+  "result": "passed_with_explicit_limits",
+  "readOrder": "最新注册时序返修先读 registrationFollowup（根失败/解释边界/模拟与原生证据/版本）；historyFollowup及independentReview保留原时点证据；versions仍为最初五场景源码，新测源码在各followup中。",
+  "summary": {
+    "newlyVerified": {
+      "namedNativeScenarios": 5,
+      "allPassed": true,
+      "modelRequestsInFinalNamedRun": 34,
+      "unitTests": {
+        "total": 48,
+        "passed": 48,
+        "skipped": 0,
+        "newModules": 31,
+        "existingTestVerify": 17
+      },
+      "relatedChecks": {
+        "pythonTotal": 112,
+        "pythonPassed": 108,
+        "pythonSkipped": 4,
+        "nodePassed": 14
+      },
+      "ordinarySmokeChecks": 9,
+      "intentionalFailureExitCode": 1,
+      "allOwnedFixturesReclaimed": true
+    },
+    "reused": "复用 smoke.fixture/doctor 与已有 HTTP/原生工具；普通会话 JS 的已核验定位/有限动作方法及其未变源文件。旧 UI 结果只作已有方法依据，不当作本轮浏览器实测；默认 smoke 已新测。",
+    "openImplementationFailures": [],
+    "temporaryDisposition": "10个本轮JSON/日志、共111281字节已清理，executor空目录已移除；各fixture自行回收；父级.ma4-owner.json与其他维护者/旧材料保留。",
+    "historyFollowup": "history已接入有限组合；新增3项回归、相关23项通过；18动作真实组合与6条历史摘要通过，10次本机模拟请求。原五场景及独立证据按代码影响复用，旧运行摘要保留。",
+    "registrationFollowup": "修复自有派工/交接的注册快照窗口：32项相关单测分两次通过，3个原生场景23次模拟请求通过；另以真实注册时序注入通过5次模拟请求，核对只创建/派工一次及精确ID。根失败瞬间未知ID未捕获，保留此限制；最终统一入口待根复验。"
+  },
+  "versions": {
+    "gitHeadAtEvidence": "a92e507bc96753959da958315502f4ad36270e56",
+    "python": "3.10.19",
+    "platform": "win32",
+    "sources": {
+      "tools/task_actions.py": "8c0a22e89ce0c5a4f29725df01f60a4ee54c603dbc015b5dbf8754e880516792",
+      "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+      "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+      "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+      "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+      "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+      "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+      "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+      "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+    },
+    "testSources": {
+      "test_task_actions.py": "5404267ffadb59ea76f179ea70380d5396848ff0505d56d76b9c1de24cdab350",
+      "test_task_scenarios.py": "4bae0689c65ceddc0ee9227e21b3a966f22dcbfd54f65844b6b7b11e037a1e3c",
+      "test_verify.py": "1e2645825c677637907cdb4cff2e37785a20eeddfaa823f993ae24fcfda528c8",
+      "test_controllers.py": "33d55fa80206eed44d15f4f8faede00182cc9f6cb8e90e9f49b2196452e6384c",
+      "test_task_policy.py": "af467fafb22698feddbdc84b2b1960acb7e38685c2420816a4dcdd5426446a81",
+      "test_architecture.py": "4f6ec4a77313364b3d63f7b2bab3c6b82231fdab5182fd57ed866336fc5c8563"
+    }
+  },
+  "modelBoundary": {
+    "native": "installed Codex 0.167.0, independent ws://127.0.0.1 random endpoint",
+    "provider": "local Responses scripted model only; 0 external provider requests in tool verification",
+    "executorDevelopment": "本制作会话由中控授权调用开发模型；与验证中的模拟模型证据分开",
+    "isolation": "own CODEX_HOME/profile/data/TEMP; task mock child uses allowlisted environment; no user session copy, credential read, dependency install, live 8764 or existing daemon restart",
+    "faultInjection": "reconnect-dedup wraps only own Hub.send_raw: original native acceptance first, then one TimeoutError; production reconciliation reads real history; no task state assignment; not supplier failure evidence"
+  },
+  "scenarios": [
+    {
+      "name": "confirmation",
+      "result": "passed",
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "b1edbfd132c54239",
+          "threadId": "01a1b61e-c64f-73e3-839a-2e55a2364c44"
+        },
+        {
+          "step": 2,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b61e-c64f-73e3-839a-2e55a2364c44",
+          "turnId": "01a1b61e-c8fe-7cd1-ba57-4495cc0f15e9",
+          "tool": "ma4_dispatch",
+          "success": false,
+          "output": "{\"error\": \"任务未启动、已暂停或正在交接\"}"
+        },
+        {
+          "step": 3,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 4,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 3,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 5,
+          "operation": "confirm-stale",
+          "task": "main",
+          "status": 400,
+          "error": "HTTP 400 /api/tasks/confirm {\"error\": \"草案已更新，请重新打开确认窗口查看最新内容\"}"
+        },
+        {
+          "step": 6,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 7,
+          "operation": "confirm",
+          "task": "main",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794057433.5584736
+          },
+          "resumed": true
+        },
+        {
+          "step": 8,
+          "operation": "pause",
+          "task": "main",
+          "paused": true,
+          "interruptErrors": []
+        },
+        {
+          "step": 9,
+          "operation": "wait",
+          "task": "main",
+          "condition": "paused-settled",
+          "status": "paused",
+          "pending": 0
+        },
+        {
+          "step": 10,
+          "operation": "resume",
+          "task": "main",
+          "resumed": true
+        },
+        {
+          "step": 11,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 12,
+          "operation": "pause",
+          "task": "main",
+          "paused": true,
+          "interruptErrors": []
+        },
+        {
+          "step": 13,
+          "operation": "wait",
+          "task": "main",
+          "condition": "paused-settled",
+          "status": "paused",
+          "pending": 0
+        },
+        {
+          "step": 14,
+          "operation": "handoff",
+          "task": "main",
+          "previous": "01a1b61e-c64f-73e3-839a-2e55a2364c44",
+          "current": "01a1b61e-cbf1-7ea0-9ac8-5e13d65208ca",
+          "retainedReports": []
+        },
+        {
+          "step": 15,
+          "operation": "resume",
+          "task": "main",
+          "resumed": true
+        },
+        {
+          "step": 16,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 17,
+          "operation": "fixed-budget-preserved",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794057433.5584736
+          },
+          "taskId": "b1edbfd132c54239"
+        }
+      ],
+      "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+      "instance": {
+        "url": "http://127.0.0.1:2230",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-c5a0pwy9",
+        "verification": {
+          "instance": "8248edfee11b4c29a86cdeae9fe6e59b",
+          "ownerPid": 36116,
+          "backendPid": 25068,
+          "endpoint": "ws://127.0.0.1:2227",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-c5a0pwy9\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-c5a0pwy9\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "modelToolCalls": [
+        {
+          "marker": "TASK-FLOW-COMMAND-1d085f593b464339a6b2c2edbc0e9013",
+          "tool": "ma4_dispatch",
+          "wireName": "ma4_dispatch"
+        }
+      ],
+      "advertisedTaskTools": [
+        "ma4_dispatch",
+        "ma4_control",
+        "ma4_artifacts"
+      ],
+      "modelRequests": 5,
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      }
+    },
+    {
+      "name": "dispatch-report",
+      "result": "passed",
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "8b74f04e48a84304",
+          "threadId": "01a1b61e-d710-76d2-9b4d-8c34c8d38960"
+        },
+        {
+          "step": 2,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 3,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 4,
+          "operation": "confirm",
+          "task": "main",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794057437.5940957
+          },
+          "resumed": true
+        },
+        {
+          "step": 5,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b61e-d710-76d2-9b4d-8c34c8d38960",
+          "turnId": "01a1b61e-db34-7740-867a-d528e1edf0b5",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b61e-db65-76a0-89ff-099fce07da06\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-5aqdn7_0\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-5aqdn7_0\\\\.agent-tmp\\\\ma4-8b74f04e48a84304\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 6,
+          "operation": "wait",
+          "task": "main",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 7,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61e-db65-76a0-89ff-099fce07da06:01a1b61e-de09-7563-96e6-c7416c2967a9": {
+              "worker": "worker",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        }
+      ],
+      "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+      "instance": {
+        "url": "http://127.0.0.1:2350",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-5aqdn7_0",
+        "verification": {
+          "instance": "5572ad9d4e4949a2862139f0636b6d19",
+          "ownerPid": 36116,
+          "backendPid": 32852,
+          "endpoint": "ws://127.0.0.1:2347",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-5aqdn7_0\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-5aqdn7_0\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "modelToolCalls": [
+        {
+          "marker": "TASK-FLOW-COMMAND-6161fba8e6ab40bdb90175247b11ef8e",
+          "tool": "ma4_dispatch",
+          "wireName": "ma4_dispatch"
+        }
+      ],
+      "advertisedTaskTools": [
+        "ma4_dispatch",
+        "ma4_control",
+        "ma4_artifacts"
+      ],
+      "modelRequests": 5,
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      }
+    },
+    {
+      "name": "pause-resume",
+      "result": "passed",
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "a22f1d7bee414975",
+          "threadId": "01a1b61e-e707-7741-bd35-707b2e69b22a"
+        },
+        {
+          "step": 2,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 3,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 4,
+          "operation": "confirm",
+          "task": "main",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794057441.7538877
+          },
+          "resumed": true
+        },
+        {
+          "step": 5,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b61e-e707-7741-bd35-707b2e69b22a",
+          "turnId": "01a1b61e-eb5d-77a2-92a0-b53181a09681",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b61e-eb8c-70a2-bcaa-97b65b124192\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-ca9g9_q0\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-ca9g9_q0\\\\.agent-tmp\\\\ma4-a22f1d7bee414975\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 6,
+          "operation": "wait",
+          "task": "main",
+          "condition": "worker-running",
+          "status": "waiting",
+          "pending": 0
+        },
+        {
+          "step": 7,
+          "operation": "pause",
+          "task": "main",
+          "paused": true,
+          "interruptErrors": []
+        },
+        {
+          "step": 8,
+          "operation": "wait",
+          "task": "main",
+          "condition": "paused-settled",
+          "status": "paused",
+          "pending": 1
+        },
+        {
+          "step": 9,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61e-eb8c-70a2-bcaa-97b65b124192:01a1b61e-ee1e-7bb0-aa3c-9fca75765a3a": {
+              "worker": "worker",
+              "status": "interrupted",
+              "delivered": 0,
+              "pending": 1,
+              "contentMatchesNative": false
+            }
+          }
+        },
+        {
+          "step": 10,
+          "operation": "resume",
+          "task": "main",
+          "resumed": true
+        },
+        {
+          "step": 11,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 12,
+          "operation": "wait",
+          "task": "main",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 13,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61e-eb8c-70a2-bcaa-97b65b124192:01a1b61e-ee1e-7bb0-aa3c-9fca75765a3a": {
+              "worker": "worker",
+              "status": "interrupted",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": false
+            }
+          }
+        },
+        {
+          "step": 14,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b61e-e707-7741-bd35-707b2e69b22a",
+          "turnId": "01a1b61e-f02f-7812-8392-ef15fa8f849a",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b61e-eb8c-70a2-bcaa-97b65b124192\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-ca9g9_q0\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-ca9g9_q0\\\\.agent-tmp\\\\ma4-a22f1d7bee414975\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 15,
+          "operation": "wait",
+          "task": "main",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 16,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61e-eb8c-70a2-bcaa-97b65b124192:01a1b61e-ee1e-7bb0-aa3c-9fca75765a3a": {
+              "worker": "worker",
+              "status": "interrupted",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": false
+            },
+            "01a1b61e-eb8c-70a2-bcaa-97b65b124192:01a1b61e-f079-7b31-9cd5-0efa166d7fac": {
+              "worker": "worker",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        }
+      ],
+      "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+      "instance": {
+        "url": "http://127.0.0.1:12832",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-ca9g9_q0",
+        "verification": {
+          "instance": "a3a7bba6b7b941bd82a3295c8d42b463",
+          "ownerPid": 36116,
+          "backendPid": 38704,
+          "endpoint": "ws://127.0.0.1:12829",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-ca9g9_q0\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-ca9g9_q0\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "modelToolCalls": [
+        {
+          "marker": "TASK-FLOW-COMMAND-5aed2ed8ffca430dacb830d1bfd5447e",
+          "tool": "ma4_dispatch",
+          "wireName": "ma4_dispatch"
+        },
+        {
+          "marker": "TASK-FLOW-COMMAND-9d6eaab999dc4de0b593b9b6f3ba980b",
+          "tool": "ma4_dispatch",
+          "wireName": "ma4_dispatch"
+        }
+      ],
+      "advertisedTaskTools": [
+        "ma4_dispatch",
+        "ma4_control",
+        "ma4_artifacts"
+      ],
+      "modelRequests": 10,
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      }
+    },
+    {
+      "name": "handoff",
+      "result": "passed",
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "20b49a254f2f492f",
+          "threadId": "01a1b61e-f9af-7dd3-8148-8987ebb6d1e0"
+        },
+        {
+          "step": 2,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 3,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 4,
+          "operation": "confirm",
+          "task": "main",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794057446.4896092
+          },
+          "resumed": true
+        },
+        {
+          "step": 5,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b61e-f9af-7dd3-8148-8987ebb6d1e0",
+          "turnId": "01a1b61e-fdf0-7a83-802e-6a4123e22797",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b61e-fe1d-7db0-a48e-34c026d0acac\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-kn6ico6c\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-kn6ico6c\\\\.agent-tmp\\\\ma4-20b49a254f2f492f\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 6,
+          "operation": "wait",
+          "task": "main",
+          "condition": "worker-running",
+          "status": "waiting",
+          "pending": 0
+        },
+        {
+          "step": 7,
+          "operation": "pause",
+          "task": "main",
+          "paused": true,
+          "interruptErrors": []
+        },
+        {
+          "step": 8,
+          "operation": "wait",
+          "task": "main",
+          "condition": "paused-settled",
+          "status": "paused",
+          "pending": 1
+        },
+        {
+          "step": 9,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61e-fe1d-7db0-a48e-34c026d0acac:01a1b61f-00b1-7391-9c5f-95987e64da2c": {
+              "worker": "worker",
+              "status": "interrupted",
+              "delivered": 0,
+              "pending": 1,
+              "contentMatchesNative": false
+            }
+          }
+        },
+        {
+          "step": 10,
+          "operation": "handoff",
+          "task": "main",
+          "previous": "01a1b61e-f9af-7dd3-8148-8987ebb6d1e0",
+          "current": "01a1b61f-015e-7473-ba36-a5cb8259ea68",
+          "retainedReports": [
+            "01a1b61e-fe1d-7db0-a48e-34c026d0acac:01a1b61f-00b1-7391-9c5f-95987e64da2c"
+          ]
+        },
+        {
+          "step": 11,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b61e-f9af-7dd3-8148-8987ebb6d1e0",
+          "turnId": "01a1b61f-03d0-7b23-b9d0-fbb4e89e2910",
+          "tool": "ma4_dispatch",
+          "success": false,
+          "output": "{\"error\": \"仅当前中控可调用本任务工具\"}"
+        },
+        {
+          "step": 12,
+          "operation": "resume",
+          "task": "main",
+          "resumed": true
+        },
+        {
+          "step": 13,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 14,
+          "operation": "wait",
+          "task": "main",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 15,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61e-fe1d-7db0-a48e-34c026d0acac:01a1b61f-00b1-7391-9c5f-95987e64da2c": {
+              "worker": "worker",
+              "status": "interrupted",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": false
+            }
+          }
+        },
+        {
+          "step": 16,
+          "operation": "replacement-context",
+          "target": true,
+          "budget": true,
+          "workers": true,
+          "handoffSummary": true
+        }
+      ],
+      "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+      "instance": {
+        "url": "http://127.0.0.1:14786",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-kn6ico6c",
+        "verification": {
+          "instance": "0a40c948595a4bc9806199c1f1737a3b",
+          "ownerPid": 36116,
+          "backendPid": 31340,
+          "endpoint": "ws://127.0.0.1:14783",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-kn6ico6c\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-kn6ico6c\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "modelToolCalls": [
+        {
+          "marker": "TASK-FLOW-COMMAND-e600f0dc5059446cb02fdf82cd976163",
+          "tool": "ma4_dispatch",
+          "wireName": "ma4_dispatch"
+        },
+        {
+          "marker": "TASK-FLOW-COMMAND-e2354e023d934c41a84623b16c8c58d7",
+          "tool": "ma4_dispatch",
+          "wireName": "ma4_dispatch"
+        }
+      ],
+      "advertisedTaskTools": [
+        "ma4_dispatch",
+        "ma4_control",
+        "ma4_artifacts"
+      ],
+      "modelRequests": 8,
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      }
+    },
+    {
+      "name": "reconnect-dedup",
+      "result": "passed",
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "85e72b049da141a4",
+          "threadId": "01a1b61f-0dad-7941-9523-8d0100e18759"
+        },
+        {
+          "step": 2,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 3,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 4,
+          "operation": "confirm",
+          "task": "main",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794057451.588869
+          },
+          "resumed": true
+        },
+        {
+          "step": 5,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b61f-0dad-7941-9523-8d0100e18759",
+          "turnId": "01a1b61f-11d7-7f20-934c-7cfa92b29bc6",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b61f-120f-72b1-8052-4d62786e9e99\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-6oqj8g29\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-6oqj8g29\\\\.agent-tmp\\\\ma4-85e72b049da141a4\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 6,
+          "operation": "wait",
+          "task": "main",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 7,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61f-120f-72b1-8052-4d62786e9e99:01a1b61f-146b-7181-af57-aba6742af20a": {
+              "worker": "worker",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        },
+        {
+          "step": 8,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61f-120f-72b1-8052-4d62786e9e99:01a1b61f-146b-7181-af57-aba6742af20a": {
+              "worker": "worker",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        },
+        {
+          "step": 9,
+          "operation": "reconnect",
+          "task": "main",
+          "backendPid": 30460,
+          "independentClientStillConnected": true
+        },
+        {
+          "step": 10,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61f-120f-72b1-8052-4d62786e9e99:01a1b61f-146b-7181-af57-aba6742af20a": {
+              "worker": "worker",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        },
+        {
+          "step": 11,
+          "operation": "pause",
+          "task": "main",
+          "paused": true,
+          "interruptErrors": []
+        },
+        {
+          "step": 12,
+          "operation": "wait",
+          "task": "main",
+          "condition": "paused-settled",
+          "status": "paused",
+          "pending": 0
+        },
+        {
+          "step": 13,
+          "operation": "reconnect",
+          "task": "main",
+          "backendPid": 30460,
+          "independentClientStillConnected": true
+        },
+        {
+          "step": 14,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 15,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b61f-120f-72b1-8052-4d62786e9e99:01a1b61f-146b-7181-af57-aba6742af20a": {
+              "worker": "worker",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        },
+        {
+          "step": 16,
+          "operation": "uncertain-send-reconciled",
+          "evidenceLayer": "logic injection after real native acceptance",
+          "httpStatus": 503,
+          "nativeTurns": 1,
+          "automaticResends": 0,
+          "requestId": "a2b9975724224a11ad3deec7208a36bd",
+          "turnId": "01a1b61f-16ab-79b3-b0e0-536e127362ea"
+        }
+      ],
+      "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+      "instance": {
+        "url": "http://127.0.0.1:7210",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-6oqj8g29",
+        "verification": {
+          "instance": "695a99bd709c4837941f53059e10914a",
+          "ownerPid": 36116,
+          "backendPid": 30460,
+          "endpoint": "ws://127.0.0.1:7202",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-6oqj8g29\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-6oqj8g29\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "modelToolCalls": [
+        {
+          "marker": "TASK-FLOW-COMMAND-f02a9dfdf2774919a7cf459487f51aba",
+          "tool": "ma4_dispatch",
+          "wireName": "ma4_dispatch"
+        }
+      ],
+      "advertisedTaskTools": [
+        "ma4_dispatch",
+        "ma4_control",
+        "ma4_artifacts"
+      ],
+      "modelRequests": 6,
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      }
+    }
+  ],
+  "ordinarySmoke": {
+    "result": "passed",
+    "backend": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) dumb (ma4_smoke_terminal; 0.1)",
+    "tests": [
+      "empty_thread",
+      "http_send_history",
+      "send_deduplication",
+      "shared_stream",
+      "steer",
+      "interrupt",
+      "rename_pin",
+      "reconnect_preserves_backend",
+      "http_sse"
+    ],
+    "model": "local mock; no external model calls"
+  },
+  "failureCleanup": {
+    "expectedExitCode": 1,
+    "actualExitCode": 1,
+    "scenario": {
+      "name": "failure-cleanup",
+      "result": "failed",
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "0f33990f090f4e9f",
+          "threadId": "01a1b61d-3792-7993-89e9-50027ad0c4ff"
+        },
+        {
+          "step": 2,
+          "operation": "intentional-failure",
+          "reason": "verify nonzero CLI exit and owned fixture cleanup"
+        }
+      ],
+      "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+      "instance": {
+        "url": "http://127.0.0.1:2528",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-xzxv1_qu",
+        "verification": {
+          "instance": "f226989441e84b7ba88449e4aa51357a",
+          "ownerPid": 33992,
+          "backendPid": 36988,
+          "endpoint": "ws://127.0.0.1:6058",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-xzxv1_qu\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-xzxv1_qu\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "error": "AssertionError: TASK-FLOW intentional failure; this scenario must exit 1",
+      "modelToolCalls": [],
+      "advertisedTaskTools": [],
+      "modelRequests": 0,
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      }
+    },
+    "sourcesAtRun": {
+      "tools/task_actions.py": "bf10977109b899756b9e8e2ef8fa6ad269b24b28eb464c48e8f9bcc7fbc9dbfc",
+      "tools/task_scenarios.py": "b8baf1a890503aa51b8fc21e80685b247926d8dba7eafba0669c6e309eff8d2e",
+      "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+      "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+      "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+      "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+      "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+      "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+      "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+    },
+    "reuseAfterFinalChanges": "后续只加强 TaskActions.wait/报告与续派判定；failure_cleanup/create 和 smoke.fixture 回收实现未变。最终五场景再次验证同一回收实现。"
+  },
+  "firstKeyFailure": {
+    "scenario": "reconnect-dedup",
+    "error": "AttributeError: 'NoneType' object has no attribute 'closed'",
+    "lastSuccessfulStep": {
+      "step": 12,
+      "operation": "wait",
+      "task": "main",
+      "condition": "paused-settled",
+      "status": "paused",
+      "pending": 0
+    },
+    "cleanup": {
+      "backendExited": true,
+      "webClosed": true,
+      "fixtureRemoved": true
+    },
+    "cause": "自有连接切换时 hub.client 短暂为 None，等待谓词在访问 closed 前缺少 None 判断；属于验证工具缺陷，未改业务。",
+    "fix": "先判断 client is not None；补低成本瞬时 None 测试，定点 reconnect-dedup 通过；最终具名全组通过。",
+    "reproductionSources": {
+      "tools/task_actions.py": "17b9e89a6e7fed4a718ac43008ee7f3e5a99e9ae8c97df9b45e0039fa35eee86",
+      "tools/task_scenarios.py": "23fae98dc7499bfda2c89bd3367e0b56e83c06b347f0be18b4aa84fb9911d5d0",
+      "tools/smoke_test.py": "a363f14a9583df1450709e8f5f76cbc3a360ec353955dd5307b1d64843d5097c",
+      "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+      "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+      "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+      "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+      "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+      "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+    },
+    "finalRegression": "test_task_actions.TaskSafetyTests.test_reconnect_wait_tolerates_a_temporarily_missing_client"
+  },
+  "commands": [
+    "D:/python/anaconda/envs/th123/python.exe -B -X utf8 -m unittest -v test_task_actions test_task_scenarios test_verify",
+    "D:/python/anaconda/envs/th123/python.exe -B -X utf8 tools/task_scenarios.py run all --scratch-root .agent-tmp/ma4-a4e72a99d4ae43e2/executor --output .agent-tmp/ma4-a4e72a99d4ae43e2/executor/acceptance.json",
+    "D:/python/anaconda/envs/th123/python.exe -B -X utf8 tools/task_scenarios.py run failure-cleanup --scratch-root .agent-tmp/ma4-a4e72a99d4ae43e2/executor",
+    "D:/python/anaconda/envs/th123/python.exe -B -X utf8 tools/smoke_test.py",
+    "D:/python/anaconda/envs/th123/python.exe -B -X utf8 tools/verify.py run tasks architecture --output .agent-tmp/ma4-a4e72a99d4ae43e2/executor/related-checks"
+  ],
+  "commandEnvironment": "MA4_TEST_SCRATCH, TEMP, TMP, TMPDIR 均指向本任务 executor；运行中子进程更细分到自有 fixture/profile。",
+  "relatedChecks": {
+    "result": "passed_with_skips",
+    "at_utc": "2026-11-07T13:07:28.100296+00:00",
+    "platform": "win32",
+    "python": "3.10.19",
+    "profiles": [
+      "tasks",
+      "architecture"
+    ],
+    "ui_requested": false,
+    "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+  },
+  "relatedCheckCounts": [
+    {
+      "check": "python",
+      "argv": [
+        "D:\\python\\anaconda\\envs\\th123\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "unittest",
+        "-v",
+        "test_controllers",
+        "test_task_policy",
+        "test_architecture"
+      ],
+      "status": "passed_with_skips",
+      "exit_code": 0,
+      "counts": {
+        "total": 112,
+        "skipped": 4
+      },
+      "seconds": 15.968
+    },
+    {
+      "check": "node",
+      "argv": [
+        "node",
+        "--test",
+        "--test-reporter=tap",
+        "test_controllers.mjs"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "counts": {
+        "total": 14,
+        "passed": 14,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "seconds": 0.203
+    }
+  ],
+  "reusedEvidence": {
+    "path": "validation/round3/independent-review.json",
+    "readable": true,
+    "sha256": "95e09ed31b8fd0c7d3a14f5a171a7a893fb824427cab4ec623b0041a5a4df4ba",
+    "unchangedInputs": {
+      "tools/session_actions.mjs": {
+        "sha256": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
+        "matchesPriorRecord": true
+      },
+      "tools/session_cli.mjs": {
+        "sha256": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
+        "matchesPriorRecord": true
+      },
+      "tools/ui_check.mjs": {
+        "sha256": "cce6a2c174991c3898e325ed8d23f41a86ac990576950744f1821b1517a9f3d5",
+        "matchesPriorRecord": true
+      },
+      "tools/browser.mjs": {
+        "sha256": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
+        "matchesPriorRecord": true
+      },
+      "server.py": {
+        "sha256": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "matchesPriorRecord": true
+      },
+      "hub.py": {
+        "sha256": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "matchesPriorRecord": true
+      },
+      "web/app.js": {
+        "sha256": "23037c4af9666ca3f56677a6643460153a83ee2ff4c898e596aab784b83bab1e",
+        "matchesPriorRecord": true
+      },
+      "test_session_actions.mjs": {
+        "sha256": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
+        "matchesPriorRecord": true
+      }
+    },
+    "validScope": "有限动作/历史匹配方法与未变普通会话 JS；仅用作无需重做页面路径的依据。Native仍为0.167.0，同机Windows；本轮未重新启动浏览器，旧UI整条通过不计入本轮。"
+  },
+  "limits": [
+    "Linux 实机未测，由派发者按项目看板交接；共享 Python 仅用标准库，无系统命令分叉。",
+    "未调用真实供应商，不证明供应商故障恢复、长期稳定性或无限运行。",
+    "未重跑浏览器或修改页面；动作入口仅面向自有隔离实例，不可接入真实8764。",
+    "4项既有符号链接检查因 Windows 权限跳过。",
+    "未运行最终整合 CI/map；README、FEATURE-MAP、verify.py、架构与其他维护者文件仅提建议。"
+  ],
+  "integrationSuggestions": [
+    "README：入口 list/run，五个正常具名场景及 failure-cleanup 必须退出1；本轮证据和模型边界；Linux未实测。",
+    "FEATURE-MAP：任务确认/报告恢复关联 task_actions.py/task_scenarios.py 与两个轻量测试；把原生场景标为显式 opt-in。",
+    "verify：tooling/CI 只纳入 test_task_actions/test_task_scenarios；task-flows 单独 run all，不进入默认CI；结果按真实退出码和JSON判定。现场已看到其他维护者接入此形态，本执行者未写。",
+    "架构：动作层只组合 HTTP 与受控原生工具；task_policy/Controllers 继续为业务判断/副作用权威。人工核对功能地图摘要后再登记，不自动刷新为通过。"
+  ],
+  "fileDisposition": {
+    "formal": [
+      "tools/task_actions.py",
+      "tools/task_scenarios.py",
+      "tools/smoke_test.py",
+      "test_task_actions.py",
+      "test_task_scenarios.py",
+      "validation/task-flows/evidence.json"
+    ],
+    "temporaryRoot": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor",
+    "parentOwnershipMarker": "保留 .agent-tmp/ma4-a4e72a99d4ae43e2/.ma4-owner.json；不改旧材料。",
+    "backups": 0,
+    "persistentServices": 0,
+    "commitsOrPushes": 0,
+    "cleanupCompleted": true,
+    "removedFiles": 10,
+    "removedBytes": 111281,
+    "executorDirectoryRemoved": true,
+    "parentOwnershipMarkerPreserved": true,
+    "inventory": {
+      "command": "session_inventory.py --since 2026-11-07T12:51:00+00:00 --root E:/PG/MA4-win --top 20 --json",
+      "exitCode": 0,
+      "scope": "仅将5个源码/测试文件和本 evidence.json 算作本执行者正式成果；其他维护者、运行数据、旧未提交内容均保留。"
+    },
+    "cleanupCheck": "清理10文件后空目录检查发现 verify 创建的 process-temp；核对 tools/verify.py 创建位置并确认空目录后删除，未递归处理未知内容。",
+    "independentReviewCleanup": {
+      "removedFiles": 2,
+      "removedBytes": 20602,
+      "reviewDirectoryRemoved": true,
+      "parentOwnershipMarkerPreserved": true
+    },
+    "independentInventory": {
+      "command": "D:/python/anaconda/envs/th123/python.exe -B -X utf8 C:/Users/DTICPW/agent-workflows/skills/project-file-lifecycle/scripts/session_inventory.py --since 2026-11-07T12:50:00+00:00 --root E:/PG/MA4-win --top 20 --json",
+      "exitCode": 0,
+      "taskFormalFileCount": 6,
+      "ownTemporaryRemaining": [
+        ".agent-tmp/ma4-a4e72a99d4ae43e2/.ma4-owner.json"
+      ],
+      "otherWritersAndOldFiles": "清点发现的README/地图/架构/verify/maintenance/规则测试、运行数据及其他任务临时文件不属本任务写入，未清理。",
+      "backupOrArchiveCreated": false,
+      "persistentServiceOrScheduledTaskCreated": false
+    }
+  },
+  "historyFollowup": {
+    "atUtc": "2026-11-07T13:18:38.980553+00:00",
+    "result": "passed",
+    "initialFailure": {
+      "input": [
+        "create",
+        {
+          "op": "history",
+          "session": "host"
+        }
+      ],
+      "error": "unknown finite action",
+      "sourceSha256": "8c0a22e89ce0c5a4f29725df01f60a4ee54c603dbc015b5dbf8754e880516792",
+      "classification": "有限组合入口覆盖缺口"
+    },
+    "change": "validate_plan/run 增加 history/session；预检按任务登记先前 dispatch 的 worker 别名和 handoff，运行时仍经原 history 的身份与归属检查；步骤仅记会话/回合ID、状态、数量、items SHA256。",
+    "unitTests": {
+      "command": "D:/python/anaconda/envs/th123/python.exe -B -X utf8 -m unittest -v test_task_actions",
+      "total": 23,
+      "passed": 23,
+      "skipped": 0,
+      "addedTests": 3,
+      "exitCode": 0,
+      "sourceSha256": "be9483c002f1e3f373c3da7f369e1ec034a6a1b393169dcf9aef3438d3ada6f6"
+    },
+    "native": {
+      "name": "history-composition",
+      "plan": [
+        "create",
+        {
+          "op": "history",
+          "session": "host"
+        },
+        {
+          "op": "create",
+          "task": "second"
+        },
+        {
+          "op": "history",
+          "task": "second",
+          "session": "host"
+        },
+        "draft",
+        {
+          "op": "confirm",
+          "explicit": true
+        },
+        {
+          "op": "dispatch",
+          "worker": "alpha"
+        },
+        "wait",
+        "reports",
+        {
+          "op": "history",
+          "session": "alpha"
+        },
+        {
+          "op": "history",
+          "session": "host"
+        },
+        {
+          "op": "draft",
+          "task": "second"
+        },
+        {
+          "op": "confirm",
+          "task": "second",
+          "explicit": true
+        },
+        {
+          "op": "dispatch",
+          "task": "second",
+          "worker": "beta"
+        },
+        {
+          "op": "wait",
+          "task": "second"
+        },
+        {
+          "op": "reports",
+          "task": "second"
+        },
+        {
+          "op": "history",
+          "task": "second",
+          "session": "beta"
+        },
+        {
+          "op": "history",
+          "session": "alpha"
+        }
+      ],
+      "sources": {
+        "tools/task_actions.py": "f518629fd601e4351e3d5b64fbc24efba0efc7b7103ff1de077c579eacc27b8d",
+        "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+        "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+        "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+        "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+      },
+      "result": "passed",
+      "instance": {
+        "url": "http://127.0.0.1:1819",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-kgb8zpfe",
+        "verification": {
+          "instance": "ab5192b0b35245fa8f3e9d67b616534f",
+          "ownerPid": 32480,
+          "backendPid": 21260,
+          "endpoint": "ws://127.0.0.1:1815",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-kgb8zpfe\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-kgb8zpfe\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "980189fd6a624e69",
+          "threadId": "01a1b628-3213-78f1-8723-e31d0b4aa0b2"
+        },
+        {
+          "step": 2,
+          "operation": "history",
+          "task": "main",
+          "session": "host",
+          "threadId": "01a1b628-3213-78f1-8723-e31d0b4aa0b2",
+          "turnCount": 0,
+          "itemCount": 0,
+          "turns": []
+        },
+        {
+          "step": 3,
+          "operation": "create",
+          "task": "second",
+          "taskId": "64dcc791503d4082",
+          "threadId": "01a1b628-34ca-7050-8128-7061752200ae"
+        },
+        {
+          "step": 4,
+          "operation": "history",
+          "task": "second",
+          "session": "host",
+          "threadId": "01a1b628-34ca-7050-8128-7061752200ae",
+          "turnCount": 0,
+          "itemCount": 0,
+          "turns": []
+        },
+        {
+          "step": 5,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 6,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 7,
+          "operation": "confirm",
+          "task": "main",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794058051.321308
+          },
+          "resumed": true
+        },
+        {
+          "step": 8,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b628-3213-78f1-8723-e31d0b4aa0b2",
+          "turnId": "01a1b628-38cf-7ff3-9308-35014b17b18c",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b628-3924-7212-afdb-41c27d660a73\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-kgb8zpfe\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-kgb8zpfe\\\\.agent-tmp\\\\ma4-980189fd6a624e69\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 9,
+          "operation": "wait",
+          "task": "main",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 10,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b628-3924-7212-afdb-41c27d660a73:01a1b628-3c39-7750-b2eb-f270220f7ef2": {
+              "worker": "alpha",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        },
+        {
+          "step": 11,
+          "operation": "history",
+          "task": "main",
+          "session": "alpha",
+          "threadId": "01a1b628-3924-7212-afdb-41c27d660a73",
+          "turnCount": 1,
+          "itemCount": 2,
+          "turns": [
+            {
+              "id": "01a1b628-3c39-7750-b2eb-f270220f7ef2",
+              "status": "completed",
+              "itemCount": 2,
+              "itemsSha256": "494b5d489afe292193984815051efe79721c919c43dd61963f20c4bdd93af488"
+            }
+          ]
+        },
+        {
+          "step": 12,
+          "operation": "history",
+          "task": "main",
+          "session": "host",
+          "threadId": "01a1b628-3213-78f1-8723-e31d0b4aa0b2",
+          "turnCount": 3,
+          "itemCount": 7,
+          "turns": [
+            {
+              "id": "01a1b628-37d7-7990-8663-6d6ba8f946d2",
+              "status": "completed",
+              "itemCount": 2,
+              "itemsSha256": "fa4e6a88c2c9327554c34c165a868f6ac6fc80657ed8e20fddbaa48f05ed6130"
+            },
+            {
+              "id": "01a1b628-38cf-7ff3-9308-35014b17b18c",
+              "status": "completed",
+              "itemCount": 3,
+              "itemsSha256": "cea3379c88b99dd6406c01f65013f8a47a221e3e5aea457edda1380f322691cb"
+            },
+            {
+              "id": "01a1b628-3c8c-7921-8dfb-665c3a4ff107",
+              "status": "completed",
+              "itemCount": 2,
+              "itemsSha256": "14e96cd5fec96a6ca16588a3ce5f796dca55f8724c353a87265c896168c8fb5f"
+            }
+          ]
+        },
+        {
+          "step": 13,
+          "operation": "draft",
+          "task": "second",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 14,
+          "operation": "wait",
+          "task": "second",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 15,
+          "operation": "confirm",
+          "task": "second",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794058053.0276482
+          },
+          "resumed": true
+        },
+        {
+          "step": 16,
+          "operation": "native-tool",
+          "task": "second",
+          "threadId": "01a1b628-34ca-7050-8128-7061752200ae",
+          "turnId": "01a1b628-3fa3-7c03-b9d8-ea6afaa50ac7",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b628-3fdf-7f31-b234-b6032e92a63b\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-kgb8zpfe\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-kgb8zpfe\\\\.agent-tmp\\\\ma4-64dcc791503d4082\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 17,
+          "operation": "wait",
+          "task": "second",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 18,
+          "operation": "reports",
+          "task": "second",
+          "reports": {
+            "01a1b628-3fdf-7f31-b234-b6032e92a63b:01a1b628-42e0-74d3-8cf1-f06f158e3b2d": {
+              "worker": "beta",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        },
+        {
+          "step": 19,
+          "operation": "history",
+          "task": "second",
+          "session": "beta",
+          "threadId": "01a1b628-3fdf-7f31-b234-b6032e92a63b",
+          "turnCount": 1,
+          "itemCount": 2,
+          "turns": [
+            {
+              "id": "01a1b628-42e0-74d3-8cf1-f06f158e3b2d",
+              "status": "completed",
+              "itemCount": 2,
+              "itemsSha256": "ab390c89b984ef2f03d213a4cd9db25a1fd5977d2df5ca9c8c2b9dbe23e9f72f"
+            }
+          ]
+        },
+        {
+          "step": 20,
+          "operation": "history",
+          "task": "main",
+          "session": "alpha",
+          "threadId": "01a1b628-3924-7212-afdb-41c27d660a73",
+          "turnCount": 1,
+          "itemCount": 2,
+          "turns": [
+            {
+              "id": "01a1b628-3c39-7750-b2eb-f270220f7ef2",
+              "status": "completed",
+              "itemCount": 2,
+              "itemsSha256": "494b5d489afe292193984815051efe79721c919c43dd61963f20c4bdd93af488"
+            }
+          ]
+        }
+      ],
+      "checks": {
+        "emptyHosts": 2,
+        "distinctWorkerHistories": 2,
+        "unchangedRepeatHistory": true,
+        "compactHistorySteps": 6,
+        "finitePlanActions": 18
+      },
+      "modelRequests": 10,
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      }
+    },
+    "reuse": {
+      "originalRunVersionsPreserved": true,
+      "originalFiveScenariosRerun": false,
+      "changedExistingSymbols": [
+        "validate_plan",
+        "TaskActions.run"
+      ],
+      "addedSymbols": [
+        "TaskActions._history_step"
+      ],
+      "unchangedExistingSymbolCount": 25,
+      "standaloneHistoryASTUnchanged": true,
+      "standaloneHistoryASTSha256": "be587b3a508803a15b56d7f143ccecfefae25dddf7de9540f024c1aa1b1c85e0",
+      "businessFixtureAndNamedScenarioSourcesUnchanged": true,
+      "reason": "原五场景逐方法调用，不调用 TaskActions.run 或 validate_plan；本次未修改它们使用的既有动作、history返回、fixture/model或业务源码。新增包装仅由有限组合的history动作调用，因此复用原五场景和独立验收结果。",
+      "independentReadOnlyEvidence": {
+        "reviewSha256": "e9e26a50f6507ef4eb8ccef3aa9c7a6971518f017b9ecd472e0130e3f6b1c382",
+        "reviewScenarioResults": {
+          "handoff": "passed",
+          "reconnect-dedup": "passed"
+        },
+        "reviewModelRequests": 14,
+        "reviewSourceHashesMatch": true,
+        "originalTemporaryPath": ".agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\independent.json",
+        "formalEvidence": "validation/task-flows/evidence.json#independentReview"
+      },
+      "independentEvidenceDisposition": "中控已将必要实例/步骤/结果/源码边界转入本文件independentReview；两份临时JSON已精确清理，不再作为正式依赖。"
+    },
+    "reuseMethod": {
+      "entry": "现有 Python API TaskActions.run(plan)，不增加任意代码 CLI；读取本 evidence 中有限 plan。",
+      "powershellCommand": "@'\nimport json\nfrom pathlib import Path\nfrom tools.smoke_test import fixture\nfrom tools.task_actions import TaskActions\nfrom tools.task_scenarios import ControlledTaskModel, local_environment\nscratch = Path('.agent-tmp/ma4-a4e72a99d4ae43e2/executor').resolve()\nscratch.mkdir(parents=True, exist_ok=True)\nplan = json.loads(Path('validation/task-flows/evidence.json').read_text(encoding='utf-8'))['historyFollowup']['native']['plan']\nwith local_environment(scratch), fixture(model_script=ControlledTaskModel()) as f:\n    steps = TaskActions(f).run(plan)\n    requests = f['model'].request_count\ncleanup = {'backendExited': f['process'].poll() is not None, 'webClosed': f['web'].fileno() == -1, 'fixtureRemoved': not f['root'].exists()}\nassert all(cleanup.values())\nprint(json.dumps({'steps': steps, 'modelRequests': requests, 'cleanup': cleanup}, ensure_ascii=False, indent=2))\n'@ | & 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 -",
+      "expected": "18个有限动作、6条紧凑历史步骤、两个任务/执行者归属分离，空历史和重复读取核对；本次10次本机模拟请求。"
+    },
+    "limits": [
+      "Linux、真实供应商及浏览器未新测；既有模型与隔离边界不变。"
+    ],
+    "cleanup": {
+      "nativeFixture": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      },
+      "executorOutputsRemoved": true,
+      "reviewUntouched": true,
+      "removedFiles": 2,
+      "removedBytes": 12691,
+      "executorDirectoryRemoved": true,
+      "parentOwnershipMarkerPreserved": true,
+      "inventoryCommand": "session_inventory.py --since 2026-11-07T13:15:00+00:00 --root E:/PG/MA4-win --top 12 --json",
+      "inventoryExitCode": 0
+    },
+    "changedFiles": [
+      "tools/task_actions.py",
+      "test_task_actions.py",
+      "validation/task-flows/evidence.json"
+    ]
+  },
+  "independentReview": {
+    "atUtc": "2026-11-07T13:21:17.654461+00:00",
+    "result": "passed_pending_integrator_review",
+    "reviewerRole": "本任务中控，独立于制作执行者",
+    "newlyVerified": {
+      "unitTests": {
+        "total": 34,
+        "passed": 34,
+        "skipped": 0,
+        "exitCode": 0,
+        "command": "D:/python/anaconda/envs/th123/python.exe -B -X utf8 -m unittest -q test_task_actions test_task_scenarios"
+      },
+      "nativeScenarioCount": 3,
+      "localMockRequests": 20,
+      "allOwnedFixturesReclaimed": true
+    },
+    "baselineSources": {
+      "tools/task_actions.py": "8c0a22e89ce0c5a4f29725df01f60a4ee54c603dbc015b5dbf8754e880516792",
+      "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+      "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+      "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+      "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+      "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+      "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+      "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+      "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+    },
+    "finalSources": {
+      "tools/task_actions.py": "f518629fd601e4351e3d5b64fbc24efba0efc7b7103ff1de077c579eacc27b8d",
+      "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+      "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+      "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+      "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+      "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+      "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+      "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+      "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+    },
+    "sourceChecks": "初次9项实现/业务源码与6项测试摘要均匹配。history返修后最终9项源码和test_task_actions摘要再次核对匹配；其他业务/fixture/具名场景未变。",
+    "nativeRuns": [
+      {
+        "name": "handoff",
+        "result": "passed",
+        "instance": {
+          "url": "http://127.0.0.1:2771",
+          "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-0_ftk391",
+          "verification": {
+            "instance": "1d3b0d3cd95e453892d75bb2c0708649",
+            "ownerPid": 13704,
+            "backendPid": 38628,
+            "endpoint": "ws://127.0.0.1:2767",
+            "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-0_ftk391\\codex-home",
+            "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-0_ftk391\\state"
+          },
+          "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+        },
+        "modelRequests": 8,
+        "cleanup": {
+          "backendExited": true,
+          "webClosed": true,
+          "fixtureRemoved": true
+        },
+        "stepCount": 16,
+        "keySteps": [
+          {
+            "step": 5,
+            "operation": "native-tool",
+            "task": "main",
+            "threadId": "01a1b624-bb3b-7112-9a92-36acac28855c",
+            "turnId": "01a1b624-bf3e-7682-86ff-1623269659d8",
+            "tool": "ma4_dispatch",
+            "success": true,
+            "output": "{\"session_id\": \"01a1b624-bf67-7e31-abe8-ec485a194118\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\review\\\\smoke-0_ftk391\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\review\\\\smoke-0_ftk391\\\\.agent-tmp\\\\ma4-cd4e7bb02cf34b6c\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+          },
+          {
+            "step": 9,
+            "operation": "reports",
+            "task": "main",
+            "reports": {
+              "01a1b624-bf67-7e31-abe8-ec485a194118:01a1b624-c154-77a3-9f55-4ca0ab6704ad": {
+                "worker": "worker",
+                "status": "interrupted",
+                "delivered": 0,
+                "pending": 1,
+                "contentMatchesNative": false
+              }
+            }
+          },
+          {
+            "step": 10,
+            "operation": "handoff",
+            "task": "main",
+            "previous": "01a1b624-bb3b-7112-9a92-36acac28855c",
+            "current": "01a1b624-c2be-76e3-a44e-f8e596e9d55b",
+            "retainedReports": [
+              "01a1b624-bf67-7e31-abe8-ec485a194118:01a1b624-c154-77a3-9f55-4ca0ab6704ad"
+            ]
+          },
+          {
+            "step": 11,
+            "operation": "native-tool",
+            "task": "main",
+            "threadId": "01a1b624-bb3b-7112-9a92-36acac28855c",
+            "turnId": "01a1b624-c4c8-7421-80ef-17f891ae7318",
+            "tool": "ma4_dispatch",
+            "success": false,
+            "output": "{\"error\": \"仅当前中控可调用本任务工具\"}"
+          },
+          {
+            "step": 15,
+            "operation": "reports",
+            "task": "main",
+            "reports": {
+              "01a1b624-bf67-7e31-abe8-ec485a194118:01a1b624-c154-77a3-9f55-4ca0ab6704ad": {
+                "worker": "worker",
+                "status": "interrupted",
+                "delivered": 1,
+                "pending": 0,
+                "contentMatchesNative": false
+              }
+            }
+          },
+          {
+            "step": 16,
+            "operation": "replacement-context",
+            "target": true,
+            "budget": true,
+            "workers": true,
+            "handoffSummary": true
+          }
+        ]
+      },
+      {
+        "name": "reconnect-dedup",
+        "result": "passed",
+        "instance": {
+          "url": "http://127.0.0.1:2713",
+          "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-9xg3tkkx",
+          "verification": {
+            "instance": "6dca2cf30e6f4700829a7eb2044cd070",
+            "ownerPid": 13704,
+            "backendPid": 26788,
+            "endpoint": "ws://127.0.0.1:2937",
+            "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-9xg3tkkx\\codex-home",
+            "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-9xg3tkkx\\state"
+          },
+          "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+        },
+        "modelRequests": 6,
+        "cleanup": {
+          "backendExited": true,
+          "webClosed": true,
+          "fixtureRemoved": true
+        },
+        "stepCount": 16,
+        "keySteps": [
+          {
+            "step": 5,
+            "operation": "native-tool",
+            "task": "main",
+            "threadId": "01a1b624-ce93-7603-99e8-eef4464af100",
+            "turnId": "01a1b624-d282-7b21-aa21-8794c56dbdcc",
+            "tool": "ma4_dispatch",
+            "success": true,
+            "output": "{\"session_id\": \"01a1b624-d2ad-7a43-ae5b-9abe0be21bd0\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\review\\\\smoke-9xg3tkkx\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\review\\\\smoke-9xg3tkkx\\\\.agent-tmp\\\\ma4-b10876702be54e58\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+          },
+          {
+            "step": 7,
+            "operation": "reports",
+            "task": "main",
+            "reports": {
+              "01a1b624-d2ad-7a43-ae5b-9abe0be21bd0:01a1b624-d4b4-7221-98bc-74455d484e38": {
+                "worker": "worker",
+                "status": "completed",
+                "delivered": 1,
+                "pending": 0,
+                "contentMatchesNative": true
+              }
+            }
+          },
+          {
+            "step": 8,
+            "operation": "reports",
+            "task": "main",
+            "reports": {
+              "01a1b624-d2ad-7a43-ae5b-9abe0be21bd0:01a1b624-d4b4-7221-98bc-74455d484e38": {
+                "worker": "worker",
+                "status": "completed",
+                "delivered": 1,
+                "pending": 0,
+                "contentMatchesNative": true
+              }
+            }
+          },
+          {
+            "step": 9,
+            "operation": "reconnect",
+            "task": "main",
+            "backendPid": 26788,
+            "independentClientStillConnected": true
+          },
+          {
+            "step": 10,
+            "operation": "reports",
+            "task": "main",
+            "reports": {
+              "01a1b624-d2ad-7a43-ae5b-9abe0be21bd0:01a1b624-d4b4-7221-98bc-74455d484e38": {
+                "worker": "worker",
+                "status": "completed",
+                "delivered": 1,
+                "pending": 0,
+                "contentMatchesNative": true
+              }
+            }
+          },
+          {
+            "step": 13,
+            "operation": "reconnect",
+            "task": "main",
+            "backendPid": 26788,
+            "independentClientStillConnected": true
+          },
+          {
+            "step": 15,
+            "operation": "reports",
+            "task": "main",
+            "reports": {
+              "01a1b624-d2ad-7a43-ae5b-9abe0be21bd0:01a1b624-d4b4-7221-98bc-74455d484e38": {
+                "worker": "worker",
+                "status": "completed",
+                "delivered": 1,
+                "pending": 0,
+                "contentMatchesNative": true
+              }
+            }
+          },
+          {
+            "step": 16,
+            "operation": "uncertain-send-reconciled",
+            "evidenceLayer": "logic injection after real native acceptance",
+            "httpStatus": 503,
+            "nativeTurns": 1,
+            "automaticResends": 0,
+            "requestId": "d0dfbdd9828d4ca6bee3919bc9ca6992",
+            "turnId": "01a1b624-d6ff-7a43-acb8-56ff48d71893"
+          }
+        ]
+      },
+      {
+        "name": "independent-former-history-composition",
+        "result": "passed",
+        "instance": {
+          "url": "http://127.0.0.1:11839",
+          "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-7v1h4z52",
+          "verification": {
+            "instance": "8ed2a75193c1491481d034a06a5880b8",
+            "ownerPid": 37772,
+            "backendPid": 5052,
+            "endpoint": "ws://127.0.0.1:11836",
+            "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-7v1h4z52\\codex-home",
+            "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-7v1h4z52\\state"
+          },
+          "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+        },
+        "modelRequests": 6,
+        "cleanup": {
+          "backendExited": true,
+          "webClosed": true,
+          "fixtureRemoved": true
+        },
+        "stepCount": 17,
+        "keySteps": [
+          {
+            "step": 5,
+            "operation": "native-tool",
+            "task": "main",
+            "threadId": "01a1b62a-8a07-71f1-97f6-3ba026a2727c",
+            "turnId": "01a1b62a-8fe1-75d3-8272-de15c8a9fae6",
+            "tool": "ma4_dispatch",
+            "success": true,
+            "output": "{\"session_id\": \"01a1b62a-9028-7eb3-be25-eaf4a923223d\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\review\\\\smoke-7v1h4z52\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\review\\\\smoke-7v1h4z52\\\\.agent-tmp\\\\ma4-d70ad4263fdd427d\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+          },
+          {
+            "step": 7,
+            "operation": "reports",
+            "task": "main",
+            "reports": {
+              "01a1b62a-9028-7eb3-be25-eaf4a923223d:01a1b62a-92e3-7152-8b95-41d9032630ca": {
+                "worker": "worker",
+                "status": "completed",
+                "delivered": 1,
+                "pending": 0,
+                "contentMatchesNative": true
+              }
+            }
+          },
+          {
+            "step": 10,
+            "operation": "handoff",
+            "task": "main",
+            "previous": "01a1b62a-8a07-71f1-97f6-3ba026a2727c",
+            "current": "01a1b62a-9448-7581-a3b7-229424ba1587",
+            "retainedReports": []
+          },
+          {
+            "step": 11,
+            "operation": "history",
+            "task": "main",
+            "session": "former",
+            "threadId": "01a1b62a-8a07-71f1-97f6-3ba026a2727c",
+            "turnCount": 3,
+            "itemCount": 7,
+            "turns": [
+              {
+                "id": "01a1b62a-8df1-75e0-83f2-a74210b8a11e",
+                "status": "completed",
+                "itemCount": 2,
+                "itemsSha256": "b5d5204f1fbcdece70a8d61e008ae7d54f37a4a92844b96a1ff249e967d59cdf"
+              },
+              {
+                "id": "01a1b62a-8fe1-75d3-8272-de15c8a9fae6",
+                "status": "completed",
+                "itemCount": 3,
+                "itemsSha256": "45a9bec7d7a26b58da8fa95d0f8fde03f89974a00c4a4c31cdcc79508b01d50d"
+              },
+              {
+                "id": "01a1b62a-933f-7d52-9edd-919d5255eaa2",
+                "status": "completed",
+                "itemCount": 2,
+                "itemsSha256": "866b209046e944f2cabfd97362280305d283dde18fb972d5dac5991a7f74b33d"
+              }
+            ]
+          },
+          {
+            "step": 15,
+            "operation": "reports",
+            "task": "main",
+            "reports": {
+              "01a1b62a-9028-7eb3-be25-eaf4a923223d:01a1b62a-92e3-7152-8b95-41d9032630ca": {
+                "worker": "worker",
+                "status": "completed",
+                "delivered": 1,
+                "pending": 0,
+                "contentMatchesNative": true
+              }
+            }
+          },
+          {
+            "step": 16,
+            "operation": "history",
+            "task": "main",
+            "session": "host",
+            "threadId": "01a1b62a-9448-7581-a3b7-229424ba1587",
+            "turnCount": 1,
+            "itemCount": 2,
+            "turns": [
+              {
+                "id": "01a1b62a-975f-7cf2-85b6-78cddf338f30",
+                "status": "completed",
+                "itemCount": 2,
+                "itemsSha256": "5ca6e599c142af4db3f1e85114f5e2bb36e88729b01f5338f65970624b430270"
+              }
+            ]
+          },
+          {
+            "step": 17,
+            "operation": "history",
+            "task": "main",
+            "session": "worker",
+            "threadId": "01a1b62a-9028-7eb3-be25-eaf4a923223d",
+            "turnCount": 1,
+            "itemCount": 2,
+            "turns": [
+              {
+                "id": "01a1b62a-92e3-7152-8b95-41d9032630ca",
+                "status": "completed",
+                "itemCount": 2,
+                "itemsSha256": "e3a365e8770fa0849d34cc82f7ba1170ed53e09d362536907b96743bc5b4ee47"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "additionalHistoryChecks": {
+      "formerHostWorkerHistorySeparated": true,
+      "reportPreservedAcrossHandoff": true,
+      "allHistoryTurnsCompleted": true
+    },
+    "historyPlan": [
+      "create",
+      "draft",
+      {
+        "op": "confirm",
+        "explicit": true
+      },
+      "dispatch",
+      "wait",
+      "reports",
+      "pause",
+      {
+        "op": "wait",
+        "condition": "paused-settled"
+      },
+      "handoff",
+      {
+        "op": "history",
+        "session": "former"
+      },
+      "resume",
+      "wait",
+      "reports",
+      {
+        "op": "history",
+        "session": "host"
+      },
+      {
+        "op": "history",
+        "session": "worker"
+      }
+    ],
+    "reviewFinding": {
+      "problem": "有限组合拒绝history，单独方法虽存在但不能纳入动作计划。",
+      "status": "fixed_and_independently_verified",
+      "evidence": "historyFollowup及本节第三个nativeRuns；新增历史前任/接任/执行者读取实际通过。"
+    },
+    "reusedEvidence": {
+      "fiveNativeScenarios": "scenarios；源码版本保留在versions.sources，history扩展只改变validate_plan/TaskActions.run并增加包装，原五场景直接调用既有方法，相关方法已读且未改变。",
+      "ordinarySmoke": "ordinarySmoke；smoke_test.py最终摘要与原实测一致，默认9项复用。",
+      "failureExitCleanup": "failureCleanup；创建/故意失败/退出与fixture回收路径未改，低成本回收检查和三条独立原生场景均再次通过。"
+    },
+    "limits": [
+      "Linux、真实供应商故障及浏览器未新测。",
+      "发送应答丢失是真实接受后的单点逻辑注入，不是供应商事故。",
+      "统一verify task-flows入口与最终CI由派发者运行；本任务不重复整套CI，不重载8764。"
+    ],
+    "temporaryFiles": {
+      "promotedTo": "validation/task-flows/evidence.json#independentReview",
+      "files": [
+        {
+          "path": ".agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\independent.json",
+          "bytes": 13126,
+          "sha256": "e9e26a50f6507ef4eb8ccef3aa9c7a6971518f017b9ecd472e0130e3f6b1c382"
+        },
+        {
+          "path": ".agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\history-independent.json",
+          "bytes": 7476,
+          "sha256": "f3aa375d5d5341a6541ba262a516ada512d0e8d11d83b6cf4db4c0568d62eacf"
+        }
+      ],
+      "cleanup": "ma4_artifacts clean 成功删除精确列出的2文件、20602字节；已核对review为空并移除；父级归属标记保留。"
+    },
+    "finalSourceCheck": {
+      "atUtc": "2026-11-07T13:22:09.566821+00:00",
+      "matches": {
+        "tools/task_actions.py": true,
+        "tools/task_scenarios.py": true,
+        "tools/smoke_test.py": true,
+        "controllers.py": true,
+        "hub.py": true,
+        "server.py": true,
+        "task_policy.py": true,
+        "appserver.py": true,
+        "runtime.py": true
+      }
+    }
+  },
+  "registrationFollowup": {
+    "atUtc": "2026-11-07T13:34:17.584970+00:00",
+    "result": "passed_pending_root_unified_recheck",
+    "scope": [
+      "tools/task_actions.py",
+      "test_task_actions.py",
+      "validation/task-flows/evidence.json"
+    ],
+    "rootFailure": {
+      "path": ".agent-tmp\\stage3-control-20261107\\unified\\task-flows\\result.json",
+      "sha256": "f80c4a2bc58b3e123dd7eebae2b0d06674c42e7903e0ac8ab0cee5b4a86e4eed",
+      "failedScenario": "handoff",
+      "error": "AssertionError: foreign session/workspace in fixture",
+      "modelRequests": 5,
+      "lastSuccessfulStep": {
+        "step": 4,
+        "operation": "confirm",
+        "task": "main",
+        "budget": {
+          "tokenLimit": 200000,
+          "currency": "CNY",
+          "deadline": 1794058272.6985586
+        },
+        "resumed": true
+      },
+      "taskId": "699c4d35ad364a80",
+      "hostId": "01a1b62b-949d-74d3-9302-c14e460500ec",
+      "nativeToolRecordPresent": false,
+      "modelDispatchOutputPresent": [
+        {
+          "marker": "TASK-FLOW-COMMAND-aeb6f93c96394484ac676bcee589ce88",
+          "tool": "ma4_dispatch",
+          "wireName": "ma4_dispatch"
+        }
+      ],
+      "notRun": [
+        "reconnect-dedup"
+      ],
+      "allFourInstancesCleaned": true,
+      "taskActionsSha256AtFailure": "f518629fd601e4351e3d5b64fbc24efba0efc7b7103ff1de077c579eacc27b8d",
+      "snapshotLimit": "根报告未保存失败瞬间的state/新会话ID；不能确定该次未知ID，也不能把以下注入当作捕获了原故障瞬间。"
+    },
+    "analysis": {
+      "sourceOrder": [
+        "hub.py:845/866 new_thread 先把原生 thread/start 返回ID加入Hub.threads，保存prefs后才返回调用方。",
+        "controllers.py:1011 派工收到new_thread返回后才将ID登记到任务workers并publish；new_host/perform_handoff有对应的退任、创建、发布顺序。",
+        "hub.py:964 state在Hub锁内取threads与Controllers已发布view；该锁并未跨越Controllers后续登记/publish，因此存在Hub已有新ID而任务视图尚未关联的合法窗口。"
+      ],
+      "deterministicOldReproduction": "旧动作层f518629...；在自有dispatch转换中注入threads含new-worker-before-publish、task.workers仍为空的state，旧guard立即报同一foreign session/workspace in fixture。",
+      "conclusion": "已用源码顺序、确定性快照和原生注册时序注入证明该检查缺陷可以发生并已修复；对根报告那一次具体失败仍是匹配的时序解释，未补造其未知会话ID。"
+    },
+    "implementation": [
+      "用明确转换记录代替_transition字符串豁免：仅本次已提交dispatch/handoff允许等待注册关联；提交前、无转换、其他任务与角色检查保持严格。",
+      "每次重取都完整检查fixture URL/ID/PID/endpoint/CODEX_HOME/data/version和cwd。未知会话最多一个，ID不可变换；消失也不当作归属确认。每次只GET /api/state，有固定截止时间；未确认不得补发/再写。",
+      "派工保持host/former和已有worker成员，只准新增一个；候选先暂存、不写入owned。真实dynamicToolCall成功返回session_id后必须与任务新增ID精确一致，才登记本次worker别名。",
+      "交接只准old host保持原位，或按完整formerHosts追加old host后出现一个new host；原workers和待报告保留，guard本身不认领host。",
+      "无法关联时抛失败并保留no-resend说明，原run_scenario非零退出/fixture finally回收机制未改。步骤诊断reads表示只读重取轮数，每轮包含doctor及state读取，不是网络请求计数。"
+    ],
+    "unitValidation": {
+      "evidenceLayer": "deterministic state timing injection, no native process/model",
+      "newTimingTests": [
+        "test_native_return_id_confirms_temporary_gap_without_new_writes",
+        "test_different_native_return_id_never_adopts_provisional_worker",
+        "test_without_submitted_transition_unknown_session_is_immediately_rejected",
+        "test_stable_foreign_session_times_out_without_adoption_or_write",
+        "test_identity_directory_and_foreign_task_drift_fail_without_waiting",
+        "test_external_url_during_transition_is_rejected_before_network",
+        "test_registration_cannot_hide_role_changes_or_multiple_foreign_workers",
+        "test_handoff_gap_requires_retirement_and_preserves_original_workers",
+        "test_candidate_cannot_disappear_or_switch_identity_to_become_accepted"
+      ],
+      "uniqueTestsExecuted": 32,
+      "passed": 32,
+      "skipped": 0,
+      "runs": [
+        {
+          "command": "D:/python/anaconda/envs/th123/python.exe -B -X utf8 -m unittest -v test_task_actions",
+          "tests": 31,
+          "exitCode": 0
+        },
+        {
+          "command": "D:/python/anaconda/envs/th123/python.exe -B -X utf8 -m unittest -v test_task_actions.RegistrationTimingTests.test_external_url_during_transition_is_rejected_before_network",
+          "tests": 1,
+          "exitCode": 0
+        }
+      ],
+      "testSourceSha256": "fbd4f6e038b1867373805a0b9306859d04d0dc029a67382497b313fc35dc6bba"
+    },
+    "nativeValidation": {
+      "schemaVersion": 1,
+      "python": "3.10.19",
+      "platform": "win32",
+      "sources": {
+        "tools/task_actions.py": "443f63313b8a47063f37b9d8915fe2423e4b5f0c34d81f837f9acdfe739fa17d",
+        "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+        "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+        "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+        "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+      },
+      "scenarios": [
+        {
+          "name": "dispatch-report",
+          "result": "passed",
+          "steps": [
+            {
+              "step": 1,
+              "operation": "create",
+              "task": "main",
+              "taskId": "8570a211149642c6",
+              "threadId": "01a1b632-fc98-7360-b94b-ffdd5ca14f5a"
+            },
+            {
+              "step": 2,
+              "operation": "draft",
+              "task": "main",
+              "draftSaved": true,
+              "draftRevision": 2,
+              "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+            },
+            {
+              "step": 3,
+              "operation": "wait",
+              "task": "main",
+              "condition": "host-idle",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 4,
+              "operation": "confirm",
+              "task": "main",
+              "budget": {
+                "tokenLimit": 200000,
+                "currency": "CNY",
+                "deadline": 1794058757.9832003
+              },
+              "resumed": true
+            },
+            {
+              "step": 5,
+              "operation": "native-tool",
+              "task": "main",
+              "threadId": "01a1b632-fc98-7360-b94b-ffdd5ca14f5a",
+              "turnId": "01a1b633-0276-7ce1-8479-504fdb1c0470",
+              "tool": "ma4_dispatch",
+              "success": true,
+              "output": "{\"session_id\": \"01a1b633-02b6-75c0-ab2d-fda993c56f84\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-tusawbby\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-tusawbby\\\\.agent-tmp\\\\ma4-8570a211149642c6\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+            },
+            {
+              "step": 6,
+              "operation": "wait",
+              "task": "main",
+              "condition": "settled",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 7,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b633-02b6-75c0-ab2d-fda993c56f84:01a1b633-0569-7070-9fd7-3dc01781e32f": {
+                  "worker": "worker",
+                  "status": "completed",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": true
+                }
+              }
+            }
+          ],
+          "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+          "instance": {
+            "url": "http://127.0.0.1:1961",
+            "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-tusawbby",
+            "verification": {
+              "instance": "d0183c3ad2d8424283c87fae94fe4e8d",
+              "ownerPid": 14116,
+              "backendPid": 38328,
+              "endpoint": "ws://127.0.0.1:1958",
+              "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-tusawbby\\codex-home",
+              "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-tusawbby\\state"
+            },
+            "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+          },
+          "modelToolCalls": [
+            {
+              "marker": "TASK-FLOW-COMMAND-0657026c01214dd7bd26d32c538f3146",
+              "tool": "ma4_dispatch",
+              "wireName": "ma4_dispatch"
+            }
+          ],
+          "advertisedTaskTools": [
+            "ma4_dispatch",
+            "ma4_control",
+            "ma4_artifacts"
+          ],
+          "modelRequests": 5,
+          "cleanup": {
+            "backendExited": true,
+            "webClosed": true,
+            "fixtureRemoved": true
+          }
+        },
+        {
+          "name": "pause-resume",
+          "result": "passed",
+          "steps": [
+            {
+              "step": 1,
+              "operation": "create",
+              "task": "main",
+              "taskId": "5bb1f72416b544b0",
+              "threadId": "01a1b633-0e9b-7262-8e87-7adf4415e856"
+            },
+            {
+              "step": 2,
+              "operation": "draft",
+              "task": "main",
+              "draftSaved": true,
+              "draftRevision": 2,
+              "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+            },
+            {
+              "step": 3,
+              "operation": "wait",
+              "task": "main",
+              "condition": "host-idle",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 4,
+              "operation": "confirm",
+              "task": "main",
+              "budget": {
+                "tokenLimit": 200000,
+                "currency": "CNY",
+                "deadline": 1794058762.607359
+              },
+              "resumed": true
+            },
+            {
+              "step": 5,
+              "operation": "native-tool",
+              "task": "main",
+              "threadId": "01a1b633-0e9b-7262-8e87-7adf4415e856",
+              "turnId": "01a1b633-133a-7c82-8f01-add0296ad69c",
+              "tool": "ma4_dispatch",
+              "success": true,
+              "output": "{\"session_id\": \"01a1b633-137b-76d1-995f-00f0c7053914\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-9qdkcgwo\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-9qdkcgwo\\\\.agent-tmp\\\\ma4-5bb1f72416b544b0\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+            },
+            {
+              "step": 6,
+              "operation": "wait",
+              "task": "main",
+              "condition": "worker-running",
+              "status": "waiting",
+              "pending": 0
+            },
+            {
+              "step": 7,
+              "operation": "pause",
+              "task": "main",
+              "paused": true,
+              "interruptErrors": []
+            },
+            {
+              "step": 8,
+              "operation": "wait",
+              "task": "main",
+              "condition": "paused-settled",
+              "status": "paused",
+              "pending": 1
+            },
+            {
+              "step": 9,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b633-137b-76d1-995f-00f0c7053914:01a1b633-168a-7722-8ac7-fb9b51f5d448": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 0,
+                  "pending": 1,
+                  "contentMatchesNative": false
+                }
+              }
+            },
+            {
+              "step": 10,
+              "operation": "resume",
+              "task": "main",
+              "resumed": true
+            },
+            {
+              "step": 11,
+              "operation": "wait",
+              "task": "main",
+              "condition": "host-idle",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 12,
+              "operation": "wait",
+              "task": "main",
+              "condition": "settled",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 13,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b633-137b-76d1-995f-00f0c7053914:01a1b633-168a-7722-8ac7-fb9b51f5d448": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": false
+                }
+              }
+            },
+            {
+              "step": 14,
+              "operation": "native-tool",
+              "task": "main",
+              "threadId": "01a1b633-0e9b-7262-8e87-7adf4415e856",
+              "turnId": "01a1b633-19a9-7d31-822d-287ceaea0437",
+              "tool": "ma4_dispatch",
+              "success": true,
+              "output": "{\"session_id\": \"01a1b633-137b-76d1-995f-00f0c7053914\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-9qdkcgwo\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-9qdkcgwo\\\\.agent-tmp\\\\ma4-5bb1f72416b544b0\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+            },
+            {
+              "step": 15,
+              "operation": "wait",
+              "task": "main",
+              "condition": "settled",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 16,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b633-137b-76d1-995f-00f0c7053914:01a1b633-168a-7722-8ac7-fb9b51f5d448": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": false
+                },
+                "01a1b633-137b-76d1-995f-00f0c7053914:01a1b633-1a09-7fc0-a2d9-d51551b07f1e": {
+                  "worker": "worker",
+                  "status": "completed",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": true
+                }
+              }
+            }
+          ],
+          "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+          "instance": {
+            "url": "http://127.0.0.1:7384",
+            "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-9qdkcgwo",
+            "verification": {
+              "instance": "53b06f54ec8e48a2bdd80679a1e1f56b",
+              "ownerPid": 14116,
+              "backendPid": 12028,
+              "endpoint": "ws://127.0.0.1:7381",
+              "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-9qdkcgwo\\codex-home",
+              "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-9qdkcgwo\\state"
+            },
+            "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+          },
+          "modelToolCalls": [
+            {
+              "marker": "TASK-FLOW-COMMAND-856cc1303623494ba981e1208300af4b",
+              "tool": "ma4_dispatch",
+              "wireName": "ma4_dispatch"
+            },
+            {
+              "marker": "TASK-FLOW-COMMAND-8f2eaea5feed4dadbecf3da54c4bb2f1",
+              "tool": "ma4_dispatch",
+              "wireName": "ma4_dispatch"
+            }
+          ],
+          "advertisedTaskTools": [
+            "ma4_dispatch",
+            "ma4_control",
+            "ma4_artifacts"
+          ],
+          "modelRequests": 10,
+          "cleanup": {
+            "backendExited": true,
+            "webClosed": true,
+            "fixtureRemoved": true
+          }
+        },
+        {
+          "name": "handoff",
+          "result": "passed",
+          "steps": [
+            {
+              "step": 1,
+              "operation": "create",
+              "task": "main",
+              "taskId": "21f92558558e4d01",
+              "threadId": "01a1b633-2344-7761-8efd-1d5fc1c3f478"
+            },
+            {
+              "step": 2,
+              "operation": "draft",
+              "task": "main",
+              "draftSaved": true,
+              "draftRevision": 2,
+              "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+            },
+            {
+              "step": 3,
+              "operation": "wait",
+              "task": "main",
+              "condition": "host-idle",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 4,
+              "operation": "confirm",
+              "task": "main",
+              "budget": {
+                "tokenLimit": 200000,
+                "currency": "CNY",
+                "deadline": 1794058767.9088397
+              },
+              "resumed": true
+            },
+            {
+              "step": 5,
+              "operation": "native-tool",
+              "task": "main",
+              "threadId": "01a1b633-2344-7761-8efd-1d5fc1c3f478",
+              "turnId": "01a1b633-2805-73d0-80d3-9824d7e3aca7",
+              "tool": "ma4_dispatch",
+              "success": true,
+              "output": "{\"session_id\": \"01a1b633-2847-7402-aab9-199d8bb326fc\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-6xzmghhx\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-6xzmghhx\\\\.agent-tmp\\\\ma4-21f92558558e4d01\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+            },
+            {
+              "step": 6,
+              "operation": "wait",
+              "task": "main",
+              "condition": "worker-running",
+              "status": "waiting",
+              "pending": 0
+            },
+            {
+              "step": 7,
+              "operation": "pause",
+              "task": "main",
+              "paused": true,
+              "interruptErrors": []
+            },
+            {
+              "step": 8,
+              "operation": "wait",
+              "task": "main",
+              "condition": "paused-settled",
+              "status": "paused",
+              "pending": 1
+            },
+            {
+              "step": 9,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b633-2847-7402-aab9-199d8bb326fc:01a1b633-2b14-7502-a934-af23c7e2afd4": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 0,
+                  "pending": 1,
+                  "contentMatchesNative": false
+                }
+              }
+            },
+            {
+              "step": 10,
+              "operation": "handoff",
+              "task": "main",
+              "previous": "01a1b633-2344-7761-8efd-1d5fc1c3f478",
+              "current": "01a1b633-2c28-7ff0-97f2-ace2e93ac538",
+              "retainedReports": [
+                "01a1b633-2847-7402-aab9-199d8bb326fc:01a1b633-2b14-7502-a934-af23c7e2afd4"
+              ]
+            },
+            {
+              "step": 11,
+              "operation": "native-tool",
+              "task": "main",
+              "threadId": "01a1b633-2344-7761-8efd-1d5fc1c3f478",
+              "turnId": "01a1b633-2f1a-76e2-b378-5b53eea1d643",
+              "tool": "ma4_dispatch",
+              "success": false,
+              "output": "{\"error\": \"仅当前中控可调用本任务工具\"}"
+            },
+            {
+              "step": 12,
+              "operation": "resume",
+              "task": "main",
+              "resumed": true
+            },
+            {
+              "step": 13,
+              "operation": "wait",
+              "task": "main",
+              "condition": "host-idle",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 14,
+              "operation": "wait",
+              "task": "main",
+              "condition": "settled",
+              "status": "attention",
+              "pending": 0
+            },
+            {
+              "step": 15,
+              "operation": "reports",
+              "task": "main",
+              "reports": {
+                "01a1b633-2847-7402-aab9-199d8bb326fc:01a1b633-2b14-7502-a934-af23c7e2afd4": {
+                  "worker": "worker",
+                  "status": "interrupted",
+                  "delivered": 1,
+                  "pending": 0,
+                  "contentMatchesNative": false
+                }
+              }
+            },
+            {
+              "step": 16,
+              "operation": "replacement-context",
+              "target": true,
+              "budget": true,
+              "workers": true,
+              "handoffSummary": true
+            }
+          ],
+          "modelBoundary": "real HTTP/native Codex; local scripted model; no external supplier",
+          "instance": {
+            "url": "http://127.0.0.1:11167",
+            "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-6xzmghhx",
+            "verification": {
+              "instance": "3476575ed43244c79775d8962750a651",
+              "ownerPid": 14116,
+              "backendPid": 33196,
+              "endpoint": "ws://127.0.0.1:11151",
+              "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-6xzmghhx\\codex-home",
+              "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-6xzmghhx\\state"
+            },
+            "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+          },
+          "modelToolCalls": [
+            {
+              "marker": "TASK-FLOW-COMMAND-f840e0ee65754e5194954907ad1cbde8",
+              "tool": "ma4_dispatch",
+              "wireName": "ma4_dispatch"
+            },
+            {
+              "marker": "TASK-FLOW-COMMAND-a98e0f1e26784fa79efc4a5acb32163f",
+              "tool": "ma4_dispatch",
+              "wireName": "ma4_dispatch"
+            }
+          ],
+          "advertisedTaskTools": [
+            "ma4_dispatch",
+            "ma4_control",
+            "ma4_artifacts"
+          ],
+          "modelRequests": 8,
+          "cleanup": {
+            "backendExited": true,
+            "webClosed": true,
+            "fixtureRemoved": true
+          }
+        }
+      ],
+      "result": "passed"
+    },
+    "timingInjectedNativeValidation": {
+      "name": "native-registration-gap-injection",
+      "evidenceLayer": "timing injection around own Hub.new_thread; real HTTP/native dynamic tool/result",
+      "sources": {
+        "tools/task_actions.py": "443f63313b8a47063f37b9d8915fe2423e4b5f0c34d81f837f9acdfe739fa17d",
+        "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+        "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+        "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+        "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+      },
+      "result": "passed",
+      "instance": {
+        "url": "http://127.0.0.1:2088",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-h6myht24",
+        "verification": {
+          "instance": "d318e4965aae45ea828e0dc91339ce71",
+          "ownerPid": 18284,
+          "backendPid": 37584,
+          "endpoint": "ws://127.0.0.1:2085",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-h6myht24\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\executor\\smoke-h6myht24\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "ee5f84c001364991",
+          "threadId": "01a1b634-c53b-7690-9a29-7ed87882f8e3"
+        },
+        {
+          "step": 2,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 3,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 4,
+          "operation": "confirm",
+          "task": "main",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794058874.8839543
+          },
+          "resumed": true
+        },
+        {
+          "step": 5,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b634-c53b-7690-9a29-7ed87882f8e3",
+          "turnId": "01a1b634-c9de-7173-b7db-2234617e73c6",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b634-ca18-7452-bf48-909958309c84\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-h6myht24\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\executor\\\\smoke-h6myht24\\\\.agent-tmp\\\\ma4-ee5f84c001364991\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 6,
+          "operation": "ownership-snapshot-wait",
+          "task": "main",
+          "kind": "dispatch",
+          "candidate": "01a1b634-ca18-7452-bf48-909958309c84",
+          "reads": 1,
+          "result": "confirmed",
+          "writes": 0
+        },
+        {
+          "step": 7,
+          "operation": "wait",
+          "task": "main",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 8,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b634-ca18-7452-bf48-909958309c84:01a1b634-cd16-7273-8577-e13c82231c90": {
+              "worker": "worker",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        }
+      ],
+      "modelRequests": 5,
+      "checks": {
+        "realNewThreadCalls": 1,
+        "nativeReturnMatchesObservedAndOwned": true,
+        "noAdditionalDispatchOrSend": true,
+        "waitDiagnostic": {
+          "step": 6,
+          "operation": "ownership-snapshot-wait",
+          "task": "main",
+          "kind": "dispatch",
+          "candidate": "01a1b634-ca18-7452-bf48-909958309c84",
+          "reads": 1,
+          "result": "confirmed",
+          "writes": 0
+        }
+      },
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      }
+    },
+    "injectedNativeMethod": "复用fixture、ControlledTaskModel与prepared。只包装该fixture的Hub.new_thread：调用原方法拿到真实ID后暂缓返回；协调线程等guard的observed出现同一ID才释放，最长2秒。Controllers随后按原路径登记，真实ma4_dispatch返回ID精确匹配observed与owned。只创建1执行者、只调用1次动态派工、5次模拟请求。包装在finally恢复；未直接赋任务状态。",
+    "reusedAndNotRerun": {
+      "priorEvidenceRetained": true,
+      "independentReviewPreserved": true,
+      "unchangedSources": {
+        "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+        "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+        "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+        "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+      },
+      "validity": "此前成功记录继续代表各自源码版本；不以旧成功证明新guard。此次新测覆盖dispatch-report/pause-resume/handoff及身份保护；confirmation/reconnect-dedup和统一入口留给根Agent最终复验。未改smoke/model/业务/共享配置，不重跑完整CI。",
+      "historyPlan": "history/validate_plan/run本次未改；相关动作层测试已新测，18动作原生history组合本轮不重跑。"
+    },
+    "limits": [
+      "原失败瞬间未知ID没有被捕获；根因归属边界如analysis所述。",
+      "三个自然原生场景本次均成功，未自然遇到重取窗口；实际窗口由单列时序注入确定性触发。",
+      "真实供应商、Linux、浏览器未新测。根统一入口仍待最终复验。"
+    ],
+    "commands": [
+      "D:/python/anaconda/envs/th123/python.exe -B -X utf8 tools/task_scenarios.py run dispatch-report pause-resume handoff --scratch-root .agent-tmp/ma4-a4e72a99d4ae43e2/executor --output .agent-tmp/ma4-a4e72a99d4ae43e2/executor/registration-native.json"
+    ],
+    "cleanup": {
+      "nativeInstancesReclaimed": true,
+      "injectedNativeInstanceReclaimed": true,
+      "executorOutputsRemoved": true,
+      "rootRawEvidenceUntouched": true,
+      "independentReviewUntouched": true,
+      "executorDirectoryRemoved": true,
+      "removedFiles": 2,
+      "removedBytes": 21827,
+      "parentOwnershipMarkerPreserved": true,
+      "inventoryCommand": "session_inventory.py --since 2026-11-07T13:25:00+00:00 --root E:/PG/MA4-win --top 12 --json",
+      "inventoryExitCode": 0
+    },
+    "independentReview": {
+      "name": "independent-registration-publication-window",
+      "result": "passed",
+      "sources": {
+        "tools/task_actions.py": "443f63313b8a47063f37b9d8915fe2423e4b5f0c34d81f837f9acdfe739fa17d",
+        "tools/task_scenarios.py": "87083d9ed0d93d7e000a0d2d57ddf76a0920893495dfa54e0c0b4e747e525682",
+        "tools/smoke_test.py": "41027bb85bdf5d5b13f63480d6e37a6f88257e0f112021b49ac9c2577a78418c",
+        "controllers.py": "6f7e8f9ac7ae57398a6bbf3c1902f8386c8adeec2494a85e4d87a8ab84258aa2",
+        "hub.py": "4fa0e26b44937e0f741a38dce6da2a336a8da1ad67c59401ee26cb4d2a2dfe71",
+        "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+        "appserver.py": "a22650de494ecfeb2d0998717dc65df1d287042dac585ae8f93c2ccc0f7a4558",
+        "runtime.py": "bfc0a5685189214c1e7cc3ce92b7d0e42bf2c90961f14b09fdd7c43a141c9276"
+      },
+      "evidenceLayer": "own Hub.new_thread return is delayed; native HTTP/tool/result are real; local model",
+      "instance": {
+        "url": "http://127.0.0.1:11024",
+        "cwd": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-h91ere1a",
+        "verification": {
+          "instance": "194bae378dd64d4ea08630a4676b163d",
+          "ownerPid": 21200,
+          "backendPid": 25716,
+          "endpoint": "ws://127.0.0.1:7063",
+          "codexHome": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-h91ere1a\\codex-home",
+          "dataDir": "E:\\PG\\MA4-win\\.agent-tmp\\ma4-a4e72a99d4ae43e2\\review\\smoke-h91ere1a\\state"
+        },
+        "backendVersion": "ma4_smoke_terminal/0.167.0 (Windows 10.0.26200; x86_64) unknown (ma4; 0.1)"
+      },
+      "observations": [
+        {
+          "observed": "01a1b63a-2a5a-77b2-b81d-22048cafdd39",
+          "ownedWorkersBeforePublication": {},
+          "candidateBeforePublication": null,
+          "submitted": true
+        }
+      ],
+      "httpWritesDuringDispatch": [
+        "/api/tasks/resume"
+      ],
+      "createdNativeThreadIds": [
+        "01a1b63a-2a5a-77b2-b81d-22048cafdd39"
+      ],
+      "modelRequests": 5,
+      "steps": [
+        {
+          "step": 1,
+          "operation": "create",
+          "task": "main",
+          "taskId": "fe2c63919e7c4d40",
+          "threadId": "01a1b63a-2503-7ff3-963e-22f4e775178a"
+        },
+        {
+          "step": 2,
+          "operation": "draft",
+          "task": "main",
+          "draftSaved": true,
+          "draftRevision": 2,
+          "message": "草案已保存，请用户在页面查看并确认目标与预算；现在结束本轮，不执行草案。"
+        },
+        {
+          "step": 3,
+          "operation": "wait",
+          "task": "main",
+          "condition": "host-idle",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 4,
+          "operation": "confirm",
+          "task": "main",
+          "budget": {
+            "tokenLimit": 200000,
+            "currency": "CNY",
+            "deadline": 1794059227.1442215
+          },
+          "resumed": true
+        },
+        {
+          "step": 5,
+          "operation": "native-tool",
+          "task": "main",
+          "threadId": "01a1b63a-2503-7ff3-963e-22f4e775178a",
+          "turnId": "01a1b63a-2a1b-7d32-89f8-e1a8e2a11a69",
+          "tool": "ma4_dispatch",
+          "success": true,
+          "output": "{\"session_id\": \"01a1b63a-2a5a-77b2-b81d-22048cafdd39\", \"state\": \"queued\", \"cwd\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\review\\\\smoke-h91ere1a\", \"write_scope\": [], \"scratch\": \"E:\\\\PG\\\\MA4-win\\\\.agent-tmp\\\\ma4-a4e72a99d4ae43e2\\\\review\\\\smoke-h91ere1a\\\\.agent-tmp\\\\ma4-fe2c63919e7c4d40\", \"message\": \"已排队；请结束本轮，结果会自动回传，无需等待或轮询。\"}"
+        },
+        {
+          "step": 6,
+          "operation": "ownership-snapshot-wait",
+          "task": "main",
+          "kind": "dispatch",
+          "candidate": "01a1b63a-2a5a-77b2-b81d-22048cafdd39",
+          "reads": 1,
+          "result": "confirmed",
+          "writes": 0
+        },
+        {
+          "step": 7,
+          "operation": "wait",
+          "task": "main",
+          "condition": "settled",
+          "status": "attention",
+          "pending": 0
+        },
+        {
+          "step": 8,
+          "operation": "reports",
+          "task": "main",
+          "reports": {
+            "01a1b63a-2a5a-77b2-b81d-22048cafdd39:01a1b63a-2d38-7ef1-b8aa-d20a46a3d1d2": {
+              "worker": "worker",
+              "status": "completed",
+              "delivered": 1,
+              "pending": 0,
+              "contentMatchesNative": true
+            }
+          }
+        }
+      ],
+      "checks": {
+        "noProvisionalAdoption": true,
+        "oneHTTPMutationNoResend": true,
+        "nativeReturnedIDMatchesOwned": true,
+        "automaticReportExactlyOnce": true
+      },
+      "cleanup": {
+        "backendExited": true,
+        "webClosed": true,
+        "fixtureRemoved": true
+      },
+      "atUtc": "2026-11-07T13:37:40.115675+00:00",
+      "unitTests": {
+        "command": "D:/python/anaconda/envs/th123/python.exe -B -X utf8 -m unittest -q test_task_actions test_task_scenarios",
+        "total": 43,
+        "passed": 43,
+        "skipped": 0,
+        "exitCode": 0
+      },
+      "sourceHashesMatch": {
+        "tools/task_actions.py": true,
+        "tools/task_scenarios.py": true,
+        "tools/smoke_test.py": true,
+        "controllers.py": true,
+        "hub.py": true,
+        "server.py": true,
+        "task_policy.py": true,
+        "appserver.py": true,
+        "runtime.py": true
+      },
+      "reuse": "本轮已核对制作方派工/暂停恢复/交接三场景及注册窗口注入的实际步骤、模型边界、清理和最终源码摘要。旧independentReview仅代表旧版本，不充当新版guard通过证据。",
+      "limits": [
+        "原统一入口失败没有记录瞬间未知会话ID；时序窗口已由源码和确定性注入证实，对原失败仍为匹配解释。",
+        "根Agent待重测统一入口；本轮未重复全CI、Linux、真实供应商或浏览器。"
+      ],
+      "cleanupDisposition": "ma4_artifacts clean已精确删除1文件4595字节；空review目录已移除；本任务只剩归属标记。"
+    }
+  }
+}

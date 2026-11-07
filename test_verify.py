@@ -31,6 +31,7 @@ class VerifyTest(unittest.TestCase):
         self.assertNotIn("test_model_image_preview", python)
         self.assertNotIn("transport", [name for name, _ in plan])
         self.assertNotIn("live-ui", [name for name, _ in plan])
+        self.assertNotIn("task-flows", [name for name, _ in plan])
         self.assertEqual(len([name for name, _ in plan if name.endswith("_check")]), 5)
         self.assertFalse(any("controller_ui_check.mjs" in " ".join(cmd) for _, cmd in plan))
         self.assertEqual([name for name, _ in verify.make_plan(["transport"], False, self.root)], ["transport"])
@@ -57,12 +58,27 @@ class VerifyTest(unittest.TestCase):
         self.assertEqual(python.count("test_controllers"), 1)
         self.assertEqual(python.count("test_task_policy"), 1)
         self.assertEqual(python.count("test_architecture"), 1)
+        for module in ("test_task_actions", "test_task_scenarios", "test_maintenance"):
+            self.assertEqual(python.count(module), 1)
         self.assertIn("test_session_actions.mjs", plan[1][1])
         self.assertIn("--test-reporter=tap", plan[1][1])
         with patch.object(verify, "execute") as execute, \
                 contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
             verify.main(["run", "ci", "--ui"])
         self.assertEqual(error.exception.code, 2)
+        execute.assert_not_called()
+
+    def test_task_flows_require_explicit_selection_and_use_owned_scratch(self):
+        plan = verify.make_plan(["task-flows", "task-flows"], False, self.root)
+        self.assertEqual(len(plan), 1)
+        name, command = plan[0]
+        self.assertEqual(name, "task-flows")
+        self.assertIn("tools/task_scenarios.py", command)
+        self.assertEqual(command[command.index("--scratch-root") + 1], str(self.root / "task-flows"))
+        self.assertEqual(command[command.index("--output") + 1], str(self.root / "task-flows/result.json"))
+        self.assertNotIn("8764", " ".join(command))
+        with patch.object(verify, "execute") as execute, contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(verify.main(["plan", "task-flows"]), 0)
         execute.assert_not_called()
 
     def test_changed_map_fails_ci_without_rewriting_review(self):
@@ -125,12 +141,16 @@ class VerifyTest(unittest.TestCase):
         self.assertIn("error", result[0])
 
     def test_python_skips_are_explicit_and_zero_tests_fail(self):
-        for stdout, status in (("Ran 2 tests in 0.01s\nOK (skipped=1)", "passed_with_skips"),
-                               ("Ran 0 tests in 0.01s\nOK", "failed")):
+        for stdout, code, status, skipped in (
+                ("Ran 2 tests in 0.01s\nOK (skipped=1)", 0, "passed_with_skips", 1),
+                ("Ran 0 tests in 0.01s\nOK", 0, "failed", 0),
+                ("Ran 2 tests in 0.01s\nFAILED (failures=1, skipped=1)", 1, "failed", 1),
+                ("Ran 2 tests in 0.01s\nFAILED (skipped=1, unexpected successes=1)", 1, "failed", 1)):
             with self.subTest(status=status), contextlib.redirect_stdout(io.StringIO()):
-                result = verify.execute([("python", [sys.executable, "-c", f"print({stdout!r})"])],
+                result = verify.execute([("python", [sys.executable, "-c", f"print({stdout!r}); raise SystemExit({code})"])],
                                         self.root, os.environ.copy())
                 self.assertEqual(result[0]["status"], status)
+                self.assertEqual(result[0]["counts"]["skipped"], skipped)
 
     def test_node_runner_reports_skipped_and_todo_checks_honestly(self):
         cases = (

@@ -35,7 +35,8 @@ PROFILES = {
                  ("test_appserver", "test_runtime", "test_platform", "test_desktop"),
                  ("test_paths.mjs",), ()),
     "tooling": ("验证入口的选择、失败传播、输出和静态服务边界",
-                ("test_verify", "test_feature_map"), ("test_session_actions.mjs",), ()),
+                ("test_verify", "test_feature_map", "test_task_actions", "test_task_scenarios", "test_maintenance"),
+                ("test_session_actions.mjs",), ()),
     "architecture": ("任务规则层的依赖方向与副作用入口检查",
                      ("test_architecture",), (), ()),
 }
@@ -77,6 +78,11 @@ def make_plan(names, ui, output):
     if "live-ui" in names:
         plan.append(("live-ui", [sys.executable, "-B", "-X", "utf8", "tools/smoke_test.py",
                                  "--ui-output", str(output / "ui"), "--output", str(output / "live-ui.json")]))
+    if "task-flows" in names:
+        scratch = output / "task-flows"
+        plan.append(("task-flows", [sys.executable, "-B", "-X", "utf8", "tools/task_scenarios.py",
+                                    "run", "all", "--scratch-root", str(scratch),
+                                    "--output", str(scratch / "result.json")]))
     if "map" in names or "ci" in names:
         plan.append(("map", [sys.executable, "-B", "-X", "utf8", "tools/feature_map.py",
                              "--output", str(output / "map.json")]))
@@ -194,7 +200,7 @@ def execute(plan, output, env):
             if name == "python":
                 output_text = log.read_text(encoding="utf-8")
                 total = re.search(r"^Ran (\d+) tests? in ", output_text, re.MULTILINE)
-                skipped = re.search(r"^OK \(skipped=(\d+)\)", output_text, re.MULTILINE)
+                skipped = re.search(r"^(?:OK|FAILED) \([^\n]*\bskipped=(\d+)[,)]", output_text, re.MULTILINE)
                 if total:
                     item["counts"] = {"total": int(total[1]), "skipped": int(skipped[1]) if skipped else 0}
                     if int(total[1]) == 0:
@@ -233,17 +239,18 @@ def main(argv=None):
     commands.add_parser("list", help="列出功能分组与副作用")
     for action in ("plan", "run"):
         sub = commands.add_parser(action, help="只显示命令" if action == "plan" else "执行所选检查")
-        sub.add_argument("profiles", nargs="+", choices=[*PROFILES, "core", "ci", "transport", "live-ui", "map"])
+        sub.add_argument("profiles", nargs="+", choices=[*PROFILES, "core", "ci", "transport", "live-ui", "task-flows", "map"])
         sub.add_argument("--ui", action="store_true", help="加跑所选功能的模拟页面检查")
         sub.add_argument("--output", help="保留日志/截图/结果至 .agent-tmp 下的新子目录；默认自动清理")
     args = parser.parse_args(argv)
     if args.action == "list":
         for name, (description, _python, _node, pages) in PROFILES.items():
             print(f"{name:10} {description}；模拟页面 {len(pages)} 项")
-        print("core       合并以上各组，重复检查只跑一次；不含 transport、live-ui、map 或图片预览")
+        print("core       合并以上各组，重复检查只跑一次；不含 transport、live-ui、task-flows、map 或图片预览")
         print("ci         core 的逻辑检查＋map；启动器只跑单元测试，不需要 Codex、浏览器、凭据或第三方包")
         print("transport  独立 CODEX_HOME + 本机模拟模型 + 临时 TCP 后台；不使用真实会话/额度")
         print("live-ui    真实浏览器 → MA4 后端 → 独立 Codex → 本机模拟模型；含历史重开与证据，不在 core 中")
+        print("task-flows 中控确认、派工/报告、在途暂停、恢复、交接与重连；独立 Codex＋本机模拟模型，显式运行")
         print("map        只读核对已登记的地图输入/操作说明/证据；变化返回待复核，不自动宣称验证通过")
         print("--ui 加跑模拟页面；live-ui 显式运行真实页面。复用 Node/Chrome/Playwright 缓存，不安装依赖。")
         print("Python 跳过或 Node 跳过/待实现项标记 passed_with_skips；数量与原因见结果/日志。")
