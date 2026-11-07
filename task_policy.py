@@ -9,6 +9,7 @@ import math
 ACTIVE = frozenset({"running", "waiting", "review"})
 RUNNING = ACTIVE | {"closing"}
 BUSY = frozenset({"running", "sending"})
+WORKER_STATES = ("running", "sending", "queued", "idle")
 TERMINAL = frozenset({"completed", "stopped"})
 TOKEN_KEYS = ("totalTokens", "inputTokens", "cachedInputTokens", "outputTokens")
 
@@ -78,6 +79,8 @@ def confirm_blocker(t, runtime):
         return control_blocker(runtime)
     if t["hostBusy"] or any(w["state"] in BUSY for w in t["workers"].values()) or t.get("outbox") or t.get("handoff"):
         return "还有回合或发送操作未结束，请等它们返回后再确认目标"
+    if any(w["state"] not in WORKER_STATES for w in t["workers"].values()):
+        return "有执行者状态待核对，请先核对对应会话与任务记录，再确认目标或恢复"
     if t["status"] in RUNNING:
         return "请先暂停任务，再确认目标与预算"
     return None
@@ -133,7 +136,7 @@ def report_delivery(t, runtime):
 def diagnosis(t, runtime):
     """Explain existing state, without RPCs, writes, retries or semantic guesses."""
     states = [w["state"] for w in t["workers"].values()]
-    work = {state: states.count(state) for state in ("running", "sending", "queued", "idle")}
+    work = {state: states.count(state) for state in WORKER_STATES}
     work["unknown"] = len(states) - sum(work.values())
     work.update(host=bool(t["hostBusy"]), reports=len(t["pending"]))
     busy = work["host"] or work["running"] or work["sending"]
@@ -143,6 +146,8 @@ def diagnosis(t, runtime):
         facts.append("接任中控已创建，交接说明尚未发送；下一次消息会附带说明。")
     if budget and t["status"] not in TERMINAL:
         facts.append(budget + "；暂停、交接或重连不会延长预算。")
+    if work["unknown"]:
+        facts.append(f"{work['unknown']} 名执行者状态待核对，不能视为空闲；核对前不能确认目标或恢复，仍可按原规则保存草案。")
     # Old hosts and uncertain timing cannot establish the latest host failure.
     turns = list(t.get("metrics", {}).get(t.get("host"), {}).get("turns", {}).values())
     ordered = turns and all(activity_timestamp(r.get("startedAt")) and not r.get("timeEstimated") for r in turns)
@@ -166,7 +171,8 @@ def diagnosis(t, runtime):
     elif t["status"] in TERMINAL:
         code = t["status"]
         title = "目标已记录为达标" if code == "completed" else "任务已记录为未达标结束"
-        reason = "结束记录已保存。" + ("仍有回合在收尾，结束记录不代表所有回合已停止。" if busy else "未记录在途回合。")
+        reason = "结束记录已保存。" + ("仍有回合在收尾，结束记录不代表所有回合已停止。" if busy else
+                                "仍有执行者状态待核对，不能确认是否还有在途回合。" if work["unknown"] else "未记录在途回合。")
         step = "你：查看验收结论及实际成果；需要继续时重新核对目标与预算并确认。"
     elif t["status"] not in RUNNING and busy:
         code, title, reason, step = "pausing", "自动推进已停，仍有回合未结束", "暂停或保存草案不等于中断已经完成，也可能有讨论回合在运行。", "你：等回合返回后再确认；需要中断现有回合时可点“停止在途回合”。"
@@ -176,6 +182,8 @@ def diagnosis(t, runtime):
             step = "MA4：按预算规则停止新增工作并处理在途回合。你：等回合结束、任务停止推进后，再核对并调整预算。"
     elif t.get("costUncertain"):
         code, title, reason, step = "cost_uncertain", "金额估算需要处理", "会话模型发生变化，现有金额估算不再可靠。", "你：在目标与预算表单中改用 token 或时限，核对后确认。"
+    elif work["unknown"]:
+        code, title, reason, step = "unknown_work", "有执行者状态待核对", "已有执行者状态无法归类，不能把它们算作空闲。", "你或维护 Agent：检查对应执行会话与任务记录，再决定接续方式。"
     elif t.get("draft") or not confirmed(t):
         code, title, reason, step = "draft", "目标尚待确认", "讨论或新草案不等于已授权自主推进。", "你：查看草案中的目标、验收要求、目录和预算，再决定保存或启动。"
     elif t.get("handoffPending"):
@@ -186,8 +194,6 @@ def diagnosis(t, runtime):
         code, title, reason, step = "host_busy", "中控回合仍在进行", "当前记录显示中控忙碌；仅凭长时间无输出不能判定卡死。", "中控：处理当前回合。你可查看最近消息和工具状态，再决定等待、暂停或交接。"
     elif work["running"] or work["sending"]:
         code, title, reason, step = "workers_busy", "执行者仍在工作", "中控当前空闲，不代表整个任务已经停住。", "执行者：完成工作并报告；MA4 在中控空闲且条件允许时自动回传。"
-    elif work["unknown"]:
-        code, title, reason, step = "unknown_work", "有执行者状态待核对", "已有执行者状态无法归类，不能把它们算作空闲。", "你或维护 Agent：检查对应执行会话与任务记录，再决定接续方式。"
     elif t["status"] in RUNNING and work["reports"]:
         code, title, reason, step = "reports", "报告等待中控处理", report_delivery(t, runtime)["reason"], "MA4：按现有回传条件处理；中控仍须独立检查成果。"
     elif t["status"] in RUNNING and work["queued"]:

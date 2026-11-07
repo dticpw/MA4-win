@@ -1,0 +1,454 @@
+{
+  "version": 1,
+  "task": "未知执行者状态的独立维护",
+  "status": "实现与相关检查已完成；等待派发者独立审查",
+  "date": "2026-11-07",
+  "base_commit": "46c5b90caf221a07cabe8ccb58c91687b08975ac",
+  "environment": {
+    "platform": "Windows",
+    "python": "D:/python/anaconda/envs/th123/python.exe -B -X utf8",
+    "version": "3.10.19",
+    "cwd": "E:/PG/MA4-win"
+  },
+  "entry_points_read": [
+    {
+      "path": "AGENTS.md",
+      "reason": "确认共享源码、纯规则边界、相关检查与文件保护要求"
+    },
+    {
+      "path": "README.md",
+      "sections": [
+        "现状与接续",
+        "中控任务（现行方式）",
+        "中控派发",
+        "PR 自动检查与同步维护",
+        "检查与验收",
+        "文件与维护约定"
+      ],
+      "reason": "定位当前阶段、接口行为、验证入口和不得外推的实机边界；全文首读输出被截断后按相关段读取"
+    },
+    {
+      "path": "FEATURE-MAP.md",
+      "sections": [
+        "流程二",
+        "流程三",
+        "验证入口怎么用"
+      ],
+      "reason": "将确认/恢复问题定位到 task_policy 与 Controllers；选择 tasks architecture"
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "reason": "纯判断无副作用；兼容方法只委托；旧比较脚本不是新行为标准"
+    },
+    {
+      "path": "tools/verify.py",
+      "reason": "核对分组和隔离输出/测试临时环境；不改验证工具"
+    },
+    {
+      "path": "tools/feature_map.py",
+      "reason": "确认摘要检测与人工登记规则"
+    },
+    {
+      "path": "C:/Users/DTICPW/agent-workflows/skills/project-file-lifecycle/SKILL.md",
+      "reason": "按现有项目约定保存证据、清点与清理自己的临时产物"
+    }
+  ],
+  "files_chosen": {
+    "task_policy.py": "唯一业务改动；confirm_blocker 同时供页面、do_confirm 和 do_resume 使用，diagnosis 负责解释未知状态",
+    "test_task_policy.py": "明确时间/连接快照和不可变输入；覆盖未知/已知状态及优先级组合",
+    "test_controllers.py": "模拟 Hub 与独立临时数据验证确认/恢复无副作用、草案可存、核对后正常继续",
+    "ARCHITECTURE.md": "记录本次判断优先级及维护样例，不改变架构或审查流程",
+    "FEATURE-MAP.md": "同步确认和恢复操作说明",
+    "validation/feature-map-review.json": "仅人工核对本次改动对应输入与说明；不为并行改动刷新摘要",
+    "validation/cold-start.json": "本次实际验证、限制、障碍及文件去向"
+  },
+  "read_only_implementation_review": [
+    "controllers.py: confirm_blocker/diagnosis 委托、do_update/stage_draft、do_confirm、do_resume；两条确认/恢复路径在写入前调用同一 blocker",
+    "task_policy.py: control_blocker/confirm_blocker/handoff_blocker/report_delivery/diagnosis 与预算优先级",
+    "test_controllers.py: 模拟 Hub、临时目录及已有诊断/预算/交接/队列用例"
+  ],
+  "actual_defect": [
+    "未知执行者虽被计数，但 unknown_work 分支排在 draft、handoff_ready、paused 等说明之后；终态在无已知 busy 时声称未记录在途回合",
+    "confirm_blocker 只识别 running/sending 为忙碌，未知执行者可通过确认保存、确认启动或直接恢复"
+  ],
+  "implementation": [
+    "共用 WORKER_STATES 元组，未知状态在确认/恢复入口拒绝；保留连接和既有在途检查优先级",
+    "所有未知执行者计入待核对事实；将 unknown_work 提至普通草案/暂停等解释之前",
+    "保留控制异常、断线/核对、未确认发送、中控缺失、收尾/交接、终态、在途停止、预算与金额不确定优先级；终态理由不再将未知误作无在途",
+    "未改变执行者状态，不推断故障根因；草案、交接、调度、任务/目标/预算/归属与接口格式沿用原实现"
+  ],
+  "initial_regression": {
+    "old_policy_sha256": "002db16e77b0e3c8d2c4ab3646f020aa347dab9bdbf8d8ce23b7debd85c1c0b3",
+    "argv": [
+      "D:\\python\\anaconda\\envs\\th123\\python.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "unittest",
+      "-v",
+      "test_task_policy",
+      "test_controllers.ControllerTest.test_unknown_worker_blocks_confirm_and_resume_without_side_effects",
+      "test_controllers.ControllerTest.test_unknown_worker_still_allows_draft_save_then_requires_state_check"
+    ],
+    "old_implementation_failed": true,
+    "first_run": {
+      "exit_code": 1,
+      "tests": 11,
+      "failure_subtests": 32,
+      "error_subtests": 22,
+      "note": "22 个子例因 assertIn 收到旧实现返回的 None 产生 TypeError；增加 assertIsNotNone 使原因成为清晰断言失败，未改产品代码"
+    },
+    "corrected_assertion_run": {
+      "exit_code": 1,
+      "tests": 11,
+      "failure_subtests": 54,
+      "errors": 0
+    },
+    "representative_failures": [
+      "confirm_save/confirm_start/resume: ValueError not raised",
+      "草案诊断 draft != unknown_work",
+      "终态理由包含 未记录在途回合",
+      "未知执行者 confirm_blocker 返回 None；预算/断线等诊断缺待核对事实"
+    ],
+    "count_note": "unittest 的失败子例数不是测试方法数；7 个新测试方法，连同4个原纯规则测试共11项"
+  },
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "config",
+        "--get",
+        "core.fileMode"
+      ],
+      "result": "false"
+    },
+    {
+      "argv": [
+        "git",
+        "check-ignore",
+        "-v",
+        "--",
+        ".agent-tmp/cold-start-worker-20261107/probe.txt"
+      ],
+      "result": ".gitignore:1:.agent-tmp/；使用前确认忽略"
+    },
+    {
+      "argv": [
+        "D:/python/anaconda/envs/th123/python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "tools/verify.py",
+        "run",
+        "map",
+        "--output",
+        ".agent-tmp/cold-start-worker-20261107/map-before"
+      ],
+      "exit_code": 0,
+      "result": "三个已登记流程均 current"
+    },
+    {
+      "argv": [
+        "D:/python/anaconda/envs/th123/python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "tools/verify.py",
+        "run",
+        "tasks",
+        "architecture",
+        "--output",
+        ".agent-tmp/cold-start-worker-20261107/checks"
+      ],
+      "exit_code": 0,
+      "report": {
+        "result": "passed_with_skips",
+        "at_utc": "2026-11-07T12:52:56.756395+00:00",
+        "platform": "win32",
+        "python": "3.10.19",
+        "profiles": [
+          "tasks",
+          "architecture"
+        ],
+        "ui_requested": false,
+        "checks": [
+          {
+            "check": "python",
+            "argv": [
+              "D:\\python\\anaconda\\envs\\th123\\python.exe",
+              "-B",
+              "-X",
+              "utf8",
+              "-m",
+              "unittest",
+              "-v",
+              "test_controllers",
+              "test_task_policy",
+              "test_architecture"
+            ],
+            "status": "passed_with_skips",
+            "exit_code": 0,
+            "counts": {
+              "total": 112,
+              "skipped": 4
+            }
+          },
+          {
+            "check": "node",
+            "argv": [
+              "node",
+              "--test",
+              "--test-reporter=tap",
+              "test_controllers.mjs"
+            ],
+            "status": "passed",
+            "exit_code": 0,
+            "counts": {
+              "total": 14,
+              "passed": 14,
+              "failed": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "todo": 0
+            }
+          }
+        ],
+        "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+      }
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "D:/python/anaconda/envs/th123/python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "tools/verify.py",
+        "run",
+        "ci",
+        "--output",
+        ".agent-tmp/cold-start-worker-20261107/ci"
+      ],
+      "exit_code": 1,
+      "report": {
+        "result": "failed",
+        "at_utc": "2026-11-07T12:55:49.232132+00:00",
+        "platform": "win32",
+        "python": "3.10.19",
+        "profiles": [
+          "ci"
+        ],
+        "ui_requested": false,
+        "checks": [
+          {
+            "check": "python",
+            "argv": [
+              "D:\\python\\anaconda\\envs\\th123\\python.exe",
+              "-B",
+              "-X",
+              "utf8",
+              "-m",
+              "unittest",
+              "-v",
+              "test_hub",
+              "test_server",
+              "test_controllers",
+              "test_task_policy",
+              "test_activity",
+              "test_health",
+              "test_quota",
+              "test_appserver",
+              "test_runtime",
+              "test_platform",
+              "test_desktop.NativeLauncherTest",
+              "test_verify",
+              "test_feature_map",
+              "test_architecture"
+            ],
+            "status": "passed_with_skips",
+            "exit_code": 0,
+            "counts": {
+              "total": 247,
+              "skipped": 4
+            }
+          },
+          {
+            "check": "node",
+            "argv": [
+              "node",
+              "--test",
+              "--test-reporter=tap",
+              "test_markdown.mjs",
+              "test_paths.mjs",
+              "test_controllers.mjs",
+              "test_session_actions.mjs"
+            ],
+            "status": "passed",
+            "exit_code": 0,
+            "counts": {
+              "total": 37,
+              "passed": 37,
+              "failed": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "todo": 0
+            }
+          },
+          {
+            "check": "map",
+            "argv": [
+              "D:\\python\\anaconda\\envs\\th123\\python.exe",
+              "-B",
+              "-X",
+              "utf8",
+              "tools/feature_map.py",
+              "--output",
+              "E:\\PG\\MA4-win\\.agent-tmp\\cold-start-worker-20261107\\ci\\map.json"
+            ],
+            "status": "failed",
+            "exit_code": 2
+          }
+        ],
+        "limits": "仅所列检查；系统/权限跳过见日志。不代表真实模型、线上任务或另一系统已验收。"
+      }
+    }
+  ],
+  "manual_map_review": {
+    "reviewed_inputs": [
+      "task_policy.py",
+      "test_task_policy.py",
+      "test_controllers.py",
+      "ARCHITECTURE.md"
+    ],
+    "reviewed_recipes": [
+      "tasks",
+      "reports"
+    ],
+    "basis": "逐项读取规则与调用顺序并审阅 diff；新回归在旧实现失败，修改后相关测试通过。sessions 仅共享上述输入摘要变化，普通会话源码/操作步骤无改动。旧历史证据原样保留。",
+    "concurrent_change": "相关检查后发现 tools/smoke_test.py 另有未提交改动；本执行者未修改，不代替派发者更新其摘要",
+    "ci_map_result": {
+      "result": "needs_review",
+      "errors": [],
+      "features": [
+        {
+          "feature": "sessions",
+          "status": "needs_review",
+          "changes": [
+            "tools/smoke_test.py"
+          ]
+        },
+        {
+          "feature": "tasks",
+          "status": "current",
+          "changes": []
+        },
+        {
+          "feature": "reports",
+          "status": "current",
+          "changes": []
+        }
+      ]
+    }
+  },
+  "unverified": [
+    "Linux 实机未测；公共规则无系统分支",
+    "未连接8764、访问真实任务状态、重启服务或 daemon、运行浏览器/真实模型；未在线加载",
+    "Windows 4 项既有符号链接测试因权限跳过",
+    "未运行 validation/task-policy-compare.py；新行为不以旧历史实现为标准",
+    "独立审查、README 与跨系统文档更新、提交和推送均留派发者"
+  ],
+  "obstacles": [
+    "首次新增断言直接包含 None 导致 TypeError，已在改实现前修正并重新复现",
+    "CI 的 Python/Node 通过；地图仅 sessions 的 tools/smoke_test.py 因范围外并行改动 needs_review。tasks/reports 均 current，未替派发者刷新其他文件摘要。"
+  ],
+  "benefit_claim": "仅记录一次无此前对话上下文的实际维护；未测耗时对照，不推算效率收益",
+  "initial_uncommitted_preserved": [
+    "README.md",
+    "validation/shared-source.md",
+    "agent-workflow-study.html",
+    "test_model_image_preview.py",
+    "tools/model_image_preview.py",
+    "validation/model-image-preview/",
+    "validation/response-body-diagnosis/"
+  ],
+  "file_lifecycle": {
+    "formal": [
+      "task_policy.py",
+      "test_task_policy.py",
+      "test_controllers.py",
+      "ARCHITECTURE.md",
+      "FEATURE-MAP.md",
+      "validation/feature-map-review.json",
+      "validation/cold-start.json"
+    ],
+    "temporary_root": ".agent-tmp/cold-start-worker-20261107/",
+    "cleanup": {
+      "status": "已清理；删除后目录不存在",
+      "root": ".agent-tmp/cold-start-worker-20261107/",
+      "files": 15,
+      "bytes": 130254,
+      "items": [
+        "inventory.json",
+        "regression-before.json",
+        "regression-before.log",
+        "regression-old-assertions.log",
+        "checks/node.log",
+        "checks/python.log",
+        "checks/result.json",
+        "ci/map.json",
+        "ci/map.log",
+        "ci/node.log",
+        "ci/python.log",
+        "ci/result.json",
+        "map-before/map.json",
+        "map-before/map.log",
+        "map-before/result.json"
+      ],
+      "reason": "相关进程均已退出；关键断言失败、命令/结果和限制已保存到本记录，临时原始日志与清点无正式依赖；不动其他任务材料。",
+      "verification": "PowerShell Resolve-Path 核对完整绝对路径在项目内；枚举拒绝 ReparsePoint；15文件/130254字节与记录一致后 Remove-Item -LiteralPath $taskScratch -Recurse -ErrorAction Stop；Test-Path 为 False。整条清理命令未使用强制删除参数。"
+    },
+    "backups_archives_scheduled_tasks_added": false,
+    "inventory": {
+      "script": "C:/Users/DTICPW/agent-workflows/skills/project-file-lifecycle/scripts/session_inventory.py",
+      "python_flags": [
+        "-B",
+        "-X",
+        "utf8"
+      ],
+      "arguments": [
+        "--since",
+        "2026-11-07T20:48:00+08:00",
+        "--root",
+        "E:/PG/MA4-win",
+        "--top",
+        "30",
+        "--json"
+      ],
+      "execution": "runpy 加载同一只读脚本；在当前进程的 PRUNE_NAMES 中排除 .ma4，在 PRUNE_PATHS 中排除其他任务临时目录，然后调用 main；不读运行状态、不改 Skill",
+      "result": "7个本任务正式文件、14个临时文件；另看到派发者 tools/smoke_test.py 与 tools/task_actions.py，仅记录归属、不处理。清点输出本身另生成 inventory.json，计入随后清理。",
+      "backups_or_archives": [],
+      "timers": "没有新增定时任务；未检查Windows既有计划任务"
+    },
+    "temporary_files_remaining": 0,
+    "retained_reason": "7个正式源码/测试/说明与验证记录保留供派发者独立审查；未新增备份、打包文件或定时任务。"
+  },
+  "dispatcher_updates_requested": {
+    "README": "未知执行者状态现在明确待核对，核对前禁止确认保存/确认启动/直接恢复，草案仍可保存；终态不再误称无在途。相关检查112项Python中108通过、4权限跳过，14项Node通过；CI逻辑247项Python中243通过、4权限跳过，37项Node通过，地图仅并行smoke_test.py待复核。本次未在线加载、Linux未测，等待派发者独立审查；不宣称效率收益。",
+    "cross_system_board": "本执行者无范围外文档写权限；请派发者在现有 MA4 条目补 Linux 未实测及按 tasks architecture 复核的边界。"
+  },
+  "source_sha256": {
+    "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
+    "test_task_policy.py": "af467fafb22698feddbdc84b2b1960acb7e38685c2420816a4dcdd5426446a81",
+    "test_controllers.py": "33d55fa80206eed44d15f4f8faede00182cc9f6cb8e90e9f49b2196452e6384c",
+    "ARCHITECTURE.md": "f17741ea9f0f4e3b0f290fa278ab75f84866db1ed267ad44257c6aedf09da2b4",
+    "FEATURE-MAP.md": "f2ab37da445d8a75f5f6c71630140f9732123d9538245596e57c4f670a4c4ecb"
+  }
+}

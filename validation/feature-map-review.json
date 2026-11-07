@@ -3,7 +3,7 @@
   "limits": "人工记录；current 仅表示登记内容未变化。未登记依赖、环境或语义正确性仍需人工判断。",
   "features": {
     "sessions": {
-      "source_reviewed_at": "2026-11-07T12:27:09.706567+00:00",
+      "source_reviewed_at": "2026-11-07T12:55:14.832407+00:00",
       "recipe_sha256": "1a4df63bf1747ab53095b0d173d96c939e2f560137ebe76ac104b7a9268ab37d",
       "inputs": {
         "tools/verify.py": "d7b88fca16d759e0f3c3876b61104a599f610cfe2f03f210395207d4e48260c4",
@@ -30,11 +30,11 @@
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
         "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
         "test_hub.py": "f51c68d85d63da5eba4ec65c24aeba1f969d9c4bfd2004bcf0c34f9708ddfb87",
-        "task_policy.py": "002db16e77b0e3c8d2c4ab3646f020aa347dab9bdbf8d8ce23b7debd85c1c0b3",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
         "tools/check_architecture.py": "4ce00a29e2da3be4c7f415d5fa5e8bfb3b0b2a78057e40b9c91c257875da0f93",
         "test_architecture.py": "4f6ec4a77313364b3d63f7b2bab3c6b82231fdab5182fd57ed866336fc5c8563",
-        "test_task_policy.py": "5cbde606620c4833d89f17abc9d47c2199d9e0923f9705bf6f0823e0962ea074",
-        "ARCHITECTURE.md": "b03449da78e4e4d0997e1537077d9dbaee3f174ab8da8eb4a746f713b07532fa"
+        "test_task_policy.py": "af467fafb22698feddbdc84b2b1960acb7e38685c2420816a4dcdd5426446a81",
+        "ARCHITECTURE.md": "f17741ea9f0f4e3b0f290fa278ab75f84866db1ed267ad44257c6aedf09da2b4"
       },
       "evidence": [
         {
@@ -324,6 +324,10 @@
         {
           "path": "validation/task-policy.json",
           "sha256": "94499052087749dde0449c656111d9b59b152d3074cdc66f61dab1b5b8f0f140"
+        },
+        {
+          "path": "validation/cold-start.json",
+          "sha256": "c3764bae57ebb9e146d56c30e56334c76fcc8f720fb127021fb62063b3ab1274"
         }
       ],
       "coverage": "Windows；17 Python/10 Node；真实故障恢复主路径1轮＋默认旧功能兼容会话1轮；独立CLI重复文本2轮/4消息重开刷新通过；未配对wait在fixture启动前拒绝。 最终 direct open 始终文档加载；双会话16步与11项Node通过，Python及旧兼容仅按原覆盖复用。",
@@ -333,11 +337,11 @@
         "审批/Skill/插话等的真实浏览器链路",
         "其他浏览器与手机真机"
       ],
-      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。"
+      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。 本次独立维护：人工核对未知执行者的诊断/确认限制及草案路径；相关112项Python中108通过、4权限跳过，14项Node通过。保留交接/调度及已知状态行为；未在线加载、Linux未测，不复用旧历史比较作为新规则标准。sessions仅共用输入变化，普通会话步骤未改。详情见validation/cold-start.json。"
     },
     "tasks": {
-      "source_reviewed_at": "2026-11-07T12:27:09.706567+00:00",
-      "recipe_sha256": "8da7c55cd833385c54bf829aa6f8b4a5207ec303fbc060fa626e53c567c82909",
+      "source_reviewed_at": "2026-11-07T12:55:14.833411+00:00",
+      "recipe_sha256": "ca5d55dc79c5d8dff5e02b297e303bc964b8a1c7ce6c8e7741bb6ba5a22ade6c",
       "inputs": {
         "tools/verify.py": "d7b88fca16d759e0f3c3876b61104a599f610cfe2f03f210395207d4e48260c4",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
@@ -352,18 +356,18 @@
         "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
         "web/index.html": "d9ff96fa000f61d6cfd4e32fed029f6aec3e241bd4098535457d182f3240a37a",
         "web/style.css": "f1ada9afbefaae6ff31a9bd781955f028d698474552ebbd829517b03341c5226",
-        "test_controllers.py": "df5cefb7c5a3bf7c42bd0880c906365b394ce3a0c1f33586566c436c8769bbdf",
+        "test_controllers.py": "33d55fa80206eed44d15f4f8faede00182cc9f6cb8e90e9f49b2196452e6384c",
         "test_controllers.mjs": "e6ac0bc929ef5898e881e0fcccb76754b5e7d2756ad171b4f14dc0c00fa2ce47",
         "tools/controller_discussion_check.mjs": "d665808a45471f691c315e29107593e4ac26ed4024ecb9c634844fa300d48c0e",
         "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
         "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
         "tools/controller_details_check.mjs": "bcb046deabc4feed932e6db265dbe92f6559f7d3d6917639fab09f3a870c8c2e",
-        "task_policy.py": "002db16e77b0e3c8d2c4ab3646f020aa347dab9bdbf8d8ce23b7debd85c1c0b3",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
         "tools/check_architecture.py": "4ce00a29e2da3be4c7f415d5fa5e8bfb3b0b2a78057e40b9c91c257875da0f93",
         "test_architecture.py": "4f6ec4a77313364b3d63f7b2bab3c6b82231fdab5182fd57ed866336fc5c8563",
-        "test_task_policy.py": "5cbde606620c4833d89f17abc9d47c2199d9e0923f9705bf6f0823e0962ea074",
-        "ARCHITECTURE.md": "b03449da78e4e4d0997e1537077d9dbaee3f174ab8da8eb4a746f713b07532fa"
+        "test_task_policy.py": "af467fafb22698feddbdc84b2b1960acb7e38685c2420816a4dcdd5426446a81",
+        "ARCHITECTURE.md": "f17741ea9f0f4e3b0f290fa278ab75f84866db1ed267ad44257c6aedf09da2b4"
       },
       "evidence": [
         {
@@ -437,6 +441,10 @@
         {
           "path": "validation/task-policy.json",
           "sha256": "94499052087749dde0449c656111d9b59b152d3074cdc66f61dab1b5b8f0f140"
+        },
+        {
+          "path": "validation/cold-start.json",
+          "sha256": "c3764bae57ebb9e146d56c30e56334c76fcc8f720fb127021fb62063b3ab1274"
         }
       ],
       "coverage": "Windows；目标确认、预算、派工与材料管理的逻辑检查，讨论/确认模拟页面三种宽度通过；Python 4 项符号链接权限跳过。源码与页面入口已核对。 2026-11-07 Windows 现有 8764 已加载，真实材料列表计数/字节与完整磁盘只读统计一致；不外推派工全链路。 第三轮真实8764经HTTP确认后，一个真实中控与一个真实执行者完成三轮工作；目标/预算/授权与原四任务保持，最终completed。 阶段1新增任务诊断、恢复安全逻辑与三种宽度模拟页面；当前服务加载状态见 validation/task-diagnosis/evidence.json。 阶段1 Windows 已实际加载；五任务/10载入会话保持，真实已达标任务页面三种宽度与键盘/只打开确认表单通过。",
@@ -445,11 +453,11 @@
         "Windows 跳过的符号链接检查",
         "Linux 实机"
       ],
-      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。"
+      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。 本次独立维护：人工核对未知执行者的诊断/确认限制及草案路径；相关112项Python中108通过、4权限跳过，14项Node通过。保留交接/调度及已知状态行为；未在线加载、Linux未测，不复用旧历史比较作为新规则标准。sessions仅共用输入变化，普通会话步骤未改。详情见validation/cold-start.json。"
     },
     "reports": {
-      "source_reviewed_at": "2026-11-07T12:27:09.706567+00:00",
-      "recipe_sha256": "bcb3852cf086f93ba15f797226d4b399a9b523bd98d9a566779393a2049b35d5",
+      "source_reviewed_at": "2026-11-07T12:55:14.833411+00:00",
+      "recipe_sha256": "dd95ef9bbff6095928175b1656639a8fa8965e8501f1dbd9869cba50b0d79e2c",
       "inputs": {
         "tools/verify.py": "d7b88fca16d759e0f3c3876b61104a599f610cfe2f03f210395207d4e48260c4",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
@@ -464,17 +472,17 @@
         "web/controllers.js": "65a1506a8ccb355f30bca68ee8f0b400cf2ba9e02faf8c5037e6550fb90c32df",
         "web/index.html": "d9ff96fa000f61d6cfd4e32fed029f6aec3e241bd4098535457d182f3240a37a",
         "web/style.css": "f1ada9afbefaae6ff31a9bd781955f028d698474552ebbd829517b03341c5226",
-        "test_controllers.py": "df5cefb7c5a3bf7c42bd0880c906365b394ce3a0c1f33586566c436c8769bbdf",
+        "test_controllers.py": "33d55fa80206eed44d15f4f8faede00182cc9f6cb8e90e9f49b2196452e6384c",
         "test_controllers.mjs": "e6ac0bc929ef5898e881e0fcccb76754b5e7d2756ad171b4f14dc0c00fa2ce47",
         "tools/controller_details_check.mjs": "bcb046deabc4feed932e6db265dbe92f6559f7d3d6917639fab09f3a870c8c2e",
         "tools/session_actions.mjs": "06fdbebad9e71ffd836a0d821dd6089310026c9963c8795850d6102f05e6b8e8",
         "tools/session_cli.mjs": "5e4ee6622a63d235756c45f216c31af24eaa44144ac16247c4b06f69e08603eb",
         "test_session_actions.mjs": "793a95dfa6a21f25e95f765df194a13a3bd3c6323603654753938f7d5defc12b",
-        "task_policy.py": "002db16e77b0e3c8d2c4ab3646f020aa347dab9bdbf8d8ce23b7debd85c1c0b3",
+        "task_policy.py": "bbd51c3054a682a8be2fb49b00982315f0f4a5f475ab52a3c1ddc1db01d84100",
         "tools/check_architecture.py": "4ce00a29e2da3be4c7f415d5fa5e8bfb3b0b2a78057e40b9c91c257875da0f93",
         "test_architecture.py": "4f6ec4a77313364b3d63f7b2bab3c6b82231fdab5182fd57ed866336fc5c8563",
-        "test_task_policy.py": "5cbde606620c4833d89f17abc9d47c2199d9e0923f9705bf6f0823e0962ea074",
-        "ARCHITECTURE.md": "b03449da78e4e4d0997e1537077d9dbaee3f174ab8da8eb4a746f713b07532fa"
+        "test_task_policy.py": "af467fafb22698feddbdc84b2b1960acb7e38685c2420816a4dcdd5426446a81",
+        "ARCHITECTURE.md": "f17741ea9f0f4e3b0f290fa278ab75f84866db1ed267ad44257c6aedf09da2b4"
       },
       "evidence": [
         {
@@ -540,6 +548,10 @@
         {
           "path": "validation/task-policy.json",
           "sha256": "94499052087749dde0449c656111d9b59b152d3074cdc66f61dab1b5b8f0f140"
+        },
+        {
+          "path": "validation/cold-start.json",
+          "sha256": "c3764bae57ebb9e146d56c30e56334c76fcc8f720fb127021fb62063b3ab1274"
         }
       ],
       "coverage": "Windows；回传去重、等待、暂停、恢复、交接等逻辑及报告详情模拟页面三种宽度通过；源码与页面入口已核对。 第三轮真实模型任务三份执行报告各自动回传一次；空闲时暂停→同任务恢复→验收完成，未重复派工，截止不延长。 阶段1新增任务诊断、恢复安全逻辑与三种宽度模拟页面；当前服务加载状态见 validation/task-diagnosis/evidence.json。 阶段1 Windows 已实际加载；五任务/10载入会话保持，真实已达标任务页面三种宽度与键盘/只打开确认表单通过。",
@@ -548,7 +560,7 @@
         "Linux 实机",
         "其他浏览器与手机真机"
       ],
-      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。"
+      "review_note": "阶段2核心路径人工核对：8项任务判断移到task_policy，Controllers保留兼容委托并串行执行副作用，外部接口/数据格式不变。2000组合对照与原编排回归通过，规则层静态依赖检查进入CI；不是全库重构或冷启动Agent能力证明。 本次独立维护：人工核对未知执行者的诊断/确认限制及草案路径；相关112项Python中108通过、4权限跳过，14项Node通过。保留交接/调度及已知状态行为；未在线加载、Linux未测，不复用旧历史比较作为新规则标准。sessions仅共用输入变化，普通会话步骤未改。详情见validation/cold-start.json。"
     }
   }
 }

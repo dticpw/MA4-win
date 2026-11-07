@@ -156,6 +156,55 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(t, before)
         self.assertEqual(self.hub.sent, [])
 
+    def test_unknown_worker_blocks_confirm_and_resume_without_side_effects(self):
+        for action in ("confirm_save", "confirm_start", "resume"):
+            with self.subTest(action=action):
+                t = self.active()
+                _, w = self.worker(t)
+                t["status"] = "paused"
+                w["state"] = "future_state"
+                self.c.publish()
+                before = copy.deepcopy(t)
+                hub_before = copy.deepcopy(vars(self.hub))
+                saved_before = self.c.path.read_bytes()
+                d = self.c.diagnosis(t)
+                with self.assertRaises(ValueError) as cm:
+                    if action == "resume":
+                        self.c.do_resume(t["id"])
+                    else:
+                        self.confirm(t, start=action == "confirm_start")
+                self.assertEqual(str(cm.exception), d["confirmBlocker"])
+                self.assertIn("核对", str(cm.exception))
+                self.assertEqual(t, before)
+                self.assertEqual(vars(self.hub), hub_before)
+                self.assertEqual(self.c.path.read_bytes(), saved_before)
+
+    def test_unknown_worker_still_allows_draft_save_then_requires_state_check(self):
+        t = self.active()
+        _, w = self.worker(t)
+        t["status"] = "paused"
+        w["state"] = "future_state"
+        before = copy.deepcopy(t)
+        result = self.c.do_update(t["id"], t["name"], "待确认的新目标", {"tokenLimit": 2000},
+                                  draft_revision=t["draftRevision"])
+        self.assertTrue(result["draftSaved"])
+        self.assertEqual(t["draft"]["target"], "待确认的新目标")
+        self.assertEqual(t["draft"]["budget"]["tokenLimit"], 2000)
+        for key in ("id", "target", "budget", "revision", "host", "workers", "workspaces", "cwd"):
+            self.assertEqual(t[key], before[key])
+        self.assertEqual(self.hub.sent, [])
+        self.assertEqual(self.c.diagnosis(t)["code"], "unknown_work")
+        with self.assertRaisesRegex(ValueError, "核对"):
+            self.confirm(t, start=True)
+        # Simulate an independently checked idle state; diagnosis must not set it.
+        w["state"] = "idle"
+        self.confirm(t, start=True)
+        self.assertEqual(t["target"], "待确认的新目标")
+        self.assertEqual(t["budget"]["tokenLimit"], 2000)
+        self.assertEqual(t["workers"].keys(), before["workers"].keys())
+        self.assertEqual(t["host"], before["host"])
+        self.assertEqual(len(self.hub.sent), 1)
+
     def test_diagnosis_connection_recovery_and_terminal_precedence(self):
         t = self.task()
         t.update(status="completed", budget={"deadline": 999})
