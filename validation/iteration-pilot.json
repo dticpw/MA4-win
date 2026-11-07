@@ -645,7 +645,9 @@
   "publication": {
     "branch": "feat/task-workflows-20261107",
     "remote": "origin",
-    "status": "pending_push",
+    "status": "implementation_commits_pushed",
+    "commits": ["a92e507bc96753959da958315502f4ad36270e56", "d5b6fb0"],
+    "push_result": "git push -u origin feat/task-workflows-20261107 succeeded; branch created remotely and tracking set. This branch push alone does not trigger the main/PR workflow.",
     "pr": "not_created",
     "cloud_ci": "not_run_for_this_branch",
     "blocker": "GitHub browser not signed in; gh unavailable; earlier authorized API credential lookup found none.",
