@@ -93,5 +93,13 @@
     "rework": "New regressions failed once before implementation, then passed; no post-fix local failure.",
     "external_dependency": "Git push authentication works, but the vault has no GitHub API credential and the current browser session is logged out; PR creation awaits login.",
     "measurement_limit": "One small tooling repair cannot establish development speedup or high-volume PR reliability."
+  },
+  "pull_request": {
+    "state": "branch_pushed_pr_not_created",
+    "branch": "fix/verification-node-results",
+    "code_commit": "e33d8a56316ce8a720fa0654a0fab286852b558e",
+    "compare_url": "https://github.com/dticpw/MA4-win/compare/main...fix/verification-node-results?expand=1",
+    "title": "正确报告 Node 验证中的跳过与待实现项",
+    "body": "## 变化与原因\n\nNode 测试即使全部跳过也返回退出码 0，原验证入口因此把它显示为 passed。现在固定使用 TAP 输出并记录测试数量；部分跳过或 todo 标记 passed_with_skips，全部跳过/todo、零项或缺统计判失败。真实测试失败仍然失败，后续检查停止。\n\n## 同步维护\n\n- 更新功能地图中的验证结果说明和对应核对记录；三个业务流程与操作步骤未变。\n- 新增真实 Node 的通过、部分跳过、部分 todo、全部跳过、全部 todo、失败六种样例，以及缺失/零项统计的回归。\n- 先在旧实现复现失败，再完成修复；run tooling：21 Python、11 Node 通过。run ci：224 Python 中 220 通过、4 项 Windows 符号链接权限跳过，36 Node 通过，地图 current。\n- 暂存内容导出检查确认提交不依赖无关未跟踪文件。主干首次 GitHub CI 已通过，本 PR 的自动检查需另外核对。\n\n## 风险与回退\n\nNode 输出固定为 TAP，日志样式会变化；跳过/todo 从纯通过改为明确状态，全部未完成会失败。沿用 Node 24 和 Python 标准库，不新增依赖或修改业务服务。Linux 本轮未实测。撤回本 PR 可恢复原报告行为。\n"
   }
 }

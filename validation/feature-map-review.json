@@ -313,7 +313,7 @@
         },
         {
           "path": "validation/pr-pilot.json",
-          "sha256": "e755ccacc228ec47523ceebe89f235922568ef1401ee49f035e93fa89ca78652"
+          "sha256": "b923f50b8e3dad99090c0c937d720a4c1c7520964a83e59ba0e2f1b629991a79"
         }
       ],
       "coverage": "Windows；17 Python/10 Node；真实故障恢复主路径1轮＋默认旧功能兼容会话1轮；独立CLI重复文本2轮/4消息重开刷新通过；未配对wait在fixture启动前拒绝。 最终 direct open 始终文档加载；双会话16步与11项Node通过，Python及旧兼容仅按原覆盖复用。",
@@ -404,7 +404,7 @@
         },
         {
           "path": "validation/pr-pilot.json",
-          "sha256": "e755ccacc228ec47523ceebe89f235922568ef1401ee49f035e93fa89ca78652"
+          "sha256": "b923f50b8e3dad99090c0c937d720a4c1c7520964a83e59ba0e2f1b629991a79"
         }
       ],
       "coverage": "Windows；目标确认、预算、派工与材料管理的逻辑检查，讨论/确认模拟页面三种宽度通过；Python 4 项符号链接权限跳过。源码与页面入口已核对。 2026-11-07 Windows 现有 8764 已加载，真实材料列表计数/字节与完整磁盘只读统计一致；不外推派工全链路。 第三轮真实8764经HTTP确认后，一个真实中控与一个真实执行者完成三轮工作；目标/预算/授权与原四任务保持，最终completed。",
@@ -486,7 +486,7 @@
         },
         {
           "path": "validation/pr-pilot.json",
-          "sha256": "e755ccacc228ec47523ceebe89f235922568ef1401ee49f035e93fa89ca78652"
+          "sha256": "b923f50b8e3dad99090c0c937d720a4c1c7520964a83e59ba0e2f1b629991a79"
         }
       ],
       "coverage": "Windows；回传去重、等待、暂停、恢复、交接等逻辑及报告详情模拟页面三种宽度通过；源码与页面入口已核对。 第三轮真实模型任务三份执行报告各自动回传一次；空闲时暂停→同任务恢复→验收完成，未重复派工，截止不延长。",

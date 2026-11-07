@@ -6,7 +6,9 @@
 
 2026-11-07，**GitHub CI 已实际启用并通过；首个维护改动已完成本地验证，PR 待网页登录后创建。** `87ae5c0` / `b437ea6` 已推送现有 origin/main，首次 [GitHub Actions](https://github.com/dticpw/MA4-win/actions/runs/42358682100) 的 Windows 检查全部步骤成功，任务约 65 秒；云端逐项测试数量未单独读取，不与本机统计混写。未修改合并规则。
 
-**首个维护改动：** 独立分支 `fix/verification-node-results` 修复 Node 测试跳过/todo 被误报为 passed 的问题：固定 TAP 输出，记录各类数量，部分未完成标记 passed_with_skips，缺统计、零项或全部跳过/todo 判失败。先用真实 Node 复现误判，新回归在旧实现上失败，修复后 `run tooling` 的 21 项 Python、11 项 Node 通过；`run ci` 的 224 项 Python 中 220 通过、4 项符号链接权限跳过，36 项 Node 通过，地图 current。仅更新验证方法和说明，不改业务源码，不重跑未变的页面/模型链路。证据与实际使用观察见 [首轮 PR 试验记录](validation/pr-pilot.json)。当前 GitHub 网页未登录，凭据库无 API 凭据；PR 创建及其自动触发尚未验证，已有 Git 认证可以推送分支。Linux 本轮未测；单次工具修复不足以证明迭代提速。
+**首个维护改动：** 独立分支 `fix/verification-node-results` 修复 Node 测试跳过/todo 被误报为 passed 的问题：固定 TAP 输出，记录各类数量，部分未完成标记 passed_with_skips，缺统计、零项或全部跳过/todo 判失败。先用真实 Node 复现误判，新回归在旧实现上失败，修复后 `run tooling` 的 21 项 Python、11 项 Node 通过；`run ci` 的 224 项 Python 中 220 通过、4 项符号链接权限跳过，36 项 Node 通过，地图 current。仅更新验证方法和说明，不改业务源码，不重跑未变的页面/模型链路。证据与实际使用观察见 [首轮 PR 试验记录](validation/pr-pilot.json)。当前 GitHub 网页未登录，凭据库无 API 凭据；PR 创建及其自动触发尚未验证，分支已推送，代码提交为 `e33d8a5`；[比较页](https://github.com/dticpw/MA4-win/compare/main...fix/verification-node-results?expand=1) 已打开，PR 标题与正文保存在上述记录中，登录后即可继续。Linux 本轮未测；单次工具修复不足以证明迭代提速。
+
+**本轮收尾：** 正式源码、地图与验证记录留项目并提交；本任务临时复现、测试日志、暂存导出和浏览器工具生成的诊断文件共 224 个、13,125,077 字节已清理。GitHub 比较页留给用户登录；未安装依赖、调用模型、重启 MA4 或新增定时机制。旧未提交改动和旧临时材料保持。
 
 2026-11-07，**PR 自动核验已接入并完成本地验证，尚未推送 GitHub。** 开发 Agent 在同一改动/PR 内维护相关地图、测试与验证方法，无需修改的项说明依据；CI 只检查，不自动刷新地图或改代码。[工作流](.github/workflows/verify.yml) 在 PR 创建/更新/重开/转为可审查、main 推送及手动触发时运行 `run ci`。具体规则、触发方式和边界见 [PR 自动检查与同步维护](#pr-自动检查与同步维护)。暂不接入独立维护 Agent、定时任务或全库覆盖审计。
 
