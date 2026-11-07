@@ -1,0 +1,71 @@
+{
+  "at_utc": "2026-11-07T08:19:55.646069+00:00",
+  "foundation_commit": "87ae5c038aca9e80cc278962229be7ca1f927437",
+  "inputs": {
+    "tools/verify.py": "48e4d9e01428c7038b38be1401e5a83a3c59c54cb683c683d0571311e4a766b2",
+    "test_verify.py": "1c3887fda3a0c89878ffe7b3251d8e1b95e6556f79b752574301e66054c2b1f3",
+    ".github/workflows/verify.yml": "983959d6dd4cfb3dc627e18ac4763513b2669e1a20c9b3a0992f457eb76e8f3c",
+    "AGENTS.md": "97c864b11dac9e9f6280e050b36c23ea8827758414fd18055cea193c553961d4",
+    "FEATURE-MAP.md": "8ed69d16bfa1ddbb248d2747e5635f3881317f7c06ca3eb27a6f9438e2fcb222"
+  },
+  "workflow_validation": "YAML parsed; PR opened/synchronize/reopened/ready_for_review, main push, manual trigger, read-only contents, Windows timeout and unified command checked.",
+  "initial_local_run": {
+    "command": "tools/verify.py run ci",
+    "python": {
+      "total": 222,
+      "passed": 218,
+      "skipped": 4
+    },
+    "node": {
+      "total": 36,
+      "passed": 36
+    },
+    "map": "needs_review: tools/verify.py and test_verify.py changed; exit 2 correctly made verify fail"
+  },
+  "clean_export_run": {
+    "at_utc": "2026-11-07T08:20:22.249235+00:00",
+    "command": "tools/verify.py run ci --output .agent-tmp/checks",
+    "source": "git checkout-index export, excluding unstaged and untracked work",
+    "python": "3.10.19",
+    "node": "v24.11.1",
+    "environment": "Temporary venv without pip or system site-packages; no packages installed",
+    "result": "passed_with_skips",
+    "checks": [
+      {
+        "check": "python",
+        "status": "passed_with_skips",
+        "exit_code": 0,
+        "counts": {
+          "total": 222,
+          "skipped": 4
+        },
+        "seconds": 23.453
+      },
+      {
+        "check": "node",
+        "status": "passed",
+        "exit_code": 0,
+        "seconds": 0.313
+      },
+      {
+        "check": "map",
+        "status": "passed",
+        "exit_code": 0,
+        "seconds": 0.328
+      }
+    ],
+    "node_counts": {
+      "total": 36,
+      "passed": 36,
+      "skipped": 0
+    },
+    "map": "current"
+  },
+  "github_actions_run": null,
+  "limits": [
+    "4 Windows symlink-permission skips; Junction check passed",
+    "No live Codex/browser/provider test this round",
+    "No Linux runtime test",
+    "No remote push or repository rule change"
+  ]
+}

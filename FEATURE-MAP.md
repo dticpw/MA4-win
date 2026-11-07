@@ -18,6 +18,7 @@
 | HTTP/SSE 与原生协议兼容 | [appserver.py](appserver.py)、server.py、hub.py | `run transport` | 启动独立 TCP Codex 后台和本机模拟模型；不连接现有 daemon |
 | 浏览器创建、发送、回复和重开历史 | [tools/session_actions.mjs](tools/session_actions.mjs)、[tools/session_cli.mjs](tools/session_cli.mjs)、[tools/ui_check.mjs](tools/ui_check.mjs)、[tools/smoke_test.py](tools/smoke_test.py) | `run live-ui` 或 session_cli | 真实页面/后端/独立原生 CLI，本机模拟模型；不代表真实供应商 |
 | 验证命令及地图检测自身 | [tools/verify.py](tools/verify.py)、[test_verify.py](test_verify.py)、[tools/feature_map.py](tools/feature_map.py)、[test_feature_map.py](test_feature_map.py) | `run tooling` | 去重、跳过/失败传播、实例身份、输出范围及地图变化检测 |
+| PR 轻量自动检查 | [workflow](.github/workflows/verify.yml)、[开发约定](AGENTS.md)、[PR 模板](.github/pull_request_template.md) | `run ci` | 逻辑/工具测试＋地图检查；无 Codex/浏览器/凭据；详见 [README](README.md#pr-自动检查与同步维护) |
 | 地图引用、已核对源码/方法/证据是否变化 | [核对记录](validation/feature-map-review.json) | `run map` | 只读比较；未变化不等于语义正确或全部功能通过 |
 
 <a id="sessions"></a>
@@ -146,6 +147,8 @@
 图片预览的 `test_model_image_preview` 需单独获准的任务目录及真实归属标记；沿用 专项工具自身说明和授权要求，不自动 discovery、不伪造标记。Linux 实机、真实模型/线上任务、外部事件和远端发布均不能由这里的模拟测试推断通过。
 
 ## 改动时怎样保持有效
+
+开发 Agent 在同一改动/PR 中同步维护受影响的地图、测试和验证方法；无需修改时说明依据。PR 更新后 CI 执行 `run ci`，发现测试失败、失效引用或登记内容变化就失败，不自动改写材料。完整触发条件和检查边界见 [README](README.md#pr-自动检查与同步维护)。
 
 - `run map` 检查本地图本地链接/锚点、三个流程的操作说明，以及核对记录中登记的源码、验证方法与证据的 SHA256。`current` 只表示这些输入未变化；`needs_review` 表示相关内容变了或核对记录不全；`invalid` 表示引用/记录有问题。后两者使统一入口失败，详细原因在 map.json 和日志中。
 - 它不检查外部网页是否可达，不自动理解文档语义，也不能发现未登记的间接依赖或运行环境变化；CLI/浏览器/系统升级后即使 current，也要按影响复验。引用存在不证明描述正确，人工仍需核对操作和代码。

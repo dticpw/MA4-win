@@ -40,12 +40,17 @@ PROFILES = {
 
 
 def selection(names, ui=False):
-    selected = list(PROFILES) if "core" in names else []
+    selected = list(PROFILES) if "core" in names or "ci" in names else []
     selected += [name for name in names if name in PROFILES]
     groups = [[], [], []]
     for name in dict.fromkeys(selected):
         for result, entries in zip(groups, PROFILES[name][1:]):
             result.extend(entry for entry in entries if entry not in result)
+    if "ci" in names and not {"core", "platform"}.intersection(names):
+        # Keep launcher unit checks, but leave native Codex process integration
+        # to the explicitly selected platform/core profiles on a prepared host.
+        groups[0] = ["test_desktop.NativeLauncherTest" if entry == "test_desktop" else entry
+                     for entry in groups[0]]
     if not ui:
         groups[2] = []
     return groups
@@ -69,7 +74,7 @@ def make_plan(names, ui, output):
     if "live-ui" in names:
         plan.append(("live-ui", [sys.executable, "-B", "-X", "utf8", "tools/smoke_test.py",
                                  "--ui-output", str(output / "ui"), "--output", str(output / "live-ui.json")]))
-    if "map" in names:
+    if "map" in names or "ci" in names:
         plan.append(("map", [sys.executable, "-B", "-X", "utf8", "tools/feature_map.py",
                              "--output", str(output / "map.json")]))
     return plan
@@ -207,7 +212,7 @@ def main(argv=None):
     commands.add_parser("list", help="列出功能分组与副作用")
     for action in ("plan", "run"):
         sub = commands.add_parser(action, help="只显示命令" if action == "plan" else "执行所选检查")
-        sub.add_argument("profiles", nargs="+", choices=[*PROFILES, "core", "transport", "live-ui", "map"])
+        sub.add_argument("profiles", nargs="+", choices=[*PROFILES, "core", "ci", "transport", "live-ui", "map"])
         sub.add_argument("--ui", action="store_true", help="加跑所选功能的模拟页面检查")
         sub.add_argument("--output", help="保留日志/截图/结果至 .agent-tmp 下的新子目录；默认自动清理")
     args = parser.parse_args(argv)
@@ -215,12 +220,15 @@ def main(argv=None):
         for name, (description, _python, _node, pages) in PROFILES.items():
             print(f"{name:10} {description}；模拟页面 {len(pages)} 项")
         print("core       合并以上各组，重复检查只跑一次；不含 transport、live-ui、map 或图片预览")
+        print("ci         core 的逻辑检查＋map；启动器只跑单元测试，不需要 Codex、浏览器、凭据或第三方包")
         print("transport  独立 CODEX_HOME + 本机模拟模型 + 临时 TCP 后台；不使用真实会话/额度")
         print("live-ui    真实浏览器 → MA4 后端 → 独立 Codex → 本机模拟模型；含历史重开与证据，不在 core 中")
         print("map        只读核对已登记的地图输入/操作说明/证据；变化返回待复核，不自动宣称验证通过")
         print("--ui 加跑模拟页面；live-ui 显式运行真实页面。复用 Node/Chrome/Playwright 缓存，不安装依赖。")
         print("Python 有跳过项时标记 passed_with_skips；具体原因见日志，零项测试判失败。")
         return 0
+    if "ci" in args.profiles and args.ui:
+        parser.error("ci 固定运行轻量检查，不接受 --ui；页面验证请单独选择相关功能分组")
     if args.action == "plan":
         output = Path(args.output) if args.output else Path("<临时输出>")
         for name, command in make_plan(args.profiles, args.ui, output):

@@ -46,6 +46,53 @@ class VerifyTest(unittest.TestCase):
         execute.assert_not_called()
         self.assertFalse(folder.exists())
 
+    def test_ci_uses_logic_checks_and_map_without_native_or_browser_suites(self):
+        plan = verify.make_plan(["ci", "map", "tasks"], False, self.root)
+        self.assertEqual([name for name, _ in plan], ["python", "node", "map"])
+        python = plan[0][1]
+        self.assertIn("test_desktop.NativeLauncherTest", python)
+        self.assertNotIn("test_desktop", python)
+        self.assertNotIn("test_model_image_preview", python)
+        self.assertIn("test_platform", python)
+        self.assertEqual(python.count("test_controllers"), 1)
+        self.assertIn("test_session_actions.mjs", plan[1][1])
+        with patch.object(verify, "execute") as execute, \
+                contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+            verify.main(["run", "ci", "--ui"])
+        self.assertEqual(error.exception.code, 2)
+        execute.assert_not_called()
+
+    def test_changed_map_fails_ci_without_rewriting_review(self):
+        from tools import feature_map
+        import hashlib
+        (self.root / "validation").mkdir()
+        source = self.root / "app.py"
+        source.write_text("value = 1\n", encoding="utf-8")
+        text = '<a id="sessions"></a>\n## Send\nOpen and send.\n'
+        (self.root / "FEATURE-MAP.md").write_text(text, encoding="utf-8")
+        (self.root / "proof.json").write_text('{}', encoding="utf-8")
+        record = self.root / feature_map.REVIEW
+        record.write_text(json.dumps({"version": 1, "features": {"sessions": {
+            "recipe_sha256": hashlib.sha256(feature_map.recipe(text, "sessions").encode()).hexdigest(),
+            "source_reviewed_at": "2026-11-07", "inputs": {"app.py": feature_map.digest(source)},
+            "evidence": [{"path": "proof.json", "sha256": feature_map.digest(self.root / "proof.json")}]}}}),
+            encoding="utf-8")
+        before = record.read_bytes()
+        self.assertEqual(feature_map.inspect(self.root)["result"], "current")
+        source.write_text("value = 2\n", encoding="utf-8")
+        script = ("from tools import feature_map; from functools import partial; "
+                  f"feature_map.inspect = partial(feature_map.inspect, {str(self.root)!r}); "
+                  "raise SystemExit(feature_map.main())")
+        output = self.root / "stale-map"
+        with patch.object(verify, "make_plan", return_value=[("map", [sys.executable, "-B", "-c", script])]), \
+                contextlib.redirect_stdout(io.StringIO()):
+            code = verify.main(["run", "ci", "--output", str(output)])
+        self.assertEqual(code, 1)
+        result = json.loads((output / "result.json").read_text(encoding="utf-8"))
+        self.assertEqual(result["checks"][0]["exit_code"], 2)
+        self.assertEqual(result["result"], "failed")
+        self.assertEqual(record.read_bytes(), before)
+
     def test_output_refuses_escape_and_existing_material(self):
         for path in (verify.ROOT, verify.ROOT / ".agent-tmp", self.root,
                      verify.ROOT / ".agent-tmp/../outside"):

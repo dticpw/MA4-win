@@ -4,6 +4,12 @@
 
 ## 现状与接续
 
+2026-11-07，**PR 自动核验已接入并完成本地验证，尚未推送 GitHub。** 开发 Agent 在同一改动/PR 内维护相关地图、测试与验证方法，无需修改的项说明依据；CI 只检查，不自动刷新地图或改代码。[工作流](.github/workflows/verify.yml) 在 PR 创建/更新/重开/转为可审查、main 推送及手动触发时运行 `run ci`。具体规则、触发方式和边界见 [PR 自动检查与同步维护](#pr-自动检查与同步维护)。暂不接入独立维护 Agent、定时任务或全库覆盖审计。
+
+**本轮验收：** 从 Git 暂存内容导出干净文件，用无 pip、无第三方包的临时 Python 3.10.19 环境运行同一命令：222 项 Python 中 218 通过、4 项符号链接权限跳过；36 项 Node 全部通过；地图为 current。首次运行正确发现 verify/test_verify 变化并失败，人工核对选择逻辑、失败退出与原功能分组未变后更新登记，未重写旧行为证据。YAML 与触发条件、权限和命令核对通过；证据见 [CI 验证记录](validation/ci-checks.json)。未实际运行 GitHub Actions，未改远程合并规则；Linux、真实浏览器/模型和完整原生启动器本轮未新测。不能据轻量检查推断全功能完备。
+
+**提交与收尾：** 原有地图、工具及其源码/证据依赖单独提交为 `87ae5c0`，本轮 CI 接入另成一笔提交；图片预览、供应商诊断和学习页等无关旧改动保留未提交。只清理本任务 `.agent-tmp/ci-20261107` 的 422 个文件、26,432,541 字节（干净检出、临时 Python 环境和日志），必要结果留在上述正式记录。没有模型调用、服务重启、推送、部署、新增备份或定时机制；旧临时材料未动。
+
 2026-11-07，**第三轮已完成：可复用会话操作工具＋一次真实中控开发任务。** [动作层](tools/session_actions.mjs)统一创建、发送、等待、打开、列表重开、刷新和历史核对；[CLI](tools/session_cli.mjs)接受有限动作组合、会话别名和消息参数，复用自有隔离实例，拒绝真实 8764、外来会话和缺少 wait 的发送计划。原 `run live-ui` 的兼容检查已保留。17 项 Python 检查通过；动作层最终 11 项 Node 检查通过（按变更补测和复用，不冒充一次全量）。派发方独立运行 16 步组合通过：两次真实 HTTP 400、两个会话、三次发送，alpha 两轮同文、beta 一轮，切换/重开/刷新后历史一致。独立验收先后发现并修复重复文本定位、跨会话只改 hash 未实际打开的问题；失败证据保留。用法见[第三轮工具入口](#普通会话组合动作工具第三轮)，实现依据见[实现摘要](validation/round3/implementation/evidence.json)和[中控审查](validation/round3/independent-review.json)。
 
 **真实调度结果：** 在现有 Windows 8764 新建任务 `1dda5fb483a146eb`，一个真实中控、一个真实执行者，执行者三轮工作和三份报告均只回传一次；包含两次定点返工、独立验收、空闲时暂停和原任务恢复，最终 completed。恢复前后目标修订、原截止时间、目录权限、会话归属与成果保持，没有重新派工。30 分钟到期后按既有规则停止新增派工，仅收尾已开始的验收回合；页面记录任务历时 30 分 34 秒。原四任务和 12 项业务/配置文件摘要未变，8764/原生 daemon 未重启。详细状态、实际用量、命令、失败及成功结果见[真实中控验证](validation/round3/control-live.json)。本次中控/执行者使用真实模型；普通会话 CLI 的隔离验证使用本机模拟模型，两者证据分别记录。
@@ -227,6 +233,22 @@ Linux 用同一 Node 入口；Python 默认选择 `/home/dticpw/conda/envs/py310
 **怎样判断值得继续：** 本轮先证明一条真实操作路径可重复验证，并修复一个仍存在的实际问题；随后在少量真实维护任务中观察定位代码的耗时、验证所需手工步骤、失败后的诊断过程和返工次数。只在现有任务记录中保存必要观察，不另建统计平台，也不为了比较而反复重跑相同任务。若维护这些辅助工具的成本超过节省的时间，缩减覆盖和规则。
 
 参考原始资料：[创建验证技能](https://github.com/cursor/plugins/blob/main/pstack/skills/create-verification-skill/SKILL.md)、[功能地图示例](https://github.com/cursor/plugins/tree/main/pstack/skills/create-verification-skill/references/feature-map-example)、[维护验证技能](https://github.com/cursor/plugins/blob/main/pstack/skills/maintain-verification-skill/SKILL.md)。借鉴其可执行验证与持续校准原则；此次不安装或直接执行这些 Skill，也不据此扩大权限或自动开启其中的多 Agent 流程。
+
+## PR 自动检查与同步维护
+
+开发者或开发 Agent 对本次改动负责：先按 [功能地图](FEATURE-MAP.md) 定位影响；用户行为、接口或验证条件变化时，同步更新相关说明、测试和验证方法，放在同一个 PR。已有检查足够或地图不受影响时，在 [PR 模板](.github/pull_request_template.md) 中说明依据即可，不要求为了形式修改每一类文件。地图摘要变化后先核对源码、操作步骤和实际证据，再更新 `validation/feature-map-review.json`，保留未测项；不能只刷新摘要让检查变绿。
+
+[GitHub Actions](.github/workflows/verify.yml) 在 PR 创建、追加提交、重新打开、转为可审查时运行；推送到 `main` 和手动触发也运行。同一个 PR/分支的新运行取消旧运行，单次最多 15 分钟；不按文件路径过滤，文档和地图变化也会被检查。CI 只读核验，不自动修改地图、测试或提交代码。没有定时维护任务；只有持续漏更或重复维护耗时的实际证据出现后，再决定是否增加独立维护 Agent。
+
+```powershell
+# 本机复现与 CI 相同的检查组合；Python/Node 均复用已安装环境
+& 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py plan ci
+& 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py run ci
+```
+
+`ci` 复用 `core` 的逻辑检查与 Node 测试，并运行地图检查；启动器只跑 `NativeLauncherTest` 的单元测试。GitHub 使用 Windows、Python 3.10 和 Node 24，无 pip/npm 安装、Codex、浏览器或凭据要求。它不接受 `--ui`；完整启动器、真实页面、原生协议和图片预览仍从各自入口按需验证。Python 因系统权限跳过的测试如实显示为 `passed_with_skips`，不算已验证。日志保留在 Actions 自带的运行记录中，不额外上传截图/产物或建立副本机制。
+
+CI 的持续代价主要是执行时间与上述少量配置维护；检查清单只在 `tools/verify.py` 维护，workflow 不复制测试列表。不引入模型费用，也不把轻量检查通过解释为功能完备。**自动运行与阻止失败合并是两件事：** workflow 推送后才可在 GitHub 执行；若要强制阻止合并，需另在仓库规则中将 `Windows checks` 设为必需检查。本轮不改变远程仓库规则，实际执行状态见「现状与接续」。
 
 ## 检查与验收
 
