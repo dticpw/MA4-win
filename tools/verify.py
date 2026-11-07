@@ -62,7 +62,8 @@ def make_plan(names, ui, output):
     if python:
         plan.append(("python", [sys.executable, "-B", "-X", "utf8", "-m", "unittest", "-v", *python]))
     if node:
-        plan.append(("node", ["node", "--test", *node]))
+        # Fix the reporter so CI and interactive terminals share one summary format.
+        plan.append(("node", ["node", "--test", "--test-reporter=tap", *node]))
     for page in pages:
         command = ["node", "tools/" + page + ".mjs"]
         if page != "session_creation_check":
@@ -198,6 +199,24 @@ def execute(plan, output, env):
                         item.update(status="failed", error="未执行任何 Python 测试")
                     elif code == 0 and skipped:
                         item["status"] = "passed_with_skips"
+            elif name == "node":
+                summary = dict(re.findall(r"^# (tests|pass|fail|cancelled|skipped|todo) (\d+)\s*$",
+                                          log.read_text(encoding="utf-8"), re.MULTILINE))
+                fields = {"tests": "total", "pass": "passed", "fail": "failed",
+                          "cancelled": "cancelled", "skipped": "skipped", "todo": "todo"}
+                if not fields.keys() <= summary.keys():
+                    item.update(status="failed", error="缺少完整 Node TAP 测试统计，不能确认检查结果")
+                else:
+                    counts = {field: int(summary[key]) for key, field in fields.items()}
+                    item["counts"] = counts
+                    if counts["total"] == 0:
+                        item.update(status="failed", error="未执行任何 Node 测试")
+                    elif counts["failed"] or counts["cancelled"]:
+                        item["status"] = "failed"
+                    elif counts["passed"] == 0:
+                        item.update(status="failed", error="Node 检查全部跳过或待实现")
+                    elif code == 0 and (counts["skipped"] or counts["todo"]):
+                        item["status"] = "passed_with_skips"
         except OSError as error:
             item.update(status="failed", error=str(error))
             print(str(error), flush=True)
@@ -225,7 +244,8 @@ def main(argv=None):
         print("live-ui    真实浏览器 → MA4 后端 → 独立 Codex → 本机模拟模型；含历史重开与证据，不在 core 中")
         print("map        只读核对已登记的地图输入/操作说明/证据；变化返回待复核，不自动宣称验证通过")
         print("--ui 加跑模拟页面；live-ui 显式运行真实页面。复用 Node/Chrome/Playwright 缓存，不安装依赖。")
-        print("Python 有跳过项时标记 passed_with_skips；具体原因见日志，零项测试判失败。")
+        print("Python 跳过或 Node 跳过/待实现项标记 passed_with_skips；数量与原因见结果/日志。")
+        print("零项测试判失败；Node 缺统计或全部跳过/待实现也判失败。")
         return 0
     if "ci" in args.profiles and args.ui:
         parser.error("ci 固定运行轻量检查，不接受 --ui；页面验证请单独选择相关功能分组")

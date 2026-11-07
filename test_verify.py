@@ -56,6 +56,7 @@ class VerifyTest(unittest.TestCase):
         self.assertIn("test_platform", python)
         self.assertEqual(python.count("test_controllers"), 1)
         self.assertIn("test_session_actions.mjs", plan[1][1])
+        self.assertIn("--test-reporter=tap", plan[1][1])
         with patch.object(verify, "execute") as execute, \
                 contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
             verify.main(["run", "ci", "--ui"])
@@ -128,6 +129,41 @@ class VerifyTest(unittest.TestCase):
                 result = verify.execute([("python", [sys.executable, "-c", f"print({stdout!r})"])],
                                         self.root, os.environ.copy())
                 self.assertEqual(result[0]["status"], status)
+
+    def test_node_runner_reports_skipped_and_todo_checks_honestly(self):
+        cases = (
+            ("passed", "test('works', () => {});", "passed", 1, 0, 0),
+            ("partial_skip", "test('works', () => {}); test.skip('unavailable', () => {});",
+             "passed_with_skips", 2, 1, 0),
+            ("partial_todo", "test('works', () => {}); test.todo('unfinished');",
+             "passed_with_skips", 2, 0, 1),
+            ("all_skipped", "test.skip('unavailable', () => {});", "failed", 1, 1, 0),
+            ("all_todo", "test.todo('unfinished');", "failed", 1, 0, 1),
+            ("failure", "test('broken', () => { throw new Error('expected failure'); });",
+             "failed", 1, 0, 0),
+        )
+        for name, source, expected, total, skipped, todo in cases:
+            with self.subTest(name=name), contextlib.redirect_stdout(io.StringIO()):
+                script = self.root / (name + ".mjs")
+                script.write_text("import test from 'node:test';\n" + source, encoding="utf-8")
+                result = verify.execute([("node", ["node", "--test", "--test-reporter=tap", str(script)])],
+                                        self.root, os.environ.copy())[0]
+                self.assertEqual(result["status"], expected)
+                self.assertEqual(result["counts"]["total"], total)
+                self.assertEqual(result["counts"]["skipped"], skipped)
+                self.assertEqual(result["counts"]["todo"], todo)
+
+    def test_missing_or_empty_node_summary_fails_and_stops_later_checks(self):
+        for name, output in (("missing", "no test summary"),
+                             ("empty", "# tests 0\n# pass 0\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0")):
+            with self.subTest(name=name), contextlib.redirect_stdout(io.StringIO()):
+                plan = [("node", [sys.executable, "-c", f"print({output!r})"]),
+                        ("later", [str(self.root / "must-not-execute")])]
+                results = verify.execute(plan, self.root, os.environ.copy())
+                self.assertEqual(results[0]["exit_code"], 0)
+                self.assertEqual(results[0]["status"], "failed")
+                self.assertIn("error", results[0])
+                self.assertEqual(results[1]["status"], "not_run")
 
     def test_doctor_refuses_wrong_http_identity_dead_backend_and_live_port(self):
         identity = {"instance": "test", "ownerPid": os.getpid(), "backendPid": 123,

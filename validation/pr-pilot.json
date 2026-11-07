@@ -1,0 +1,97 @@
+{
+  "at_utc": "2026-11-07T09:18:54.193490+00:00",
+  "base_commit": "b437ea654e4fe47f688e56915c8d051b0742b127",
+  "scope": "First maintenance PR: honest Node skip/todo/count reporting in the existing verification entry point; no business/runtime changes.",
+  "initial_github_ci": {
+    "run_id": 42358682100,
+    "sha": "b437ea654e4fe47f688e56915c8d051b0742b127",
+    "url": "https://github.com/dticpw/MA4-win/actions/runs/42358682100",
+    "job_id": 128362226062,
+    "conclusion": "success",
+    "job_started_at": "2026-11-07T09:11:44Z",
+    "job_completed_at": "2026-11-07T09:12:49Z",
+    "evidence": "Public GitHub Actions runs/jobs API; all setup, check and cleanup steps successful. Per-test cloud counts not inspected."
+  },
+  "before": {
+    "all_skipped": "Actual Node runner: tests=1, pass=0, skipped=1, exit=0; verify incorrectly reported passed",
+    "partial_skip": "Actual Node runner: tests=2, pass=1, skipped=1, exit=0; verify incorrectly reported passed",
+    "new_regression_tests": "Before fix: 2 test methods, 6 failed subcases and 2 missing-count errors. After fix they pass."
+  },
+  "local_tooling": {
+    "python": {
+      "total": 21,
+      "passed": 21
+    },
+    "node": {
+      "total": 11,
+      "passed": 11
+    },
+    "real_node_cases": [
+      "pass",
+      "partial skip",
+      "partial todo",
+      "all skipped",
+      "all todo",
+      "failure"
+    ],
+    "synthetic_summary_cases": [
+      "missing summary",
+      "zero summary"
+    ],
+    "result": "passed"
+  },
+  "inputs": {
+    "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
+    "test_verify.py": "3dfda341ea81b9b904fa6368686c483a257c1cbf4753332c93d63dd320a147b6",
+    "FEATURE-MAP.md": "9cf1788517c24f8405ac32cd42f71d982ff35ff80b0574ca0064983e60bdb3cc"
+  },
+  "limits": [
+    "No MA4 business/runtime change",
+    "No Linux host test; Python/Node standard library implementation is shared",
+    "No real model/browser workbench verification this round",
+    "No branch protection changes; PR creation/check still pending"
+  ],
+  "local_ci": {
+    "at_utc": "2026-11-07T09:19:18.558564+00:00",
+    "result": "passed_with_skips",
+    "checks": [
+      {
+        "check": "python",
+        "status": "passed_with_skips",
+        "exit_code": 0,
+        "counts": {
+          "total": 224,
+          "skipped": 4
+        },
+        "seconds": 23.437
+      },
+      {
+        "check": "node",
+        "status": "passed",
+        "exit_code": 0,
+        "counts": {
+          "total": 36,
+          "passed": 36,
+          "failed": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "seconds": 0.328
+      },
+      {
+        "check": "map",
+        "status": "passed",
+        "exit_code": 0,
+        "seconds": 0.344
+      }
+    ]
+  },
+  "iteration_observations": {
+    "discovery": "Review of CI result reporting led to an actual Node skip reproduction. No production issue was invented or injected.",
+    "test_selection": "FEATURE-MAP tooling entry identified verify/test_verify; existing 21 Python and 11 Node tooling checks were reused, then the PR ci profile ran.",
+    "rework": "New regressions failed once before implementation, then passed; no post-fix local failure.",
+    "external_dependency": "Git push authentication works, but the vault has no GitHub API credential and the current browser session is logged out; PR creation awaits login.",
+    "measurement_limit": "One small tooling repair cannot establish development speedup or high-volume PR reliability."
+  }
+}

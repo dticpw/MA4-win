@@ -4,6 +4,10 @@
 
 ## 现状与接续
 
+2026-11-07，**GitHub CI 已实际启用并通过；首个维护改动已完成本地验证，PR 待网页登录后创建。** `87ae5c0` / `b437ea6` 已推送现有 origin/main，首次 [GitHub Actions](https://github.com/dticpw/MA4-win/actions/runs/42358682100) 的 Windows 检查全部步骤成功，任务约 65 秒；云端逐项测试数量未单独读取，不与本机统计混写。未修改合并规则。
+
+**首个维护改动：** 独立分支 `fix/verification-node-results` 修复 Node 测试跳过/todo 被误报为 passed 的问题：固定 TAP 输出，记录各类数量，部分未完成标记 passed_with_skips，缺统计、零项或全部跳过/todo 判失败。先用真实 Node 复现误判，新回归在旧实现上失败，修复后 `run tooling` 的 21 项 Python、11 项 Node 通过；`run ci` 的 224 项 Python 中 220 通过、4 项符号链接权限跳过，36 项 Node 通过，地图 current。仅更新验证方法和说明，不改业务源码，不重跑未变的页面/模型链路。证据与实际使用观察见 [首轮 PR 试验记录](validation/pr-pilot.json)。当前 GitHub 网页未登录，凭据库无 API 凭据；PR 创建及其自动触发尚未验证，已有 Git 认证可以推送分支。Linux 本轮未测；单次工具修复不足以证明迭代提速。
+
 2026-11-07，**PR 自动核验已接入并完成本地验证，尚未推送 GitHub。** 开发 Agent 在同一改动/PR 内维护相关地图、测试与验证方法，无需修改的项说明依据；CI 只检查，不自动刷新地图或改代码。[工作流](.github/workflows/verify.yml) 在 PR 创建/更新/重开/转为可审查、main 推送及手动触发时运行 `run ci`。具体规则、触发方式和边界见 [PR 自动检查与同步维护](#pr-自动检查与同步维护)。暂不接入独立维护 Agent、定时任务或全库覆盖审计。
 
 **本轮验收：** 从 Git 暂存内容导出干净文件，用无 pip、无第三方包的临时 Python 3.10.19 环境运行同一命令：222 项 Python 中 218 通过、4 项符号链接权限跳过；36 项 Node 全部通过；地图为 current。首次运行正确发现 verify/test_verify 变化并失败，人工核对选择逻辑、失败退出与原功能分组未变后更新登记，未重写旧行为证据。YAML 与触发条件、权限和命令核对通过；证据见 [CI 验证记录](validation/ci-checks.json)。未实际运行 GitHub Actions，未改远程合并规则；Linux、真实浏览器/模型和完整原生启动器本轮未新测。不能据轻量检查推断全功能完备。
@@ -246,7 +250,7 @@ Linux 用同一 Node 入口；Python 默认选择 `/home/dticpw/conda/envs/py310
 & 'D:/python/anaconda/envs/th123/python.exe' -B -X utf8 tools/verify.py run ci
 ```
 
-`ci` 复用 `core` 的逻辑检查与 Node 测试，并运行地图检查；启动器只跑 `NativeLauncherTest` 的单元测试。GitHub 使用 Windows、Python 3.10 和 Node 24，无 pip/npm 安装、Codex、浏览器或凭据要求。它不接受 `--ui`；完整启动器、真实页面、原生协议和图片预览仍从各自入口按需验证。Python 因系统权限跳过的测试如实显示为 `passed_with_skips`，不算已验证。日志保留在 Actions 自带的运行记录中，不额外上传截图/产物或建立副本机制。
+`ci` 复用 `core` 的逻辑检查与 Node 测试，并运行地图检查；启动器只跑 `NativeLauncherTest` 的单元测试。GitHub 使用 Windows、Python 3.10 和 Node 24，无 pip/npm 安装、Codex、浏览器或凭据要求。它不接受 `--ui`；完整启动器、真实页面、原生协议和图片预览仍从各自入口按需验证。Python 因系统权限跳过、Node 的跳过或待实现项如实显示为 `passed_with_skips`，不算已验证；Node 缺统计、零项或全部跳过/待实现会失败。日志保留在 Actions 自带的运行记录中，不额外上传截图/产物或建立副本机制。
 
 CI 的持续代价主要是执行时间与上述少量配置维护；检查清单只在 `tools/verify.py` 维护，workflow 不复制测试列表。不引入模型费用，也不把轻量检查通过解释为功能完备。**自动运行与阻止失败合并是两件事：** workflow 推送后才可在 GitHub 执行；若要强制阻止合并，需另在仓库规则中将 `Windows checks` 设为必需检查。本轮不改变远程仓库规则，实际执行状态见「现状与接续」。
 

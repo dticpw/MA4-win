@@ -3,12 +3,12 @@
   "limits": "人工记录；current 仅表示登记内容未变化。未登记依赖、环境或语义正确性仍需人工判断。",
   "features": {
     "sessions": {
-      "source_reviewed_at": "2026-11-07T08:19:55.646069+00:00",
+      "source_reviewed_at": "2026-11-07T09:18:54.273151+00:00",
       "recipe_sha256": "1a4df63bf1747ab53095b0d173d96c939e2f560137ebe76ac104b7a9268ab37d",
       "inputs": {
-        "tools/verify.py": "48e4d9e01428c7038b38be1401e5a83a3c59c54cb683c683d0571311e4a766b2",
+        "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
-        "test_verify.py": "1c3887fda3a0c89878ffe7b3251d8e1b95e6556f79b752574301e66054c2b1f3",
+        "test_verify.py": "3dfda341ea81b9b904fa6368686c483a257c1cbf4753332c93d63dd320a147b6",
         "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
@@ -310,6 +310,10 @@
         {
           "path": "validation/ci-checks.json",
           "sha256": "658c47cd009cff17358010b385c952a64f06164112cec8ed36d2e8e6d06ba65c"
+        },
+        {
+          "path": "validation/pr-pilot.json",
+          "sha256": "e755ccacc228ec47523ceebe89f235922568ef1401ee49f035e93fa89ca78652"
         }
       ],
       "coverage": "Windows；17 Python/10 Node；真实故障恢复主路径1轮＋默认旧功能兼容会话1轮；独立CLI重复文本2轮/4消息重开刷新通过；未配对wait在fixture启动前拒绝。 最终 direct open 始终文档加载；双会话16步与11项Node通过，Python及旧兼容仅按原覆盖复用。",
@@ -319,15 +323,15 @@
         "审批/Skill/插话等的真实浏览器链路",
         "其他浏览器与手机真机"
       ],
-      "review_note": "2026-11-07 CI 接入复核：仅 verify 的 ci 选择与新增回归检查变化，既有功能分组及业务源码摘要未变；已核对选择、地图失败退出和不写回行为。未重跑原浏览器/真实模型证据，原覆盖与未测项保留。"
+      "review_note": "2026-11-07 首个维护 PR：核对 Node TAP 统计、跳过/todo/无有效检查的结果与失败传播，真实 Node 样例及 tooling 回归通过。业务源码、各功能检查清单和三个流程操作说明未变；旧页面/模型证据仅按原覆盖复用，未测项保留。"
     },
     "tasks": {
-      "source_reviewed_at": "2026-11-07T08:19:55.646069+00:00",
+      "source_reviewed_at": "2026-11-07T09:18:54.277350+00:00",
       "recipe_sha256": "35fc1f65f216213b74118fbdeba946341afefeb1f092ca99a2cb7a88141a8527",
       "inputs": {
-        "tools/verify.py": "48e4d9e01428c7038b38be1401e5a83a3c59c54cb683c683d0571311e4a766b2",
+        "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
-        "test_verify.py": "1c3887fda3a0c89878ffe7b3251d8e1b95e6556f79b752574301e66054c2b1f3",
+        "test_verify.py": "3dfda341ea81b9b904fa6368686c483a257c1cbf4753332c93d63dd320a147b6",
         "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
@@ -397,6 +401,10 @@
         {
           "path": "validation/ci-checks.json",
           "sha256": "658c47cd009cff17358010b385c952a64f06164112cec8ed36d2e8e6d06ba65c"
+        },
+        {
+          "path": "validation/pr-pilot.json",
+          "sha256": "e755ccacc228ec47523ceebe89f235922568ef1401ee49f035e93fa89ca78652"
         }
       ],
       "coverage": "Windows；目标确认、预算、派工与材料管理的逻辑检查，讨论/确认模拟页面三种宽度通过；Python 4 项符号链接权限跳过。源码与页面入口已核对。 2026-11-07 Windows 现有 8764 已加载，真实材料列表计数/字节与完整磁盘只读统计一致；不外推派工全链路。 第三轮真实8764经HTTP确认后，一个真实中控与一个真实执行者完成三轮工作；目标/预算/授权与原四任务保持，最终completed。",
@@ -405,15 +413,15 @@
         "Windows 跳过的符号链接检查",
         "Linux 实机"
       ],
-      "review_note": "2026-11-07 CI 接入复核：仅 verify 的 ci 选择与新增回归检查变化，既有功能分组及业务源码摘要未变；已核对选择、地图失败退出和不写回行为。未重跑原浏览器/真实模型证据，原覆盖与未测项保留。"
+      "review_note": "2026-11-07 首个维护 PR：核对 Node TAP 统计、跳过/todo/无有效检查的结果与失败传播，真实 Node 样例及 tooling 回归通过。业务源码、各功能检查清单和三个流程操作说明未变；旧页面/模型证据仅按原覆盖复用，未测项保留。"
     },
     "reports": {
-      "source_reviewed_at": "2026-11-07T08:19:55.646069+00:00",
+      "source_reviewed_at": "2026-11-07T09:18:54.279868+00:00",
       "recipe_sha256": "fbfbd7a2d50e06430dfa5916c3da51334b9c7330fe89e2692fdbe101f3461241",
       "inputs": {
-        "tools/verify.py": "48e4d9e01428c7038b38be1401e5a83a3c59c54cb683c683d0571311e4a766b2",
+        "tools/verify.py": "62bb084abd1e93037096881e47f4774634bf6d69bf9c45943aa96f8b1e7fc764",
         "tools/feature_map.py": "01592a19ae5cc7ae45777614c57cf66b4b25762580e94487bad31f3da051cf8e",
-        "test_verify.py": "1c3887fda3a0c89878ffe7b3251d8e1b95e6556f79b752574301e66054c2b1f3",
+        "test_verify.py": "3dfda341ea81b9b904fa6368686c483a257c1cbf4753332c93d63dd320a147b6",
         "test_feature_map.py": "de7f67cb995fad5b0e812c4f38e71dd107aaa8cc0f4682c986d9f666a2534550",
         "tools/browser.mjs": "434e7a4dbfdad8badbac9d3d52ae99b741c9d15f90a77aa3dd17694fd9b9457d",
         "server.py": "ab13cfe8be0e765321d6676502cd36c0790a49538a5171e2699d7044a9ca960c",
@@ -475,6 +483,10 @@
         {
           "path": "validation/ci-checks.json",
           "sha256": "658c47cd009cff17358010b385c952a64f06164112cec8ed36d2e8e6d06ba65c"
+        },
+        {
+          "path": "validation/pr-pilot.json",
+          "sha256": "e755ccacc228ec47523ceebe89f235922568ef1401ee49f035e93fa89ca78652"
         }
       ],
       "coverage": "Windows；回传去重、等待、暂停、恢复、交接等逻辑及报告详情模拟页面三种宽度通过；源码与页面入口已核对。 第三轮真实模型任务三份执行报告各自动回传一次；空闲时暂停→同任务恢复→验收完成，未重复派工，截止不延长。",
@@ -483,7 +495,7 @@
         "Linux 实机",
         "其他浏览器与手机真机"
       ],
-      "review_note": "2026-11-07 CI 接入复核：仅 verify 的 ci 选择与新增回归检查变化，既有功能分组及业务源码摘要未变；已核对选择、地图失败退出和不写回行为。未重跑原浏览器/真实模型证据，原覆盖与未测项保留。"
+      "review_note": "2026-11-07 首个维护 PR：核对 Node TAP 统计、跳过/todo/无有效检查的结果与失败传播，真实 Node 样例及 tooling 回归通过。业务源码、各功能检查清单和三个流程操作说明未变；旧页面/模型证据仅按原覆盖复用，未测项保留。"
     }
   }
 }
